@@ -138,7 +138,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
   };
 
   return (
-    <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-30 ${
+    <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-30 flex flex-col ${
       isCollapsed ? 'w-16' : 'w-64'
     }`}>
       {/* Header */}
