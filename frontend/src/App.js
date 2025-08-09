@@ -12,6 +12,7 @@ import SolutionUserLiveStreetView from "./portals/solution-user/LiveStreetView";
 import SolutionUserVideoReview from "./portals/solution-user/VideoReview";
 import SolutionUserSiteOverview from "./portals/solution-user/SiteOverview";
 import SolutionUserAlertCenter from "./portals/solution-user/AlertCenter";
+import SolutionUserAIAnalytics from "./portals/solution-user/AIAnalytics";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
