@@ -428,3 +428,367 @@ Safety & Alerts > Alert Center > Incident #12345 > Response Team
 - `← →` → Frame Navigation
 
 This comprehensive navigation design ensures efficient access to all 22 screens with intuitive, role-based menu structures optimized for construction site environments.
+
+---
+
+# ADVANCED NAVIGATION FEATURES
+
+## Context-Aware Navigation
+
+### **Smart Menu Highlighting:**
+- **Active Screen**: Current screen highlighted in bold with accent color
+- **Related Screens**: Related menu items show subtle indicators
+- **Recent Activity**: Recently accessed screens show activity dots
+- **Pending Actions**: Screens with pending tasks show notification badges
+
+### **Contextual Quick Actions:**
+Each screen includes contextual floating action buttons (FABs):
+
+#### **Live View Screen:**
+- 🔴 Emergency Alert
+- 📸 Screenshot All Cameras
+- 🎥 Start Recording
+- 🚶 Switch to Street View
+
+#### **Historical Analysis Screens:**
+- 📊 Generate Report
+- 💾 Export Evidence
+- 📧 Share Analysis
+- ⏱️ Set Time Bookmark
+
+#### **Street View Screens:**
+- 🎯 Mark Location
+- 📱 Call Site Manager
+- ⚠️ Report Hazard
+- 🔄 Switch Route
+
+## Multi-Modal Navigation
+
+### **Voice Commands (Mobile/Tablet):**
+```javascript
+"Go to Live View" → Navigate to Screen 4
+"Show me alerts" → Navigate to Alert Center
+"Start street navigation" → Navigate to Live Street View
+"Emergency contact" → Activate emergency procedures
+"Take screenshot" → Capture current screen
+"Switch to site [name]" → Change active site
+```
+
+### **Gesture Navigation (Tablet):**
+- **Swipe Right**: Open navigation menu
+- **Swipe Left**: Close navigation menu
+- **Two-finger Swipe Up**: Emergency mode
+- **Pinch**: Zoom in video/map views
+- **Long Press**: Context menu
+
+### **Hardware Button Integration:**
+- **Volume Up**: Emergency alert (when app is active)
+- **Volume Down**: Acknowledge alert
+- **Power Button (Double Press)**: Emergency contact
+- **Back Button**: Hierarchical navigation
+
+---
+
+# USER EXPERIENCE FLOWS
+
+## Daily Operation Workflows
+
+### **Morning Site Check Routine:**
+```
+1. Login → Dashboard Home
+   ├── Review overnight alerts
+   ├── Check weather conditions
+   └── Verify all cameras online
+
+2. Dashboard → Live View
+   ├── Scan all active areas
+   ├── Verify PPE compliance
+   └── Check equipment positions
+
+3. Live View → Site Overview
+   ├── Plan daily inspection routes
+   ├── Update zone restrictions
+   └── Brief field teams
+
+4. Site Overview → Field Assessment
+   ├── Deploy mobile teams
+   ├── Monitor progress
+   └── Document findings
+```
+
+### **Incident Response Workflow:**
+```
+1. Alert Notification → Alert Center
+   ├── Assess severity
+   ├── Gather evidence
+   └── Assign response team
+
+2. Alert Center → Live View
+   ├── Monitor situation
+   ├── Direct response efforts
+   └── Document resolution
+
+3. Live View → Historical Analysis
+   ├── Review incident timeline
+   ├── Identify root cause
+   └── Generate report
+
+4. Historical → Field Assessment
+   ├── Implement corrective actions
+   ├── Update safety protocols
+   └── Conduct follow-up training
+```
+
+## Navigation State Management
+
+### **Session Persistence:**
+- **Last Screen**: Return to last active screen on login
+- **Filter Settings**: Preserve search/filter preferences
+- **Layout Preferences**: Remember panel positions and sizes
+- **Site Selection**: Maintain selected site across sessions
+
+### **Multi-Tab Workflow:**
+Users can open multiple tabs for parallel workflows:
+- Tab 1: Live monitoring (Live View)
+- Tab 2: Historical analysis (Time Lapse)
+- Tab 3: Incident investigation (Alert Center)
+- Tab 4: Documentation (Field Assessment)
+
+### **Deep Linking:**
+Direct navigation to specific content:
+```
+/dashboard → Dashboard Home
+/live/camera/[id] → Specific camera in Live View
+/alerts/[id] → Specific alert details
+/routes/[id] → Specific assessment route
+/incidents/[id] → Specific incident report
+/sites/[id]/overview → Specific site overview
+```
+
+---
+
+# MOBILE-OPTIMIZED NAVIGATION
+
+## Touch-Friendly Design Standards
+
+### **Minimum Touch Targets:**
+- **Menu Items**: 48px height minimum
+- **Action Buttons**: 44px × 44px minimum
+- **Toggle Switches**: 32px minimum
+- **Text Links**: 32px height minimum
+
+### **Thumb-Friendly Zones:**
+```
+┌─────────────────────────────────┐
+│ 🟢 Easy reach (Top corners)    │
+│                                 │
+│ 🟡 Moderate reach (Sides)      │
+│                                 │
+│ 🟢 Easy reach (Bottom corners) │
+│ ████ Prime thumb zone ████     │
+└─────────────────────────────────┘
+```
+
+### **Swipe Gestures:**
+- **Right Swipe**: Open navigation menu
+- **Left Swipe**: Close navigation menu
+- **Up Swipe**: Quick actions menu
+- **Down Swipe**: Refresh current screen
+
+## Progressive Disclosure
+
+### **Menu Hierarchy:**
+```
+Level 1: Main Categories (Always Visible)
+├── Level 2: Sub-features (Expand/Collapse)
+    └── Level 3: Specific actions (Context menu)
+```
+
+### **Smart Menu Collapsing:**
+- **Auto-collapse**: Inactive sections collapse automatically
+- **Favorites**: Frequently used items stay expanded
+- **Recent**: Recently accessed items remain visible
+- **Context**: Current workflow items prioritized
+
+---
+
+# ACCESSIBILITY FEATURES
+
+## Screen Reader Support
+
+### **ARIA Labels:**
+```html
+<nav aria-label="Main Navigation">
+  <ul role="menubar">
+    <li role="menuitem" aria-expanded="true">
+      <span>Live Operations</span>
+      <ul role="menu">
+        <li role="menuitem">
+          <a href="/live-view" aria-describedby="live-view-desc">
+            Live View
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+```
+
+### **Keyboard Navigation:**
+- **Tab**: Navigate through menu items
+- **Enter/Space**: Activate menu item
+- **Arrow Keys**: Navigate within submenus
+- **Escape**: Close current menu level
+- **Home**: Navigate to first menu item
+- **End**: Navigate to last menu item
+
+## Visual Accessibility
+
+### **High Contrast Mode:**
+- **Background**: #000000 (Pure black)
+- **Text**: #FFFFFF (Pure white)
+- **Accent**: #FFD700 (High contrast yellow)
+- **Alerts**: #FF0000 (Pure red)
+
+### **Font Scaling:**
+- **Small**: 14px base font
+- **Medium**: 16px base font (default)
+- **Large**: 18px base font
+- **Extra Large**: 22px base font
+
+### **Motor Impairment Support:**
+- **Larger Touch Targets**: Up to 64px for users with motor difficulties
+- **Sticky Hover**: Hover states persist longer
+- **Click Delay**: Configurable delay before action execution
+- **Voice Control**: Full voice navigation capability
+
+---
+
+# PERFORMANCE OPTIMIZATION
+
+## Lazy Loading Navigation
+
+### **Menu Loading Strategy:**
+1. **Immediate**: Core navigation structure
+2. **Priority**: User's most accessed screens
+3. **Background**: Secondary features
+4. **On-Demand**: Advanced configuration screens
+
+### **Icon Optimization:**
+- **SVG Icons**: Scalable vector graphics for crisp display
+- **Icon Fonts**: Fallback for older devices
+- **Sprite Sheets**: Optimized loading for multiple icons
+- **Lazy Loading**: Icons load as menu sections expand
+
+## Cache Strategy
+
+### **Navigation State Caching:**
+```javascript
+// Cache user's navigation preferences
+localStorage.setItem('nav_preferences', {
+  expanded_sections: ['live_operations', 'safety_alerts'],
+  favorite_screens: ['live_view', 'alert_center'],
+  recent_screens: ['dashboard', 'time_lapse'],
+  layout_mode: 'expanded'
+});
+```
+
+### **Menu Item Preloading:**
+- **Next Likely Screen**: Preload based on user patterns
+- **Related Screens**: Preload contextually related content
+- **Background Updates**: Refresh menu data during idle time
+
+---
+
+# NOTIFICATION INTEGRATION
+
+## In-Navigation Alerts
+
+### **Menu Badge System:**
+```
+📡 LIVE OPERATIONS [3]
+├── • Live View [2] (2 active alerts)
+└── • Live Street View [1] (1 GPS deviation)
+
+🚨 SAFETY & ALERTS [15]
+├── • Alert Center [12] (12 pending alerts)
+└── • AI Analytics [3] (3 compliance issues)
+```
+
+### **Urgent Alert Handling:**
+- **Critical Alerts**: Flash red menu background
+- **Emergency**: Auto-navigate to Alert Center
+- **High Priority**: Persistent notification badge
+- **Sound Alerts**: Configurable audio notifications
+
+## Cross-Screen Notifications
+
+### **Toast Notifications:**
+Position: Top-right of main content area
+```
+┌─────────────────────────────────────┐
+│ ⚠️ New safety violation detected     │
+│ Zone 3 - PPE compliance             │
+│ [View] [Dismiss]            [X]     │
+└─────────────────────────────────────┘
+```
+
+### **Banner Notifications:**
+Position: Below header, above content
+```
+┌─────────────────────────────────────┐
+│ 🔴 EMERGENCY: Evacuation in progress │
+│ All personnel report to assembly point │
+│ [Emergency Procedures] [Dismiss]      │
+└─────────────────────────────────────┘
+```
+
+---
+
+# CUSTOMIZATION OPTIONS
+
+## User Preferences
+
+### **Menu Customization:**
+- **Reorder Items**: Drag and drop menu reorganization
+- **Hide Items**: Hide unused features
+- **Custom Labels**: Rename menu items for company terminology
+- **Shortcut Creation**: Create custom shortcuts
+
+### **Layout Options:**
+```javascript
+navigation_layouts: {
+  compact: { menu_width: '200px', icon_size: '16px' },
+  standard: { menu_width: '250px', icon_size: '20px' },
+  large: { menu_width: '300px', icon_size: '24px' },
+  tablet: { menu_mode: 'overlay', touch_targets: '48px' }
+}
+```
+
+## Role-Based Customization
+
+### **Admin Configurability:**
+- **Menu Structure**: Customize menu for different roles
+- **Feature Visibility**: Enable/disable features per role
+- **Branding**: Company colors, logos, terminology
+- **Shortcuts**: Define role-specific shortcuts
+
+### **Bulk Configuration:**
+```json
+{
+  "role_configurations": {
+    "site_coordinator": {
+      "hidden_menus": ["ai_management", "system_config"],
+      "default_screen": "field_assessment",
+      "shortcuts": ["emergency", "incident_report"]
+    },
+    "safety_officer": {
+      "priority_menus": ["safety_alerts", "ai_analytics"],
+      "default_screen": "alert_center",
+      "auto_alerts": true
+    }
+  }
+}
+```
+
+This completes the comprehensive navigation design specification, covering all aspects from basic menu structure to advanced accessibility and performance considerations.
