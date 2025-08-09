@@ -6,8 +6,8 @@ import {
   Menu, X, Shield, Building2, Users, ChevronDown,
   ChevronRight, Bell, Search
 } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { mockUser, mockSites, mockNotifications } from '../../data/mockData';
+import { useTheme } from '../../../context/ThemeContext';
+import { mockUser, mockSites, mockNotifications } from '../../../data/mockData';
 
 const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) => {
   const location = useLocation();
