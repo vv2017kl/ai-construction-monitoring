@@ -345,7 +345,7 @@ const Dashboard = () => {
                 color={theme.warning[500]}
               />
               <QuickActionButton
-                icon={Tool}
+                icon={Settings}
                 title="Field Assessment"
                 subtitle="Mobile inspection tool"
                 onClick={() => navigate('/field-assessment')}
