@@ -82,6 +82,8 @@ function App() {
             <Route path="/time-lapse" element={<SolutionUserTimeLapse />} />
             <Route path="/personnel" element={<SolutionUserPersonnelManagement />} />
             <Route path="/reports" element={<SolutionUserReportsCenter />} />
+            <Route path="/field-assessment" element={<SolutionUserFieldAssessment />} />
+            <Route path="/profile" element={<SolutionUserMyProfile />} />
             
             {/* Future Portal Routes will be added here */}
             {/* Solution Admin Portal: /admin/* */}
