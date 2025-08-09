@@ -177,7 +177,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
 
       {/* Navigation Menu */}
       <div 
-        className="flex-1 overflow-y-scroll sidebar-scroll"
+        className="flex-1 min-h-0 overflow-y-scroll sidebar-scroll"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#d1d5db #f3f4f6'
