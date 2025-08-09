@@ -16,6 +16,8 @@ import SolutionUserAIAnalytics from "./portals/solution-user/AIAnalytics";
 import SolutionUserTimeLapse from "./portals/solution-user/TimeLapse";
 import SolutionUserPersonnelManagement from "./portals/solution-user/PersonnelManagement";
 import SolutionUserReportsCenter from "./portals/solution-user/ReportsCenter";
+import SolutionUserFieldAssessment from "./portals/solution-user/FieldAssessment";
+import SolutionUserMyProfile from "./portals/solution-user/MyProfile";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
