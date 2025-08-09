@@ -403,3 +403,219 @@ export const mockNotifications = [
     actionUrl: '/reports/daily'
   }
 ];
+
+export const mockPersonnel = [
+  {
+    id: 'p001',
+    name: 'John Mitchell',
+    role: 'Site Supervisor',
+    department: 'Construction',
+    email: 'j.mitchell@constructionai.com',
+    phone: '+1 (555) 0123',
+    status: 'active',
+    currentLocation: 'Zone A - Foundation',
+    lastSeen: new Date(Date.now() - 15 * 60 * 1000),
+    certifications: ['OSHA 30', 'First Aid', 'Forklift'],
+    safetyScore: 95,
+    hoursWorked: 42,
+    checkInTime: new Date().setHours(7, 30),
+    ppeCompliance: 98,
+    avatar: null
+  },
+  {
+    id: 'p002',
+    name: 'Sarah Chen',
+    role: 'Safety Inspector',
+    department: 'Safety',
+    email: 's.chen@constructionai.com',
+    phone: '+1 (555) 0124',
+    status: 'active',
+    currentLocation: 'Zone B - Steel Frame',
+    lastSeen: new Date(Date.now() - 5 * 60 * 1000),
+    certifications: ['OSHA 10', 'Safety Management'],
+    safetyScore: 100,
+    hoursWorked: 40,
+    checkInTime: new Date().setHours(8, 0),
+    ppeCompliance: 100,
+    avatar: null
+  },
+  {
+    id: 'p003',
+    name: 'Mike Rodriguez',
+    role: 'Equipment Operator',
+    department: 'Equipment',
+    email: 'm.rodriguez@constructionai.com',
+    phone: '+1 (555) 0125',
+    status: 'active',
+    currentLocation: 'Zone C - Excavation',
+    lastSeen: new Date(Date.now() - 30 * 60 * 1000),
+    certifications: ['Heavy Equipment', 'CDL Class A'],
+    safetyScore: 88,
+    hoursWorked: 45,
+    checkInTime: new Date().setHours(6, 45),
+    ppeCompliance: 92,
+    avatar: null
+  },
+  {
+    id: 'p004',
+    name: 'Emma Thompson',
+    role: 'Quality Control',
+    department: 'Quality Assurance',
+    email: 'e.thompson@constructionai.com',
+    phone: '+1 (555) 0126',
+    status: 'break',
+    currentLocation: 'Break Room',
+    lastSeen: new Date(Date.now() - 10 * 60 * 1000),
+    certifications: ['QA Certification', 'Material Testing'],
+    safetyScore: 96,
+    hoursWorked: 38,
+    checkInTime: new Date().setHours(8, 15),
+    ppeCompliance: 94,
+    avatar: null
+  },
+  {
+    id: 'p005',
+    name: 'David Park',
+    role: 'Electrician',
+    department: 'Electrical',
+    email: 'd.park@constructionai.com',
+    phone: '+1 (555) 0127',
+    status: 'off-site',
+    currentLocation: 'Off-Site',
+    lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    certifications: ['Electrical License', 'Arc Flash Safety'],
+    safetyScore: 91,
+    hoursWorked: 35,
+    checkInTime: null,
+    ppeCompliance: 89,
+    avatar: null
+  }
+];
+
+export const mockDepartments = [
+  { id: 'dept001', name: 'Construction', personnel: 12, manager: 'John Mitchell' },
+  { id: 'dept002', name: 'Safety', personnel: 3, manager: 'Sarah Chen' },
+  { id: 'dept003', name: 'Equipment', personnel: 8, manager: 'Mike Rodriguez' },
+  { id: 'dept004', name: 'Quality Assurance', personnel: 4, manager: 'Emma Thompson' },
+  { id: 'dept005', name: 'Electrical', personnel: 6, manager: 'David Park' }
+];
+
+export const mockReports = [
+  {
+    id: 'r001',
+    title: 'Daily Safety Report',
+    type: 'safety',
+    description: 'Comprehensive daily safety metrics and incident reports',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
+    author: 'Sarah Chen',
+    fileSize: '2.1 MB',
+    format: 'PDF',
+    pages: 12,
+    downloads: 45,
+    schedule: 'daily',
+    tags: ['safety', 'compliance', 'incidents'],
+    preview: true
+  },
+  {
+    id: 'r002',
+    title: 'Weekly Personnel Analytics',
+    type: 'personnel',
+    description: 'Personnel productivity, attendance, and performance metrics',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 22 * 60 * 60 * 1000),
+    author: 'John Mitchell',
+    fileSize: '5.7 MB',
+    format: 'XLSX',
+    pages: null,
+    downloads: 23,
+    schedule: 'weekly',
+    tags: ['personnel', 'productivity', 'attendance'],
+    preview: false
+  },
+  {
+    id: 'r003',
+    title: 'AI Detection Summary',
+    type: 'ai_analytics',
+    description: 'AI detection accuracy, false positives, and model performance',
+    status: 'processing',
+    createdAt: new Date(Date.now() - 30 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 15 * 60 * 1000),
+    author: 'System Generated',
+    fileSize: null,
+    format: 'PDF',
+    pages: null,
+    downloads: 0,
+    schedule: 'real-time',
+    tags: ['ai', 'detection', 'performance'],
+    preview: false
+  },
+  {
+    id: 'r004',
+    title: 'Equipment Utilization Report',
+    type: 'equipment',
+    description: 'Equipment usage, maintenance schedules, and efficiency metrics',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    author: 'Mike Rodriguez',
+    fileSize: '3.2 MB',
+    format: 'PDF',
+    pages: 18,
+    downloads: 67,
+    schedule: 'weekly',
+    tags: ['equipment', 'utilization', 'maintenance'],
+    preview: true
+  },
+  {
+    id: 'r005',
+    title: 'Construction Progress Report',
+    type: 'progress',
+    description: 'Project milestones, completion rates, and timeline analysis',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    author: 'Emma Thompson',
+    fileSize: '8.4 MB',
+    format: 'PDF',
+    pages: 25,
+    downloads: 112,
+    schedule: 'weekly',
+    tags: ['progress', 'milestones', 'timeline'],
+    preview: true
+  },
+  {
+    id: 'r006',
+    title: 'Compliance Audit Report',
+    type: 'compliance',
+    description: 'Regulatory compliance status and audit findings',
+    status: 'draft',
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
+    author: 'Sarah Chen',
+    fileSize: null,
+    format: 'PDF',
+    pages: null,
+    downloads: 0,
+    schedule: 'monthly',
+    tags: ['compliance', 'audit', 'regulatory'],
+    preview: false
+  }
+];
+
+export const mockTimeLapseData = {
+  sessions: [
+    {
+      id: 'tl001',
+      cameraId: 'cam-001',
+      startTime: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      endTime: new Date(Date.now() - 23 * 60 * 60 * 1000),
+      duration: 3600,
+      events: 15,
+      fileSize: '834 MB',
+      compressionLevel: 'medium'
+    }
+  ]
+};
