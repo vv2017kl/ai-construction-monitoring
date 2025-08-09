@@ -77,6 +77,7 @@ function App() {
             <Route path="/alert-center/:alertId" element={<SolutionUserAlertCenter />} />
             <Route path="/ai-analytics" element={<SolutionUserAIAnalytics />} />
             <Route path="/time-lapse" element={<SolutionUserTimeLapse />} />
+            <Route path="/personnel" element={<SolutionUserPersonnelManagement />} />
             
             {/* Future Portal Routes will be added here */}
             {/* Solution Admin Portal: /admin/* */}
