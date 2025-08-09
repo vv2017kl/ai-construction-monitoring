@@ -79,6 +79,7 @@ function App() {
             <Route path="/ai-analytics" element={<SolutionUserAIAnalytics />} />
             <Route path="/time-lapse" element={<SolutionUserTimeLapse />} />
             <Route path="/personnel" element={<SolutionUserPersonnelManagement />} />
+            <Route path="/reports" element={<SolutionUserReportsCenter />} />
             
             {/* Future Portal Routes will be added here */}
             {/* Solution Admin Portal: /admin/* */}
