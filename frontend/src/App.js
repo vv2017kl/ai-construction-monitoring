@@ -5,6 +5,7 @@ import axios from "axios";
 import { ThemeProvider } from "./context/ThemeContext";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
+import LiveView from "./pages/LiveView";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -57,11 +58,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/live-view" element={<LiveView />} />
           </Routes>
         </BrowserRouter>
       </div>
     </ThemeProvider>
   );
 }
+
+export default App;
 
 export default App;
