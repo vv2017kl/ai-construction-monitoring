@@ -5,8 +5,8 @@ import {
   ChevronDown, Menu, Sun, Cloud, Wind, Thermometer,
   Clock, MapPin
 } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { mockUser, mockSites, mockNotifications } from '../../data/mockData';
+import { useTheme } from '../../../context/ThemeContext';
+import { mockUser, mockSites, mockNotifications } from '../../../data/mockData';
 
 const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
   const navigate = useNavigate();
