@@ -192,21 +192,6 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         </div>
       )}
 
-      {/* Search */}
-      {!isCollapsed && (
-        <div className="p-4 border-b border-gray-100">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search cameras, locations..."
-              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:border-transparent"
-              style={{ '--tw-ring-color': theme.primary[500] + '40' }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Navigation Menu */}
       <div className="flex-1 overflow-y-auto">
         <nav className="px-2 py-4 space-y-2">
