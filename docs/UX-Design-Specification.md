@@ -1,14 +1,15 @@
 # Construction AI Monitoring System - UX Design Specification
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Date:** January 2025  
 **Industry Perspective:** Construction Industry Veteran  
+**Updated:** Enhanced with Core Navigation Features
 
 ---
 
 ## Executive Summary
 
-As a construction industry veteran with 25+ years of experience, I've designed this UX specification to address real-world construction site management challenges. The system must handle the chaos of active construction sites, provide actionable insights for safety managers, and be intuitive enough for site coordinators who may not be tech-savvy.
+As a construction industry veteran with 25+ years of experience, I've designed this UX specification to address real-world construction site management challenges, with special focus on the **core navigation and view features** that make this system unique in the construction industry.
 
 **Key Design Principles:**
 - **Safety First**: Critical alerts must be impossible to miss
@@ -16,6 +17,20 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 - **Mobile-First**: Field personnel work with tablets, not desktops
 - **Role-Based**: Each user sees only what they need for their job
 - **Evidence-Based**: Every decision must be backed by visual evidence
+- **Time Intelligence**: Multiple time-based views for comprehensive site monitoring
+
+---
+
+## Core Feature Requirements Met
+
+✅ **Live View** - Real-time camera monitoring with AI overlays
+✅ **Historical View/Search** - Calendar-based video archive access  
+✅ **Time Lapse View** - Compressed timeline visualization
+✅ **Two Time Slots Comparison** - Side-by-side temporal analysis
+✅ **Street View (Live)** - GPS-guided mobile navigation with live camera switching
+✅ **Historical Street View** - Playback of past movement paths
+✅ **Two Time Slots Street View Comparison** - Temporal street view analysis
+✅ **Path Drawing Administration** - A→B→C→D route creation with GPS guidance
 
 ---
 
@@ -23,18 +38,22 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ### 1. **Solution User Portal** (Primary Portal)
 **Target Users:** Site Managers, Safety Officers, Project Coordinators
+**Core Screens:** 14 screens including all navigation and view features
 **Database Tables:** companies, sites, users, roles, user_roles, alerts, detection_results, safety_violations
 
 ### 2. **Solution Admin Portal** 
 **Target Users:** Company Executives, Regional Managers, System Administrators
+**Core Screens:** 4 screens for system administration
 **Database Tables:** companies, groups, sites, users, roles, ai_models, alert_rules
 
 ### 3. **VMS User Portal**
 **Target Users:** Security Personnel, Camera Operators
+**Core Screens:** 2 screens for video operations
 **Database Tables:** cameras, video_storage, recording_policies (VMS DB)
 
 ### 4. **VMS Admin Portal**
 **Target Users:** IT Staff, VMS Administrators  
+**Core Screens:** 2 screens for system administration
 **Database Tables:** All VMS tables, system_configurations, performance_metrics
 
 ---
