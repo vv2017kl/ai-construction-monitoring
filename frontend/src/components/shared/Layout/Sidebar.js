@@ -4,7 +4,7 @@ import {
   Home, Video, History, Clock, MapPin, Navigation, 
   AlertTriangle, BarChart3, Settings, Phone, 
   Menu, X, Shield, Building2, Users, ChevronDown,
-  ChevronRight, Bell, FileText
+  ChevronRight, FileText
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { mockUser, mockSites, mockNotifications } from '../../../data/mockData';
