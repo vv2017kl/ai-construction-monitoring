@@ -160,35 +160,18 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         </button>
       </div>
 
-      {/* User Profile */}
+      {/* Site Selector */}
       {!isCollapsed && (
         <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
-              style={{ backgroundColor: theme.primary[500] }}
-            >
-              {mockUser.firstName[0]}{mockUser.lastName[0]}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{mockUser.displayName}</p>
-              <p className="text-xs text-gray-500 truncate">{mockUser.role}</p>
-            </div>
-            <Bell className="w-4 h-4 text-gray-400" />
-          </div>
-          
-          {/* Site Selector */}
-          <div className="mt-3">
-            <select 
-              className="w-full text-xs px-2 py-1 border border-gray-200 rounded-md focus:ring-1"
-              style={{ '--tw-ring-color': theme.primary[500] + '40' }}
-              defaultValue={mockUser.currentSite}
-            >
-              {mockSites.map(site => (
-                <option key={site.id} value={site.name}>{site.name}</option>
-              ))}
-            </select>
-          </div>
+          <select 
+            className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:border-transparent"
+            style={{ '--tw-ring-color': theme.primary[500] + '40' }}
+            defaultValue={mockUser.currentSite}
+          >
+            {mockSites.map(site => (
+              <option key={site.id} value={site.name}>{site.name}</option>
+            ))}
+          </select>
         </div>
       )}
 
