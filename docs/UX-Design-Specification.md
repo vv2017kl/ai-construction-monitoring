@@ -872,3 +872,25 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 - Dynamic rerouting capabilities
 
 This comprehensive UX specification provides a complete roadmap for building an industry-leading construction AI monitoring system with advanced navigation capabilities that address real-world safety, compliance, and operational challenges.
+
+---
+
+## Navigation Design Reference
+
+**📋 Complete Navigation Specification:** See `/app/docs/Navigation-Design-Specification.md`
+
+The navigation design includes:
+- **4 Portal-Specific Menu Structures** with role-based access
+- **22 Screen Navigation Flows** with contextual quick actions
+- **Mobile-Optimized Touch Navigation** with gesture controls
+- **Advanced Features**: Voice commands, keyboard shortcuts, accessibility
+- **Performance Optimization**: Lazy loading, caching, preloading strategies
+- **Customization Options**: User preferences and role-based configurations
+
+**Key Navigation Features:**
+- Hamburger menu with collapsible sidebar
+- Context-aware menu highlighting and badges  
+- Multi-modal input (touch, voice, keyboard, gestures)
+- Emergency quick access always visible
+- Smart menu organization based on user workflows
+- Progressive disclosure with favorites and recent items
