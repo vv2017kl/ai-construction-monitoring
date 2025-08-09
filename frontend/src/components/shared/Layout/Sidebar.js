@@ -60,6 +60,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         icon: MapPin,
         items: [
           { name: 'Site Overview', path: '/site-overview', icon: MapPin },
+          { name: 'Personnel Management', path: '/personnel', icon: Users },
           { name: 'Field Assessment', path: '/field-assessment', icon: Navigation }
         ]
       },
