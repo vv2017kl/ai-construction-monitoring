@@ -74,6 +74,14 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         ]
       },
       {
+        id: 'reports_docs',
+        title: 'REPORTS & DOCUMENTATION',
+        icon: FileText,
+        items: [
+          { name: 'Reports Center', path: '/reports', icon: FileText }
+        ]
+      },
+      {
         id: 'settings',
         title: 'SETTINGS',
         icon: Settings,
