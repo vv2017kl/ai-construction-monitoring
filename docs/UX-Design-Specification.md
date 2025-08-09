@@ -125,19 +125,21 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 3: Site Overview (Street View)**
-**Purpose:** Google Earth-style site visualization with camera overlays
+### **Screen 3: Site Overview (Street View Map)**
+**Purpose:** Google Earth-style site visualization with camera overlays and navigation planning
 **User Experience:**
 - Interactive map showing site boundaries
 - Camera icons showing live status and coverage areas
 - Click camera icons to get live preview popup
 - Zone overlays showing restricted/safety areas
+- **NEW: Path planning interface for street view navigation**
 
 **Database Integration:**
 - `sites` table for site coordinates and boundaries
 - `site_coordinates` for camera positions
 - `site_zones` for safety/work areas
 - `site_maps` for blueprint overlays
+- `assessment_routes` for planned navigation paths
 - `cameras` (VMS) for camera locations and status
 
 **Features:**
@@ -153,7 +155,13 @@ As a construction industry veteran with 25+ years of experience, I've designed t
    - Equipment markers from AI detection
    - Personnel density heat maps
 
-3. **Context Panel** (Side)
+3. **Navigation Planning** (NEW)
+   - Draw walking/driving paths from A→B→C→D
+   - GPS coordinate generation for mobile guidance
+   - Estimated walking times between points
+   - Audio guidance script preview
+
+4. **Context Panel** (Side)
    - Current weather and visibility
    - Site-specific safety requirements
    - Active work zones for today
@@ -166,7 +174,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 4: Live Camera View**
+### **Screen 4: Live View**
 **Purpose:** Real-time RTSP video monitoring with AI overlays
 **User Experience:**
 - Multiple camera grid (1, 4, 9, or 16 cameras)
@@ -254,7 +262,54 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 6: Time Comparison View**
+### **Screen 6: Time Lapse View**
+**Purpose:** Compressed timeline visualization showing site progress and activity patterns
+**User Experience:**
+- Days/hours compressed into minutes of video
+- Progress tracking with milestone markers
+- Weather overlay showing conditions
+- Adjustable compression ratios (1 day = 1-10 minutes)
+
+**Database Integration:**
+- `video_storage` (VMS) for time-series footage
+- `detection_results` for activity level data
+- `assessment_routes` for progress measurement points
+- `weather_data` (external API) for conditions overlay
+
+**Features:**
+1. **Time Compression Controls**
+   - Adjustable speed ratios (6x to 1440x)
+   - Smart frame selection (skip inactive periods)
+   - Activity-based compression (slow during work, fast during idle)
+   - Custom time range selection
+
+2. **Progress Visualization**
+   - Construction milestone markers
+   - Before/after comparison points
+   - Automatic progress percentage calculation
+   - Equipment movement tracking
+
+3. **Analysis Tools**
+   - Activity heat maps over time
+   - Personnel density trends
+   - Equipment utilization patterns
+   - Weather impact visualization
+
+4. **Export Capabilities**
+   - Generate progress reports
+   - Time-lapse video export
+   - Still image sequences
+   - Data analytics export
+
+**Construction Use Cases:**
+- Daily/weekly progress reviews
+- Client progress presentations
+- Regulatory compliance documentation
+- Dispute resolution evidence
+
+---
+
+### **Screen 7: Two Time Slots Comparison View**
 **Purpose:** Side-by-side comparison of same location at different times
 **User Experience:**
 - Split screen showing two time periods
@@ -294,7 +349,136 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 7: Alert Management Center**
+### **Screen 8: Live Street View Navigation**
+**Purpose:** GPS-guided mobile navigation with real-time camera switching and audio directions
+**User Experience:**
+- First-person mobile view following predefined paths
+- Automatic camera switching based on GPS location
+- Audio directions for navigation guidance
+- Real-time hazard and PPE alerts during movement
+
+**Database Integration:**
+- `assessment_routes` for predefined navigation paths
+- `site_coordinates` for GPS waypoints
+- `cameras` (VMS) for location-based camera switching
+- `site_zones` for safety alerts during movement
+
+**Features:**
+1. **GPS Navigation**
+   - Turn-by-turn audio directions
+   - Distance to next waypoint
+   - Route progress indicator
+   - Deviation alerts and rerouting
+
+2. **Dynamic Camera Switching**
+   - Automatic switching based on GPS location
+   - Smooth transitions between camera views
+   - Override controls for manual selection
+   - Picture-in-picture for multiple angles
+
+3. **Safety Integration**
+   - Real-time zone violation alerts
+   - PPE compliance monitoring
+   - Emergency stop functionality
+   - Hazard warnings based on location
+
+4. **Mobile Optimization**
+   - Large touch targets for work gloves
+   - High contrast display for outdoor use
+   - Voice commands for hands-free operation
+   - Offline capability with GPS tracking
+
+**Navigation Interface:**
+- Compass heading indicator
+- Speed and movement tracking
+- Estimated time to destination
+- Alternative route suggestions
+
+---
+
+### **Screen 9: Historical Street View**
+**Purpose:** Playback of past movement paths with historical camera footage
+**User Experience:**
+- Timeline-based route playback
+- Historical footage from cameras along the path
+- Comparison with current conditions
+- Incident investigation and analysis tools
+
+**Database Integration:**
+- `mobile_recordings` for past route recordings
+- `assessment_routes` for historical paths
+- `video_storage` (VMS) for camera footage along routes
+- `safety_violations` for incidents during past movements
+
+**Features:**
+1. **Route Playback**
+   - Timeline scrubber for route progression
+   - Variable playback speed
+   - Pause at specific waypoints
+   - Jump to incident locations
+
+2. **Historical Analysis**
+   - Compare route conditions over time
+   - Incident correlation with location
+   - Weather condition overlay
+   - Personnel behavior patterns
+
+3. **Investigation Tools**
+   - Evidence collection and tagging
+   - Measurement tools for distances
+   - Time correlation with other events
+   - Export capabilities for reports
+
+**Use Cases:**
+- Safety incident investigation
+- Training material creation
+- Compliance auditing
+- Process improvement analysis
+
+---
+
+### **Screen 10: Street View Time Comparison**
+**Purpose:** Side-by-side comparison of the same route at different time periods
+**User Experience:**
+- Dual timeline interface for two different periods
+- Synchronized route progression
+- Overlay comparison tools
+- Change detection and highlighting
+
+**Database Integration:**
+- `mobile_recordings` for historical route data
+- `video_storage` (VMS) for temporal footage comparison
+- `assessment_routes` for route definitions
+- `detection_results` for activity analysis
+
+**Features:**
+1. **Dual Route Playback**
+   - Synchronized timeline progression
+   - Independent speed controls
+   - Side-by-side video comparison
+   - Waypoint alignment assistance
+
+2. **Comparison Analysis**
+   - Change detection highlighting
+   - Progress measurement tools
+   - Activity level comparison
+   - Environmental condition comparison
+
+3. **Advanced Tools**
+   - Difference visualization
+   - Statistical analysis
+   - Trend identification
+   - Export and reporting
+
+**Business Value:**
+- Progress tracking over time
+- Seasonal impact analysis
+- Safety improvement measurement
+- Training effectiveness evaluation
+
+---
+
+### **Screen 11: Alert Management Center**
 **Purpose:** Central command for all safety and security alerts
 **User Experience:**
 - Priority-sorted alert list with visual severity indicators
@@ -341,7 +525,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 8: AI Insights & Analytics**
+### **Screen 12: AI Insights & Analytics**
 **Purpose:** Data-driven insights for safety and operational improvement
 **User Experience:**
 - Interactive charts showing trends over time
@@ -388,7 +572,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 9: Mobile Field Assessment**
+### **Screen 13: Mobile Field Assessment**
 **Purpose:** Tablet-based tool for on-site inspections and assessments
 **User Experience:**
 - GPS-guided route navigation
@@ -435,56 +619,68 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 10: Zone Management & Interactive Controls**
-**Purpose:** Manage site zones with IoT device control capabilities
+### **Screen 14: Path Drawing Administration**
+**Purpose:** Create and manage GPS-guided navigation paths with A→B→C→D waypoint system
 **User Experience:**
-- Visual zone editor over site maps
-- Real-time IoT device status display
-- One-click emergency controls
-- Zone occupancy and compliance monitoring
+- Mouse-based path drawing on site maps
+- Waypoint creation with turn-by-turn directions
+- Audio guidance script recording and testing
+- Route validation and GPS coordinate generation
 
 **Database Integration:**
-- `site_zones` for zone definitions and properties
-- `site_maps` for visual representation
-- External IoT APIs for device control
-- `personnel_tracking` for occupancy data
+- `assessment_routes` for path definitions
+- `site_maps` for visual route overlay
+- `site_coordinates` for waypoint GPS data
+- `site_zones` for safety zone integration
 
 **Features:**
-1. **Zone Editor**
-   - Drag-and-drop zone creation
-   - Shape tools (rectangle, circle, polygon)
-   - Zone property assignment
-   - Visual rule representation
+1. **Path Creation Tools**
+   - Click-to-place waypoint system (A→B→C→D)
+   - Drag-and-drop path adjustment
+   - Automatic distance calculation
+   - Estimated walking time generation
 
-2. **IoT Device Integration**
-   - Real-time device status indicators
-   - Remote control capabilities
-   - Automated response configuration
-   - Device health monitoring
+2. **Waypoint Configuration**
+   - GPS coordinate assignment
+   - Turn direction specification (left, right, straight)
+   - Audio guidance script recording
+   - Visual landmark identification
 
-3. **Safety Controls**
-   - Emergency zone lockdown
-   - Evacuation route activation
-   - Warning system triggers
-   - Access control integration
+3. **Route Optimization**
+   - Shortest path calculation
+   - Safety zone avoidance
+   - Accessibility consideration
+   - Weather-resistant routing
 
-4. **Monitoring Dashboard**
-   - Zone occupancy levels
-   - Unauthorized access alerts
-   - Equipment movement tracking
-   - Environmental condition monitoring
+4. **Testing and Validation**
+   - Virtual route walkthrough
+   - GPS accuracy verification
+   - Audio guidance playback testing
+   - Mobile device compatibility check
 
-**Emergency Features:**
-- Panic button integration
-- Automatic emergency services notification
-- Mass notification system
-- Evacuation route guidance
+5. **Advanced Features**
+   - Multiple route variants (normal/emergency)
+   - Time-based routing (morning/afternoon paths)
+   - Equipment-specific routes (vehicle vs pedestrian)
+   - Integration with zone restrictions
+
+**Administration Tools:**
+- Bulk route import/export
+- Template route library
+- Route sharing between sites
+- Performance analytics per route
+
+**Construction-Specific Considerations:**
+- Routes avoid active work zones
+- Integration with daily safety briefings
+- Emergency evacuation route creation
+- Contractor access path management
 
 ---
 
 ## **SOLUTION ADMIN PORTAL**
 
-### **Screen 11: Company & Multi-Site Management**
+### **Screen 15: Company & Multi-Site Management**
 **Purpose:** Executive-level oversight across multiple sites and groups
 **Database Integration:** `companies`, `groups`, `sites`, `users`
 
@@ -496,7 +692,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 12: User & Role Management**
+### **Screen 16: User & Role Management**
 **Purpose:** Comprehensive user administration and role-based access control
 **Database Integration:** `users`, `roles`, `user_roles`, `user_sessions`
 
@@ -508,7 +704,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 13: AI Model Management**
+### **Screen 17: AI Model Management**
 **Purpose:** Configure and monitor AI detection models
 **Database Integration:** `ai_models`, `confidence_metrics`, `detection_results`
 
@@ -520,7 +716,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 14: System Configuration & Rules**
+### **Screen 18: System Configuration & Rules**
 **Purpose:** Global system settings and alert rule management
 **Database Integration:** `alert_rules`, `system_configurations` (VMS)
 
@@ -534,7 +730,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ## **VMS USER PORTAL**
 
-### **Screen 15: Camera Operations Center**
+### **Screen 19: Camera Operations Center**
 **Purpose:** Dedicated camera monitoring and control interface
 **Database Integration:** All VMS database tables
 
@@ -546,7 +742,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 16: Video Storage Management**
+### **Screen 20: Video Storage Management**
 **Purpose:** Manage video archives and storage allocation
 **Database Integration:** `video_storage`, `recording_policies` (VMS)
 
@@ -560,7 +756,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ## **VMS ADMIN PORTAL**
 
-### **Screen 17: System Administration**
+### **Screen 21: System Administration**
 **Purpose:** Complete VMS system administration
 **Database Integration:** All VMS system tables
 
@@ -572,7 +768,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 
 ---
 
-### **Screen 18: Camera Installation & Configuration**
+### **Screen 22: Camera Installation & Configuration**
 **Purpose:** Camera setup and network configuration
 **Database Integration:** `cameras`, `camera_configurations`, `camera_api_endpoints` (VMS)
 
@@ -596,8 +792,10 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 6. **Alert System**: `alerts`, `alert_rules`, `alert_escalations`, `notifications`
 7. **Field Assessment**: `assessment_routes`, `mobile_recordings`, `field_reports`
 8. **Role-Based Access**: `roles`, `user_roles` with comprehensive permission system
+9. **Navigation & Street View**: `assessment_routes`, `site_coordinates`, `mobile_recordings`
+10. **Time-Based Features**: Supported by time-series data in all tables with partitioning
 
-**No database gaps identified** - The schema comprehensively supports all UX requirements.
+**No database gaps identified** - The schema comprehensively supports all UX requirements including the enhanced navigation features.
 
 ---
 
@@ -607,6 +805,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 - Rugged Android tablets (10-12 inch screens)
 - Smartphones for emergency access
 - Vehicle-mounted displays
+- Wearable devices for GPS guidance
 
 ### **Design Considerations:**
 - **Touch Targets**: Minimum 44px for work gloves
@@ -614,6 +813,7 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 - **Battery**: Optimized for 8-hour construction shifts
 - **Durability**: Weather and drop-resistant interfaces
 - **Connectivity**: Offline capability with sync
+- **GPS**: High-accuracy positioning for navigation
 
 ---
 
@@ -622,22 +822,53 @@ As a construction industry veteran with 25+ years of experience, I've designed t
 ### **Phase 1 (MVP):**
 1. Login & Authentication
 2. Dashboard Home
-3. Live Camera View
+3. Live View
 4. Basic Alert Management
 
-### **Phase 2 (Core Features):**
-5. Site Overview (Street View)
+### **Phase 2 (Core Navigation Features):**
+5. Site Overview (Street View Map)
 6. Historical Video Review
-7. Alert Management Center
+7. Path Drawing Administration
+8. Live Street View Navigation
 
-### **Phase 3 (Advanced Features):**
-8. Time Comparison View
-9. AI Insights & Analytics
-10. Mobile Field Assessment
+### **Phase 3 (Advanced Time Features):**
+9. Time Lapse View
+10. Two Time Slots Comparison
+11. Historical Street View
+12. Street View Time Comparison
 
 ### **Phase 4 (Enterprise Features):**
-11. Zone Management & IoT Controls
-12. Admin Portals
-13. Advanced Analytics
+13. AI Insights & Analytics
+14. Mobile Field Assessment
+15. Admin Portals
+16. Advanced Analytics
 
-This UX specification provides a comprehensive roadmap for building a construction industry-leading AI monitoring system that addresses real-world safety, compliance, and operational challenges.
+---
+
+## Core Navigation System Architecture
+
+### **GPS Integration:**
+- Real-time positioning accuracy within 1-2 meters
+- Offline map caching for remote construction sites
+- Integration with survey-grade GPS when available
+- Compass and gyroscope integration for direction
+
+### **Camera Switching Logic:**
+- Automatic switching based on GPS proximity
+- Manual override capabilities
+- Smooth transition algorithms
+- Failover to next closest camera
+
+### **Audio Guidance System:**
+- Text-to-speech for automated directions
+- Custom audio recording capability
+- Multiple language support
+- Emergency alert audio integration
+
+### **Path Optimization:**
+- Real-time hazard avoidance
+- Weather-based route adjustments
+- Time-of-day optimizations
+- Dynamic rerouting capabilities
+
+This comprehensive UX specification provides a complete roadmap for building an industry-leading construction AI monitoring system with advanced navigation capabilities that address real-world safety, compliance, and operational challenges.
