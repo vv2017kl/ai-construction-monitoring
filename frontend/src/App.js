@@ -70,6 +70,8 @@ function App() {
             <Route path="/live-street-view" element={<SolutionUserLiveStreetView />} />
             <Route path="/video-review" element={<SolutionUserVideoReview />} />
             <Route path="/site-overview" element={<SolutionUserSiteOverview />} />
+            <Route path="/alert-center" element={<SolutionUserAlertCenter />} />
+            <Route path="/alert-center/:alertId" element={<SolutionUserAlertCenter />} />
             
             {/* Future Portal Routes will be added here */}
             {/* Solution Admin Portal: /admin/* */}
