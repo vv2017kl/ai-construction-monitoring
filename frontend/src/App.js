@@ -64,6 +64,7 @@ function App() {
             {/* Solution User Portal Routes */}
             <Route path="/dashboard" element={<SolutionUserDashboard />} />
             <Route path="/live-view" element={<SolutionUserLiveView />} />
+            <Route path="/live-street-view" element={<SolutionUserLiveStreetView />} />
             
             {/* Future Portal Routes will be added here */}
             {/* Solution Admin Portal: /admin/* */}
