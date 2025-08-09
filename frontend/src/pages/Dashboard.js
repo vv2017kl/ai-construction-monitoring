@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, Shield, Users, Camera, TrendingUp, 
   Clock, MapPin, Activity, CheckCircle, XCircle,
-  Play, Eye, BarChart3, Navigation, Zap, Tool,
+  Play, Eye, BarChart3, Navigation, Zap, Settings,
   Calendar, Wind, Thermometer
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
