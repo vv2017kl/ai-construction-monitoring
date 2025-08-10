@@ -6,7 +6,7 @@ import {
   Settings, User, UserCheck, UserX, MoreVertical, Clock,
   Globe, Building2, Camera, FileText, BarChart3, Wrench,
   Activity, RefreshCw, Download, Upload, Grid, List,
-  TrendingUp, Database, Server, Wifi, Monitor, Zap
+  TrendingUp, Database, Server, Wifi, Monitor, Zap, X
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
