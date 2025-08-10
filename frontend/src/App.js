@@ -102,6 +102,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<UserDirectory />} />
+            <Route path="/admin/departments" element={<DepartmentManagement />} />
             
             {/* Future Portal Routes will be added here */}
             {/* VMS User Portal: /vms/operations/* */}
