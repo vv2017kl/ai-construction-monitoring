@@ -121,7 +121,7 @@ const FieldAssessment = () => {
           <span>Connected</span>
         </div>
         <div className="flex items-center space-x-1">
-          <GPS className="w-4 h-4 text-green-400" />
+          <Locate className="w-4 h-4 text-green-400" />
           <span>{mockGPSLocation.accuracy}m</span>
         </div>
       </div>
