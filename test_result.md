@@ -210,8 +210,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Continue wireframe development with Alert Center screen"
-    - "Implement remaining portal screens from UX specification"
+    - "User Directory screen implementation"
+    - "Admin Portal routing setup"
+    - "Test admin portal accessibility and functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
