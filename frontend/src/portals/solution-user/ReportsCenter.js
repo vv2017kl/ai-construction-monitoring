@@ -211,9 +211,9 @@ const ReportsCenter = () => {
       case 'personnel': return theme.primary[500];
       case 'ai_analytics': return theme.success[500];
       case 'equipment': return theme.warning[500];
-      case 'progress': return theme.info[500];
+      case 'progress': return theme.primary[600]; // Using primary variant instead of non-existent info
       case 'compliance': return theme.secondary[500];
-      default: return theme.gray[500];
+      default: return theme.secondary[600]; // Using secondary instead of non-existent gray
     }
   };
 
