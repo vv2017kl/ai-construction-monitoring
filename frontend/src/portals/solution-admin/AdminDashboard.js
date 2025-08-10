@@ -427,7 +427,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="p-6 space-y-4">
                   <HealthMetric title="CPU Usage" value={systemHealth.cpu} icon={Cpu} />
-                  <HealthMetric title="Memory" value={systemHealth.memory} icon={Memory} />
+                  <HealthMetric title="Memory" value={systemHealth.memory} icon={Monitor} />
                   <HealthMetric title="Disk Space" value={systemHealth.disk} icon={HardDisk} />
                   <HealthMetric title="Network" value={systemHealth.network} icon={Wifi} />
                   <HealthMetric title="Database" value={systemHealth.database} icon={Database} />
