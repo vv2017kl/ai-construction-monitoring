@@ -496,7 +496,7 @@ const ReportsCenter = () => {
               value={reports.reduce((acc, r) => acc + r.downloads, 0)}
               subtitle="All time"
               icon={Download}
-              color={theme.info[500]}
+              color={theme.primary[600]}
             />
           </div>
         </div>
