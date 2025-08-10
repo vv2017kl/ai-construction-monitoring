@@ -27,6 +27,7 @@ import SolutionUserPathAdministration from "./portals/solution-user/PathAdminist
 import AdminDashboard from "./portals/solution-admin/AdminDashboard";
 import UserDirectory from "./portals/solution-admin/UserDirectory";
 import DepartmentManagement from "./portals/solution-admin/DepartmentManagement";
+import AccessControl from "./portals/solution-admin/AccessControl";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
