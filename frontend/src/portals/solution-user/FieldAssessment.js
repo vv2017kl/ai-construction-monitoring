@@ -485,7 +485,7 @@ const FieldAssessment = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <GPS className="w-4 h-4 text-green-500" />
+                      <Locate className="w-4 h-4 text-green-500" />
                       <span className="text-sm">GPS</span>
                     </div>
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
