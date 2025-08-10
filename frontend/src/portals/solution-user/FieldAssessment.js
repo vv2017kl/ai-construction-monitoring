@@ -312,7 +312,7 @@ const FieldAssessment = () => {
                 <MapPin className="w-3 h-3" />
                 <span>{currentSite.name}</span>
                 <span>•</span>
-                <GPS className="w-3 h-3 text-green-500" />
+                <Locate className="w-3 h-3 text-green-500" />
                 <span>GPS Active</span>
                 <span>•</span>
                 <Clock className="w-3 h-3" />
