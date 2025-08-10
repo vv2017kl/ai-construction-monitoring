@@ -447,7 +447,7 @@ const FieldAssessment = () => {
                 <h3 className="font-semibold text-gray-900 mb-4">Current Location</h3>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <GPS className="w-4 h-4 text-green-500" />
+                    <Locate className="w-4 h-4 text-green-500" />
                     <span className="text-sm">GPS Coordinates</span>
                   </div>
                   <p className="text-xs font-mono bg-gray-100 p-2 rounded">
