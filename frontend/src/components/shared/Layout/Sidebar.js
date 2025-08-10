@@ -105,9 +105,9 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         title: 'ORGANIZATION',
         icon: Building2,
         items: [
-          { name: 'Company Management', path: '/admin/companies', icon: Building2 },
-          { name: 'User Management', path: '/admin/users', icon: Users },
-          { name: 'Groups & Sites', path: '/admin/groups', icon: MapPin }
+          { name: 'User Directory', path: '/admin/users', icon: Users },
+          { name: 'Department Management', path: '/admin/departments', icon: Building2 },
+          { name: 'Access Control', path: '/admin/access-control', icon: Shield }
         ]
       },
       {
