@@ -124,8 +124,9 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         title: 'SYSTEM CONFIG',
         icon: Settings,
         items: [
-          { name: 'Global Settings', path: '/admin/settings', icon: Settings },
-          { name: 'Reporting & Analytics', path: '/admin/reports', icon: BarChart3 }
+          { name: 'Site Configuration', path: '/admin/site-config', icon: MapPin },
+          { name: 'Equipment Management', path: '/admin/equipment', icon: Settings },
+          { name: 'Integration Settings', path: '/admin/integrations', icon: Settings }
         ]
       }
     ]
