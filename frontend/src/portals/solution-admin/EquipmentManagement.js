@@ -269,7 +269,7 @@ const EquipmentManagement = () => {
 
   const getEquipmentIcon = (type) => {
     switch (type) {
-      case 'crane': return Crane;
+      case 'crane': return Construction;
       case 'excavator': return Construction;
       case 'mixer': return Truck;
       case 'bulldozer': return Construction;
