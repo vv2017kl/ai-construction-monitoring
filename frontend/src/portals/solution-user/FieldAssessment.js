@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   MapPin, Navigation, Camera, Mic, FileText, CheckSquare,
   AlertTriangle, Clock, Users, Smartphone, Tablet, Monitor,
-  GPS, Compass, Route, Map, Layers, Target, Upload,
+  Locate, Compass, Route, Map, Layers, Target, Upload,
   Download, Save, Share2, RefreshCw, Settings, Eye,
   Play, Pause, Square, ZoomIn, ZoomOut, RotateCw,
   Battery, Wifi, Signal, Volume2, VolumeX, Bell
