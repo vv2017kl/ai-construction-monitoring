@@ -23,6 +23,10 @@ import SolutionUserHistoricalStreetView from "./portals/solution-user/Historical
 import SolutionUserStreetViewComparison from "./portals/solution-user/StreetViewComparison";
 import SolutionUserPathAdministration from "./portals/solution-user/PathAdministration";
 
+// Solution Admin Portal Components
+import AdminDashboard from "./portals/solution-admin/AdminDashboard";
+import UserDirectory from "./portals/solution-admin/UserDirectory";
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
