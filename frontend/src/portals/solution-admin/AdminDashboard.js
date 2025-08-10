@@ -5,7 +5,7 @@ import {
   Server, Shield, AlertTriangle, CheckCircle, Clock,
   Activity, Zap, Database, Globe, Settings, Eye,
   RefreshCw, Download, Filter, Calendar, MapPin,
-  User, Camera, Bell, Wifi, HardDisk, Cpu, Memory
+  User, Camera, Bell, Wifi, HardDisk, Cpu, Monitor
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
