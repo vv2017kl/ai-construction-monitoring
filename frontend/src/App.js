@@ -90,6 +90,8 @@ function App() {
             <Route path="/profile" element={<SolutionUserMyProfile />} />
             <Route path="/time-comparison" element={<SolutionUserTimeComparison />} />
             <Route path="/historical-street" element={<SolutionUserHistoricalStreetView />} />
+            <Route path="/street-comparison" element={<SolutionUserStreetViewComparison />} />
+            <Route path="/path-admin" element={<SolutionUserPathAdministration />} />
             
             {/* Future Portal Routes will be added here */}
             {/* Solution Admin Portal: /admin/* */}
