@@ -97,8 +97,12 @@ function App() {
             <Route path="/street-comparison" element={<SolutionUserStreetViewComparison />} />
             <Route path="/path-admin" element={<SolutionUserPathAdministration />} />
             
+            {/* Solution Admin Portal Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<UserDirectory />} />
+            
             {/* Future Portal Routes will be added here */}
-            {/* Solution Admin Portal: /admin/* */}
             {/* VMS User Portal: /vms/operations/* */}
             {/* VMS Admin Portal: /vms/admin/* */}
           </Routes>
