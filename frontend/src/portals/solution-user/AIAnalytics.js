@@ -57,6 +57,39 @@ const AIAnalytics = () => {
 
   const analytics = getAnalyticsData();
 
+  // Mock chart data
+  const chartData = {
+    hourlyDetections: [
+      { time: '00:00', personnel: 12, violations: 1 },
+      { time: '02:00', personnel: 8, violations: 0 },
+      { time: '04:00', personnel: 15, violations: 2 },
+      { time: '06:00', personnel: 28, violations: 1 },
+      { time: '08:00', personnel: 45, violations: 3 },
+      { time: '10:00', personnel: 42, violations: 2 },
+      { time: '12:00', personnel: 38, violations: 1 },
+      { time: '14:00', personnel: 41, violations: 4 },
+      { time: '16:00', personnel: 35, violations: 2 },
+      { time: '18:00', personnel: 29, violations: 1 },
+      { time: '20:00', personnel: 18, violations: 0 },
+      { time: '22:00', personnel: 12, violations: 1 }
+    ],
+    safetyMetrics: [
+      { category: 'PPE Violations', count: 12, trend: 'down', color: '#f59e0b' },
+      { category: 'Restricted Area Access', count: 8, trend: 'up', color: '#ef4444' },
+      { category: 'Equipment Safety', count: 15, trend: 'stable', color: '#3b82f6' },
+      { category: 'Fall Protection', count: 6, trend: 'down', color: '#10b981' },
+      { category: 'Emergency Protocols', count: 3, trend: 'stable', color: '#8b5cf6' }
+    ],
+    cameraPerformance: [
+      { id: 'cam001', name: 'Camera 01', location: 'Main Entrance', detections: 156, accuracy: 94, uptime: 99.2, status: 'online' },
+      { id: 'cam002', name: 'Camera 02', location: 'Construction Zone A', detections: 203, accuracy: 91, uptime: 98.7, status: 'online' },
+      { id: 'cam003', name: 'Camera 03', location: 'Equipment Storage', detections: 89, accuracy: 96, uptime: 99.8, status: 'online' },
+      { id: 'cam004', name: 'Camera 04', location: 'Safety Office', detections: 45, accuracy: 98, uptime: 97.3, status: 'online' },
+      { id: 'cam005', name: 'Camera 05', location: 'Loading Dock', detections: 178, accuracy: 88, uptime: 95.1, status: 'maintenance' },
+      { id: 'cam006', name: 'Camera 06', location: 'Break Area', detections: 67, accuracy: 93, uptime: 99.5, status: 'online' }
+    ]
+  };
+
   // Enhanced Interactive Functions
   const handleChartDataClick = (dataPoint, chartName) => {
     setSelectedChartData({ ...dataPoint, chart: chartName });
