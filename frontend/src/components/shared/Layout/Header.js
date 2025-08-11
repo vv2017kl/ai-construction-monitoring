@@ -32,22 +32,25 @@ const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
   };
 
   const WeatherWidget = () => (
-    <div className="hidden md:flex items-center space-x-4 px-4 py-2 bg-gray-50 rounded-lg">
+    <div 
+      className="hidden md:flex items-center space-x-4 px-4 py-2 rounded-lg"
+      style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+    >
       <div className="flex items-center space-x-2">
         {currentSite.weather.condition === 'Clear' ? (
-          <Sun className="w-4 h-4 text-yellow-500" />
+          <Sun className="w-4 h-4 text-yellow-300" />
         ) : currentSite.weather.condition === 'Partly Cloudy' ? (
-          <Cloud className="w-4 h-4 text-gray-500" />
+          <Cloud className="w-4 h-4 text-white/80" />
         ) : (
-          <Cloud className="w-4 h-4 text-gray-600" />
+          <Cloud className="w-4 h-4 text-white/70" />
         )}
-        <span className="text-sm font-medium">{currentSite.weather.temp}°F</span>
+        <span className="text-sm font-medium text-white">{currentSite.weather.temp}°F</span>
       </div>
-      <div className="flex items-center space-x-1 text-xs text-gray-600">
+      <div className="flex items-center space-x-1 text-xs text-white/80">
         <Wind className="w-3 h-3" />
         <span>{currentSite.weather.wind}</span>
       </div>
-      <div className="text-xs text-gray-500">{currentSite.weather.condition}</div>
+      <div className="text-xs text-white/70">{currentSite.weather.condition}</div>
     </div>
   );
 
