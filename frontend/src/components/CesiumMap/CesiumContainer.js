@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { 
   Viewer, 
-  createWorldTerrainAsync, 
   Cartesian3, 
   Math as CesiumMath, 
   VerticalOrigin, 
