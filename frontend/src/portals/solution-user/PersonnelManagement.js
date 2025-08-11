@@ -5,7 +5,9 @@ import {
   MoreVertical, Eye, Edit, Trash2, Shield, HardHat,
   Clock, MapPin, Phone, Mail, Calendar, CheckCircle,
   AlertTriangle, XCircle, User, Building2, Briefcase,
-  Activity, TrendingUp, BarChart3, Camera, Bell
+  Activity, TrendingUp, BarChart3, Camera, Bell, X,
+  Plus, Save, Navigation, UserCheck, UserX, Send,
+  Archive, FileText, Map, Zap, Target, Settings
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
