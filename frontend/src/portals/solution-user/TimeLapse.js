@@ -387,9 +387,28 @@ const TimeLapse = () => {
                 ))}
               </div>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button
+                onClick={() => setShowBookmarkModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <BookmarkPlus className="w-4 h-4" />
+                <span>Bookmark</span>
+              </button>
+
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <Download className="w-4 h-4" />
                 <span>Export</span>
+              </button>
+
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share</span>
               </button>
             </div>
           </div>
