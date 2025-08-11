@@ -184,18 +184,39 @@ const SiteOverview = () => {
   const CameraIcon = ({ camera, onClick }) => {
     const isOnline = camera.status === 'online';
     const hasAlerts = camera.alerts > 0;
+    const isSelected = selectedItems.has(`cameras-${camera.id}`);
     
     return (
       <div
         className={`absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all hover:scale-110 ${
-          selectedCamera === camera.id ? 'z-20' : 'z-10'
+          selectedCamera === camera.id || isSelected ? 'z-20' : 'z-10'
         }`}
         style={{ 
           left: `${camera.coordinates.x}%`, 
           top: `${camera.coordinates.y}%` 
         }}
-        onClick={() => onClick(camera)}
       >
+        {/* Selection checkbox */}
+        <div className="absolute -top-2 -left-2 z-30">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleSelectItem(camera.id, 'cameras');
+            }}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+        </div>
+
+        <div
+          onClick={() => onClick(camera)}
+          className={`relative p-2 rounded-full shadow-lg ${
+            isOnline ? 'bg-green-500' : 'bg-red-500'
+          } ${selectedCamera === camera.id ? 'ring-4 ring-blue-500' : ''} ${
+            isSelected ? 'ring-2 ring-green-500' : ''
+          }`}
+        >
         <div className={`relative p-2 rounded-full shadow-lg ${
           isOnline ? 'bg-green-500' : 'bg-red-500'
         } ${selectedCamera === camera.id ? 'ring-4 ring-blue-500' : ''}`}>
