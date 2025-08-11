@@ -479,15 +479,32 @@ const ReportsCenter = () => {
           
           <div className="flex items-center space-x-2">
             {report.preview && (
-              <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
+              <button 
+                onClick={() => handlePreviewReport(report)}
+                className="p-1 hover:bg-gray-100 rounded text-gray-600"
+                title="Preview Report"
+              >
                 <Eye className="w-4 h-4" />
               </button>
             )}
-            <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
+            <button 
+              onClick={() => handleShareReport(report)}
+              className="p-1 hover:bg-gray-100 rounded text-gray-600"
+              title="Share Report"
+            >
               <Share2 className="w-4 h-4" />
             </button>
-            <button className="p-1 hover:bg-gray-100 rounded text-blue-600">
+            <button 
+              className="p-1 hover:bg-gray-100 rounded text-blue-600"
+              title="Download Report"
+            >
               <Download className="w-4 h-4" />
+            </button>
+            <button 
+              className="p-1 hover:bg-gray-100 rounded text-yellow-600"
+              title="Bookmark Report"
+            >
+              <Bookmark className="w-4 h-4" />
             </button>
           </div>
         </div>
