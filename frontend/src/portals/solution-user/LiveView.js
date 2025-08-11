@@ -255,15 +255,55 @@ const LiveView = () => {
         </div>
 
         {/* Zoom Controls */}
-        <div className="mt-4 flex space-x-2">
-          <button className="flex-1 flex items-center justify-center space-x-2 p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+        <div className="flex justify-center space-x-2 mt-4">
+          <button 
+            onClick={() => handleZoom(camera.id, false)}
+            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
             <ZoomOut className="w-4 h-4" />
             <span className="text-sm">Zoom Out</span>
           </button>
-          <button className="flex-1 flex items-center justify-center space-x-2 p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button 
+            onClick={() => handleZoom(camera.id, true)}
+            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
             <ZoomIn className="w-4 h-4" />
             <span className="text-sm">Zoom In</span>
           </button>
+        </div>
+        
+        {/* Recording Controls */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Recording</h4>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => toggleRecording(camera.id)}
+              className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${
+                recordingCameras.has(camera.id)
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              {recordingCameras.has(camera.id) ? (
+                <>
+                  <Pause className="w-4 h-4" />
+                  <span className="text-sm">Stop Recording</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  <span className="text-sm">Start Recording</span>
+                </>
+              )}
+            </button>
+            <button 
+              onClick={() => openCameraSettings(camera)}
+              className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="text-sm">Settings</span>
+            </button>
+          </div>
         </div>
       </div>
     );
