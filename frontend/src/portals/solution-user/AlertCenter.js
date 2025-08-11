@@ -523,8 +523,11 @@ const AlertCenter = () => {
                     <h3 className="font-semibold text-gray-900 mb-4">Evidence</h3>
                     <div className="grid grid-cols-1 gap-3">
                       {selectedAlert.evidence.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-3">
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                          <div 
+                            className="flex items-center space-x-3 flex-1"
+                            onClick={() => handleViewEvidence(item)}
+                          >
                             {item.includes('.jpg') || item.includes('.png') ? (
                               <Eye className="w-4 h-4 text-blue-600" />
                             ) : (
@@ -534,7 +537,10 @@ const AlertCenter = () => {
                               {item.includes('.jpg') || item.includes('.png') ? 'Screenshot' : 'Video Recording'}
                             </span>
                           </div>
-                          <button className="text-blue-600 hover:text-blue-800 text-sm">
+                          <button 
+                            onClick={() => handleViewEvidence(item)}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
                             <ExternalLink className="w-4 h-4" />
                           </button>
                         </div>
