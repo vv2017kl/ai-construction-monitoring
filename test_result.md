@@ -239,6 +239,18 @@ frontend:
         agent: "main"
         comment: "Added Solution Admin Portal routes including /admin, /admin/dashboard, and /admin/users. Imported AdminDashboard and UserDirectory components."
 
+  - task: "Alert Center interactive enhancements"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/portals/solution-user/AlertCenter.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Successfully enhanced Alert Center with bulk operations (select all, bulk actions bar with Investigate/Resolve/Assign/Archive), assignment modal with personnel selection, comment system with modals, enhanced evidence viewer, export to JSON functionality, real-time alert simulation, and improved detail modal. All features tested via screenshots and working perfectly."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
