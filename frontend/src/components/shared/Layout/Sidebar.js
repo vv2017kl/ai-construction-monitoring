@@ -13,7 +13,16 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
   const location = useLocation();
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const [expandedSections, setExpandedSections] = useState(['live_operations', 'historical']);
+  
+  // Initialize expanded sections based on portal
+  const getInitialExpandedSections = () => {
+    if (portal === 'solution-admin') {
+      return ['executive_dashboard', 'organization', 'ai_management', 'system_config'];
+    }
+    return ['dashboard', 'live_operations', 'historical', 'site_management', 'safety_alerts', 'reports_documentation', 'settings'];
+  };
+  
+  const [expandedSections, setExpandedSections] = useState(getInitialExpandedSections());
 
   const toggleSection = (sectionId) => {
     setExpandedSections(prev => 
