@@ -676,6 +676,22 @@ const PersonnelManagement = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <button
+                onClick={handleSelectAll}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>{selectedPersonnel.size === filteredPersonnel.length ? 'Deselect All' : 'Select All'}</span>
+              </button>
+
+              <button
+                onClick={handleExportPersonnel}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+              </button>
+
               {/* View Mode Toggle */}
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
                 <button
