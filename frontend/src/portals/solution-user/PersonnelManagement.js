@@ -971,10 +971,21 @@ const PersonnelManagement = () => {
                             <Eye className="w-4 h-4 text-gray-600" />
                           </button>
                           <button
+                            onClick={() => {
+                              setEditingPerson({ ...person });
+                              setShowEditModal(true);
+                            }}
                             className="p-1 hover:bg-gray-200 rounded"
-                            title="More Actions"
+                            title="Edit Personnel"
                           >
-                            <MoreVertical className="w-4 h-4 text-gray-600" />
+                            <Edit className="w-4 h-4 text-gray-600" />
+                          </button>
+                          <button
+                            onClick={() => handleDeletePersonnel(person.id)}
+                            className="p-1 hover:bg-gray-200 rounded"
+                            title="Delete Personnel"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                         </div>
                       </td>
