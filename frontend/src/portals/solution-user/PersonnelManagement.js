@@ -377,6 +377,105 @@ const PersonnelManagement = () => {
     </div>
   );
 
+  const AddPersonnelModal = () => {
+    if (!showAddModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Add New Personnel</h3>
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input
+                type="text"
+                value={newPersonForm.name}
+                onChange={(e) => setNewPersonForm(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                placeholder="Enter full name"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <input
+                type="text"
+                value={newPersonForm.role}
+                onChange={(e) => setNewPersonForm(prev => ({ ...prev, role: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                placeholder="Enter role"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+              <select
+                value={newPersonForm.department}
+                onChange={(e) => setNewPersonForm(prev => ({ ...prev, department: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+              >
+                <option value="">Select Department</option>
+                <option value="Construction">Construction</option>
+                <option value="Safety">Safety</option>
+                <option value="Equipment">Equipment</option>
+                <option value="Quality Assurance">Quality Assurance</option>
+                <option value="Electrical">Electrical</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={newPersonForm.email}
+                onChange={(e) => setNewPersonForm(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                placeholder="Enter email address"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={newPersonForm.phone}
+                onChange={(e) => setNewPersonForm(prev => ({ ...prev, phone: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                placeholder="Enter phone number"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddPersonnel}
+              disabled={!newPersonForm.name || !newPersonForm.role || !newPersonForm.department}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4" />
+              <span>Add Personnel</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const PersonnelDetailModal = () => {
     if (!showDetailModal || !selectedPerson) return null;
 
