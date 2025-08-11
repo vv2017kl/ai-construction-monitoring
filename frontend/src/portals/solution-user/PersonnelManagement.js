@@ -580,25 +580,71 @@ const PersonnelManagement = () => {
               </div>
             </div>
 
+            {/* Status Update */}
+            <div className="mt-6">
+              <h3 className="font-semibold text-gray-900 mb-4">Status Update</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleStatusUpdate(selectedPerson.id, 'active')}
+                  className="flex items-center justify-center space-x-2 p-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span>Check In</span>
+                </button>
+                <button
+                  onClick={() => handleStatusUpdate(selectedPerson.id, 'break')}
+                  className="flex items-center justify-center space-x-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors"
+                >
+                  <Clock className="w-4 h-4" />
+                  <span>On Break</span>
+                </button>
+                <button
+                  onClick={() => handleStatusUpdate(selectedPerson.id, 'off-site')}
+                  className="flex items-center justify-center space-x-2 p-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <UserX className="w-4 h-4" />
+                  <span>Off-Site</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLocationModal(true);
+                  }}
+                  className="flex items-center justify-center space-x-2 p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <Navigation className="w-4 h-4" />
+                  <span>Update Location</span>
+                </button>
+              </div>
+            </div>
+
             {/* Quick Actions */}
             <div className="mt-6">
               <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
-                <button className="flex items-center justify-center space-x-2 p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
+                <button
+                  onClick={() => {
+                    setEditingPerson({ ...selectedPerson });
+                    setShowEditModal(true);
+                  }}
+                  className="flex items-center justify-center space-x-2 p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Edit Details</span>
+                </button>
+                <button
+                  onClick={() => navigate('/live-view')}
+                  className="flex items-center justify-center space-x-2 p-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                >
                   <Camera className="w-4 h-4" />
-                  <span>View Location</span>
+                  <span>View on Camera</span>
                 </button>
                 <button className="flex items-center justify-center space-x-2 p-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
                   <Phone className="w-4 h-4" />
                   <span>Call</span>
                 </button>
-                <button className="flex items-center justify-center space-x-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors">
-                  <Bell className="w-4 h-4" />
+                <button className="flex items-center justify-center space-x-2 p-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors">
+                  <Send className="w-4 h-4" />
                   <span>Send Alert</span>
-                </button>
-                <button className="flex items-center justify-center space-x-2 p-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
-                  <BarChart3 className="w-4 h-4" />
-                  <span>View Reports</span>
                 </button>
               </div>
             </div>
