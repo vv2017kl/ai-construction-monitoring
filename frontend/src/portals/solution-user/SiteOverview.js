@@ -296,6 +296,28 @@ const SiteOverview = () => {
         </div>
 
         <div onClick={() => onClick(zone)} className="w-full h-full">
+          {/* Zone label */}
+          <div className="absolute top-2 left-2">
+            <div className="bg-black/70 text-white px-2 py-1 rounded text-xs">
+              {zone.name}
+            </div>
+          </div>
+          
+          {/* Zone status */}
+          <div className="absolute top-2 right-2">
+            <div className={`w-3 h-3 rounded-full ${
+              zone.status === 'active' ? 'bg-green-500' : 
+              zone.status === 'restricted' ? 'bg-red-500' : 'bg-gray-500'
+            }`}></div>
+          </div>
+
+          {/* Occupancy indicator */}
+          <div className="absolute bottom-2 left-2">
+            <div className="bg-black/70 text-white px-2 py-1 rounded text-xs">
+              {zone.currentOccupancy}/{zone.maxOccupancy}
+            </div>
+          </div>
+        </div>
         {/* Zone label */}
         <div className="absolute top-2 left-2">
           <div className="bg-black/70 text-white px-2 py-1 rounded text-xs">
