@@ -27,10 +27,24 @@ const SiteOverview = () => {
   });
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [selectedZone, setSelectedZone] = useState(null);
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [drawingTool, setDrawingTool] = useState('rectangle'); // 'rectangle', 'circle', 'polygon'
   const [zoomLevel, setZoomLevel] = useState(100);
   const [mapCenter, setMapCenter] = useState({ x: 50, y: 50 });
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showZoneModal, setShowZoneModal] = useState(false);
+  const [editingZone, setEditingZone] = useState(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [zones, setZones] = useState(mockZones);
+  const [newZone, setNewZone] = useState({
+    name: '',
+    type: 'work_area',
+    safetyLevel: 'medium',
+    maxOccupancy: 10,
+    requiresPPE: true,
+    coordinates: []
+  });
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
