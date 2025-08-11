@@ -871,6 +871,51 @@ const SiteOverview = () => {
               </div>
             </div>
 
+            {/* Drawing Controls */}
+            {isDrawingMode && (
+              <div className="absolute top-6 left-6 bg-white rounded-lg p-4 shadow-lg border">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-700">
+                      Drawing {drawingTool} zone
+                    </span>
+                  </div>
+                  
+                  {drawingTool === 'polygon' && (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={finishDrawing}
+                        disabled={drawingPath.length < 3}
+                        className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Finish ({drawingPath.length} points)
+                      </button>
+                    </div>
+                  )}
+                  
+                  <button
+                    onClick={cancelDrawing}
+                    className="px-3 py-1 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                
+                {drawingTool === 'polygon' && (
+                  <div className="mt-2 text-xs text-gray-600">
+                    Click to add points. Double-click or use "Finish" to complete the zone.
+                  </div>
+                )}
+                
+                {(drawingTool === 'rectangle' || drawingTool === 'circle') && (
+                  <div className="mt-2 text-xs text-gray-600">
+                    Click and drag to draw a {drawingTool}.
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Map Legend */}
             <div className="absolute bottom-6 left-6 bg-white rounded-lg p-4 shadow-lg border max-w-xs">
               <h4 className="font-semibold text-gray-900 mb-3">Legend</h4>
