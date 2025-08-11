@@ -13,7 +13,7 @@ const MapLiveView = () => {
   const { cameraId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useTheme();
   
   // Get parameters from URL
   const mapContext = searchParams.get('mapContext') === 'true';
