@@ -319,9 +319,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Reports Center interactive enhancements (next)"
-    - "My Profile interactive enhancements (next)"
+    - "My Profile interactive enhancements (FINAL SCREEN)"
     - "Personnel Management bug fix (runtime issue)"
+    - "Final testing and validation"
   stuck_tasks:
     - "Personnel Management runtime issue - page renders blank"
   test_all: false
