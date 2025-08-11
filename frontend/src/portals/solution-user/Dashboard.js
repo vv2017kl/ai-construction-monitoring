@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, Shield, Users, Camera, TrendingUp, 
   Clock, MapPin, Activity, CheckCircle, XCircle,
   Play, Eye, BarChart3, Navigation, Zap, Settings,
-  Calendar, Wind, Thermometer
+  Calendar, Wind, Thermometer, X, ExternalLink,
+  ChevronRight, Maximize2, Filter, Download
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
