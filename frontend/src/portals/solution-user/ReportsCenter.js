@@ -158,7 +158,140 @@ const ReportsCenter = () => {
 
   useEffect(() => {
     setReports(generateMockReports());
+    setReportTemplates(generateReportTemplates());
   }, []);
+
+  // Generate report templates
+  const generateReportTemplates = () => [
+    {
+      id: 't001',
+      name: 'Daily Safety Dashboard',
+      description: 'Comprehensive daily safety metrics with incidents and compliance',
+      type: 'safety',
+      sections: ['incidents', 'ppe_compliance', 'safety_score', 'alerts'],
+      estimatedTime: '5 minutes',
+      popularity: 95,
+      icon: Shield
+    },
+    {
+      id: 't002',
+      name: 'Weekly Progress Summary',
+      description: 'Project progress with milestones and completion rates',
+      type: 'progress',
+      sections: ['milestones', 'completion', 'timeline', 'resources'],
+      estimatedTime: '8 minutes',
+      popularity: 87,
+      icon: TrendingUp
+    },
+    {
+      id: 't003',
+      name: 'AI Analytics Digest',
+      description: 'AI detection performance and model accuracy metrics',
+      type: 'ai_analytics',
+      sections: ['detections', 'accuracy', 'false_positives', 'trends'],
+      estimatedTime: '3 minutes',
+      popularity: 78,
+      icon: Zap
+    },
+    {
+      id: 't004',
+      name: 'Personnel Performance Review',
+      description: 'Personnel productivity, attendance, and safety records',
+      type: 'personnel',
+      sections: ['productivity', 'attendance', 'safety', 'certifications'],
+      estimatedTime: '12 minutes',
+      popularity: 82,
+      icon: Users
+    }
+  ];
+
+  // Enhanced functions
+  const handleSelectReport = (reportId) => {
+    const newSelected = new Set(selectedReports);
+    if (newSelected.has(reportId)) {
+      newSelected.delete(reportId);
+    } else {
+      newSelected.add(reportId);
+    }
+    setSelectedReports(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedReports.size === filteredReports.length) {
+      setSelectedReports(new Set());
+      setShowBulkActions(false);
+    } else {
+      setSelectedReports(new Set(filteredReports.map(report => report.id)));
+      setShowBulkActions(true);
+    }
+  };
+
+  const handleBulkDownload = () => {
+    const selectedReportObjects = reports.filter(report => selectedReports.has(report.id));
+    // Simulate bulk download
+    console.log('Downloading reports:', selectedReportObjects.map(r => r.title));
+    setSelectedReports(new Set());
+    setShowBulkActions(false);
+  };
+
+  const handleBulkDelete = () => {
+    setReports(prev => prev.filter(report => !selectedReports.has(report.id)));
+    setSelectedReports(new Set());
+    setShowBulkActions(false);
+  };
+
+  const handlePreviewReport = (report) => {
+    setPreviewReport(report);
+    setShowPreviewModal(true);
+  };
+
+  const handleShareReport = (report) => {
+    setShareReport(report);
+    setShowShareModal(true);
+  };
+
+  const handleGenerateFromTemplate = (template) => {
+    setIsGenerating(true);
+    
+    // Simulate report generation
+    setTimeout(() => {
+      const newReport = {
+        id: `r${Date.now()}`,
+        title: `${template.name} - Generated`,
+        type: template.type,
+        description: `Auto-generated report from ${template.name} template`,
+        status: 'completed',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        author: mockUser.displayName,
+        fileSize: Math.floor(Math.random() * 10) + 1 + ' MB',
+        format: 'PDF',
+        pages: Math.floor(Math.random() * 20) + 5,
+        downloads: 0,
+        schedule: 'manual',
+        tags: template.sections,
+        preview: true
+      };
+      
+      setReports(prev => [newReport, ...prev]);
+      setIsGenerating(false);
+      setShowTemplateModal(false);
+    }, 3000);
+  };
+
+  const handleScheduleReport = () => {
+    // Simulate scheduling
+    console.log('Scheduling report:', newSchedule);
+    setShowScheduleModal(false);
+    setNewSchedule({
+      reportType: 'safety',
+      frequency: 'daily',
+      time: '09:00',
+      recipients: [],
+      format: 'PDF'
+    });
+  };
 
   // Filter and sort reports
   const filteredReports = reports
