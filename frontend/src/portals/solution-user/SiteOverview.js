@@ -173,6 +173,111 @@ const SiteOverview = () => {
     linkElement.click();
   };
 
+  // Drawing functions
+  const getMapCoordinates = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    return { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) };
+  };
+
+  const handleMapMouseDown = (e) => {
+    if (!isDrawingMode) return;
+    
+    const point = getMapCoordinates(e);
+    setDrawingStartPoint(point);
+    
+    if (drawingTool === 'polygon') {
+      setDrawingPath(prev => [...prev, point]);
+    } else {
+      setIsDrawing(true);
+    }
+  };
+
+  const handleMapMouseMove = (e) => {
+    if (!isDrawingMode || (!isDrawing && drawingTool !== 'polygon')) return;
+    
+    const currentPoint = getMapCoordinates(e);
+    
+    if (drawingTool === 'rectangle' && drawingStartPoint) {
+      const shape = {
+        type: 'rectangle',
+        coordinates: [
+          { x: Math.min(drawingStartPoint.x, currentPoint.x), y: Math.min(drawingStartPoint.y, currentPoint.y) },
+          { x: Math.max(drawingStartPoint.x, currentPoint.x), y: Math.min(drawingStartPoint.y, currentPoint.y) },
+          { x: Math.max(drawingStartPoint.x, currentPoint.x), y: Math.max(drawingStartPoint.y, currentPoint.y) },
+          { x: Math.min(drawingStartPoint.x, currentPoint.x), y: Math.max(drawingStartPoint.y, currentPoint.y) }
+        ]
+      };
+      setTempShapes([shape]);
+    } else if (drawingTool === 'circle' && drawingStartPoint) {
+      const centerX = drawingStartPoint.x;
+      const centerY = drawingStartPoint.y;
+      const radius = Math.sqrt(Math.pow(currentPoint.x - centerX, 2) + Math.pow(currentPoint.y - centerY, 2));
+      
+      // Create circle as polygon with 16 points
+      const points = [];
+      for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * 2 * Math.PI;
+        points.push({
+          x: centerX + radius * Math.cos(angle),
+          y: centerY + radius * Math.sin(angle)
+        });
+      }
+      
+      const shape = {
+        type: 'circle',
+        coordinates: points
+      };
+      setTempShapes([shape]);
+    }
+  };
+
+  const handleMapMouseUp = (e) => {
+    if (!isDrawingMode) return;
+    
+    if (drawingTool === 'rectangle' || drawingTool === 'circle') {
+      if (tempShapes.length > 0) {
+        const coordinates = tempShapes[0].coordinates;
+        setNewZone(prev => ({ ...prev, coordinates }));
+        setTempShapes([]);
+        setShowZoneModal(true);
+        setIsDrawing(false);
+        setDrawingStartPoint(null);
+      }
+    }
+  };
+
+  const handleMapDoubleClick = (e) => {
+    if (!isDrawingMode || drawingTool !== 'polygon') return;
+    
+    if (drawingPath.length >= 3) {
+      setNewZone(prev => ({ ...prev, coordinates: drawingPath }));
+      setDrawingPath([]);
+      setShowZoneModal(true);
+    }
+  };
+
+  const finishDrawing = () => {
+    if (drawingTool === 'polygon' && drawingPath.length >= 3) {
+      setNewZone(prev => ({ ...prev, coordinates: drawingPath }));
+      setDrawingPath([]);
+      setShowZoneModal(true);
+    }
+    setIsDrawingMode(false);
+    setIsDrawing(false);
+    setTempShapes([]);
+    setDrawingStartPoint(null);
+  };
+
+  const cancelDrawing = () => {
+    setDrawingPath([]);
+    setTempShapes([]);
+    setIsDrawing(false);
+    setDrawingStartPoint(null);
+    setIsDrawingMode(false);
+  };
+
   // Real-time updates simulation
   useEffect(() => {
     const interval = setInterval(() => {
