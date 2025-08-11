@@ -339,6 +339,37 @@ const AIAnalytics = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Chart Type Selector */}
+              <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setChartType('bar')}
+                  className={`p-2 rounded transition-colors ${
+                    chartType === 'bar' ? 'bg-white shadow-sm text-blue-600' : 'hover:bg-gray-200'
+                  }`}
+                  title="Bar Chart"
+                >
+                  <BarChart className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => setChartType('line')}
+                  className={`p-2 rounded transition-colors ${
+                    chartType === 'line' ? 'bg-white shadow-sm text-blue-600' : 'hover:bg-gray-200'
+                  }`}
+                  title="Line Chart"
+                >
+                  <LineChart className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => setChartType('pie')}
+                  className={`p-2 rounded transition-colors ${
+                    chartType === 'pie' ? 'bg-white shadow-sm text-blue-600' : 'hover:bg-gray-200'
+                  }`}
+                  title="Pie Chart"
+                >
+                  <PieChart className="w-3 h-3" />
+                </button>
+              </div>
+
               {/* Time Range Selector */}
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
                 {['1h', '24h', '7d', '30d'].map((range) => (
@@ -356,7 +387,41 @@ const AIAnalytics = () => {
                 ))}
               </div>
 
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              {/* Comparison Mode Toggle */}
+              <button
+                onClick={() => setComparisonMode(!comparisonMode)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  comparisonMode ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Compare className="w-4 h-4" />
+                <span>Compare</span>
+              </button>
+
+              {/* Real-time Toggle */}
+              <button
+                onClick={() => setRealTimeEnabled(!realTimeEnabled)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  realTimeEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {realTimeEnabled ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                <span>Live</span>
+              </button>
+
+              {/* Export Button */}
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+              </button>
+
+              <button 
+                onClick={() => window.location.reload()}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <RefreshCw className="w-4 h-4" />
                 <span>Refresh</span>
               </button>
