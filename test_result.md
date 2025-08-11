@@ -283,9 +283,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Personnel Management interactive enhancements"
-    - "Site Overview interactive enhancements (next)"
     - "AI Analytics interactive enhancements (next)"
+    - "Time Lapse interactive enhancements (next)"
+    - "Reports Center interactive enhancements (next)"
   stuck_tasks:
     - "Personnel Management runtime issue - page renders blank"
   test_all: false
