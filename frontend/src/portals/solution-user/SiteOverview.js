@@ -430,6 +430,33 @@ const SiteOverview = () => {
 
             {/* Map Controls */}
             <div className="flex items-center space-x-4">
+              {/* Selection Controls */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleSelectAll('cameras')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                >
+                  <Camera className="w-3 h-3" />
+                  <span>Select Cameras</span>
+                </button>
+                <button
+                  onClick={() => handleSelectAll('zones')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                >
+                  <Square className="w-3 h-3" />
+                  <span>Select Zones</span>
+                </button>
+              </div>
+
+              {/* Zone Management */}
+              <button
+                onClick={() => setShowZoneModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create Zone</span>
+              </button>
+
               {/* View Toggle */}
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
                 {[
