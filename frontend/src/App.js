@@ -22,6 +22,7 @@ import SolutionUserTimeComparison from "./portals/solution-user/TimeComparison";
 import SolutionUserHistoricalStreetView from "./portals/solution-user/HistoricalStreetView";
 import SolutionUserStreetViewComparison from "./portals/solution-user/StreetViewComparison";
 import SolutionUserPathAdministration from "./portals/solution-user/PathAdministration";
+import CesiumDashboard from "./portals/solution-user/CesiumDashboard";
 
 // Solution Admin Portal Components
 import AdminDashboard from "./portals/solution-admin/AdminDashboard";
