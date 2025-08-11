@@ -350,11 +350,27 @@ const AlertCenter = () => {
               {alert.priority.toUpperCase()}
             </span>
             {alert.evidence.length > 0 && (
-              <div className="flex items-center space-x-1 text-blue-600">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewEvidence(alert.evidence[0]);
+                }}
+                className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+              >
                 <Eye className="w-3 h-3" />
                 <span className="text-xs">{alert.evidence.length}</span>
-              </div>
+              </button>
             )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedAlert(alert);
+                setShowCommentModal(true);
+              }}
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <MessageSquare className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>
