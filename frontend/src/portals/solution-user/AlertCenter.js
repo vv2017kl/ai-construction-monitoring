@@ -715,6 +715,59 @@ const AlertCenter = () => {
           </div>
         )}
 
+        {/* Bulk Actions Bar */}
+        {showBulkActions && (
+          <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedAlerts.size} alert{selectedAlerts.size !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedAlerts(new Set());
+                    setShowBulkActions(false);
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Clear selection
+                </button>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleBulkStatusUpdate('investigating')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors text-sm"
+                >
+                  <Info className="w-3 h-3" />
+                  <span>Investigate</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusUpdate('resolved')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-sm"
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Resolve</span>
+                </button>
+                <button
+                  onClick={() => setShowAssignModal(true)}
+                  className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm"
+                >
+                  <UserPlus className="w-3 h-3" />
+                  <span>Assign</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusUpdate('archived')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                >
+                  <Archive className="w-3 h-3" />
+                  <span>Archive</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Alert List */}
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 p-6 overflow-y-auto">
