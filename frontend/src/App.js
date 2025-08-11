@@ -105,6 +105,7 @@ function App() {
             <Route path="/street-comparison" element={<SolutionUserStreetViewComparison />} />
             <Route path="/path-admin" element={<SolutionUserPathAdministration />} />
             <Route path="/cesium-dashboard" element={<CesiumDashboard />} />
+            <Route path="/map-live-view/:cameraId" element={<MapLiveView />} />
             
             {/* Solution Admin Portal Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
