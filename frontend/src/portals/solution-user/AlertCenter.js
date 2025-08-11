@@ -482,12 +482,38 @@ const AlertCenter = () => {
                       <Camera className="w-4 h-4" />
                       <span>View Camera</span>
                     </button>
-                    <button className="flex items-center justify-center space-x-2 p-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-                      <Download className="w-4 h-4" />
-                      <span>Export</span>
+                    <button 
+                      onClick={() => setShowCommentModal(true)}
+                      className="flex items-center justify-center space-x-2 p-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Add Comment</span>
                     </button>
                   </div>
                 </div>
+
+                {/* Comments Section */}
+                {alertComments[selectedAlert.id] && alertComments[selectedAlert.id].length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-4">Comments</h3>
+                    <div className="space-y-3 max-h-40 overflow-y-auto">
+                      {alertComments[selectedAlert.id].map((comment) => (
+                        <div key={comment.id} className="bg-gray-50 rounded-lg p-3">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                              <User className="w-3 h-3 text-blue-600" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">{comment.author}</span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(comment.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700 ml-8">{comment.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Evidence & Timeline */}
