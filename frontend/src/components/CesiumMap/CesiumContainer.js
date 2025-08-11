@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Viewer, Terrain, createWorldTerrain, IonResource, BingMapsStyle, Math as CesiumMath } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
+import './cesium-overrides.css';
 
 const CesiumContainer = ({
   sites = [],
