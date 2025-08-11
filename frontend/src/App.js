@@ -32,6 +32,7 @@ import SiteConfiguration from "./portals/solution-admin/SiteConfiguration";
 import EquipmentManagement from "./portals/solution-admin/EquipmentManagement";
 import AIModelManagement from "./portals/solution-admin/AIModelManagement";
 import SystemMonitoring from "./portals/solution-admin/SystemMonitoring";
+import IntegrationSettings from "./portals/solution-admin/IntegrationSettings";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
