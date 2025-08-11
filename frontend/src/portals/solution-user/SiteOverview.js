@@ -792,6 +792,23 @@ const SiteOverview = () => {
                           {zone.requiresPPE ? 'Yes' : 'No'}
                         </span>
                       </div>
+                      
+                      <div className="pt-3 border-t space-y-2">
+                        <button
+                          onClick={() => handleEditZone(zone)}
+                          className="w-full flex items-center justify-center space-x-2 p-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          <span>Edit Zone</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteZone(zone.id)}
+                          className="w-full flex items-center justify-center space-x-2 p-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete Zone</span>
+                        </button>
+                      </div>
                     </div>
                   ) : null;
                 })()}
