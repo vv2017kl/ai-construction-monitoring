@@ -413,11 +413,20 @@ const ReportsCenter = () => {
     const statusConfig = getStatusColor(report.status);
     const TypeIcon = getTypeIcon(report.type);
     const StatusIcon = statusConfig.icon;
+    const isSelected = selectedReports.has(report.id);
     
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-all duration-200">
+      <div className={`bg-white rounded-lg border p-6 hover:shadow-md transition-all duration-200 ${
+        isSelected ? 'border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/30' : 'border-gray-200'
+      }`}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => handleSelectReport(report.id)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
             <div 
               className="p-2 rounded-lg"
               style={{ backgroundColor: getTypeColor(report.type) + '20' }}
