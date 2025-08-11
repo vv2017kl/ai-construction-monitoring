@@ -24,6 +24,11 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
   
   const [expandedSections, setExpandedSections] = useState(getInitialExpandedSections());
 
+  // Update expanded sections when portal changes
+  useEffect(() => {
+    setExpandedSections(getInitialExpandedSections());
+  }, [portal]);
+  
   const toggleSection = (sectionId) => {
     setExpandedSections(prev => 
       prev.includes(sectionId) 
