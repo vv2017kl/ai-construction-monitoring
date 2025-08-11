@@ -20,6 +20,14 @@ const LiveView = () => {
   const [showAIOverlay, setShowAIOverlay] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [ptzActive, setPtzActive] = useState(null);
+  
+  // New state for enhanced functionality
+  const [showCameraSettings, setShowCameraSettings] = useState(false);
+  const [selectedCameraForSettings, setSelectedCameraForSettings] = useState(null);
+  const [recordingCameras, setRecordingCameras] = useState(new Set());
+  const [showDetectionDetail, setShowDetectionDetail] = useState(false);
+  const [selectedDetection, setSelectedDetection] = useState(null);
+  const [cameraPTZSettings, setCameraPTZSettings] = useState({});
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
