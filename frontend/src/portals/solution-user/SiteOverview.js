@@ -721,10 +721,15 @@ const SiteOverview = () => {
         <div className="flex-1 flex overflow-hidden">
           {/* Map Area */}
           <div className="flex-1 relative bg-gray-100">
-            <div 
+            {/* Map Container with Interactive Elements */}
+            <div
               ref={mapRef}
-              className="absolute inset-0 overflow-hidden"
+              className={`absolute inset-0 overflow-hidden ${isDrawingMode ? 'cursor-crosshair' : 'cursor-default'}`}
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'center center' }}
+              onMouseDown={handleMapMouseDown}
+              onMouseMove={handleMapMouseMove}
+              onMouseUp={handleMapMouseUp}
+              onDoubleClick={handleMapDoubleClick}
             >
               {/* Base Map Layer */}
               <div className="w-full h-full relative">
