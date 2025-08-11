@@ -1047,6 +1047,7 @@ const PersonnelManagement = () => {
                       <span>Last seen: {formatLastSeen(person.lastSeen)}</span>
                     </div>
                   </div>
+                  </div>
                 </div>
               ))}
             </div>
