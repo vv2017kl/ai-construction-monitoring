@@ -579,13 +579,30 @@ const AlertCenter = () => {
 
             <div className="flex items-center space-x-4">
               <button
+                onClick={handleSelectAll}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>{selectedAlerts.size === filteredAlerts.length ? 'Deselect All' : 'Select All'}</span>
+              </button>
+              <button
+                onClick={handleExportAlerts}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+              </button>
+              <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <Filter className="w-4 h-4" />
                 <span>Filters</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => window.location.reload()}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <RefreshCw className="w-4 h-4" />
                 <span>Refresh</span>
               </button>
