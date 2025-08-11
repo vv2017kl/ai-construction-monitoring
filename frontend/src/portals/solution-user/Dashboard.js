@@ -16,6 +16,13 @@ const Dashboard = () => {
   const { theme } = useTheme();
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
+  // State for modals and interactive elements
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState('today');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   const StatCard = ({ title, value, subtitle, icon: Icon, color, onClick, badge }) => (
     <div 
       className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer transform hover:scale-[1.02]"
