@@ -223,7 +223,7 @@ const Dashboard = () => {
                     <span className="text-sm text-gray-500">Live</span>
                   </div>
                   <button 
-                    onClick={() => navigate('/live-view')}
+                    onClick={() => setShowActivityModal(true)}
                     className="text-sm font-medium hover:underline"
                     style={{ color: theme.primary[500] }}
                   >
