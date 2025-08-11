@@ -33,7 +33,6 @@ const CesiumContainer = ({
   useEffect(() => {
     if (cesiumContainerRef.current && !viewer) {
       const cesiumViewer = new Viewer(cesiumContainerRef.current, {
-        terrainProvider: createWorldTerrain(),
         baseLayerPicker: false,
         geocoder: false,
         homeButton: false,
@@ -43,6 +42,17 @@ const CesiumContainer = ({
         timeline: false,
         fullscreenButton: false,
         vrButton: false
+      });
+
+      // Load terrain asynchronously (optional)
+      createWorldTerrainAsync({
+        requestVertexNormals: true,
+        requestWaterMask: true,
+      }).then(terrain => {
+        cesiumViewer.terrainProvider = terrain;
+      }).catch(error => {
+        console.warn('Failed to load terrain:', error);
+        // Continue without terrain
       });
 
       // Set initial camera position (global view)
