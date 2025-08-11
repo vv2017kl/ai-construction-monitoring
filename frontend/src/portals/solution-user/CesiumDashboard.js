@@ -4,7 +4,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import CesiumContainer from '../../components/CesiumMap/CesiumContainer';
 import MapControls from '../../components/CesiumMap/MapControls';
 import AlertSummaryPanel from '../../components/CesiumMap/AlertSummaryPanel';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { mockSites, mockCameras, regions } from '../../data/cesiumMockData';
 import { ArrowLeft, Home, Navigation2, Maximize } from 'lucide-react';
 
