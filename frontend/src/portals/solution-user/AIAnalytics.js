@@ -57,6 +57,83 @@ const AIAnalytics = () => {
 
   const analytics = getAnalyticsData();
 
+  // Enhanced Interactive Functions
+  const handleChartDataClick = (dataPoint, chartName) => {
+    setSelectedChartData({ ...dataPoint, chart: chartName });
+  };
+
+  const handleExportData = () => {
+    const exportData = {
+      metrics: analytics,
+      chartData: chartData,
+      cameras: chartData.cameraPerformance,
+      timeRange: timeRange,
+      exportDate: new Date().toISOString()
+    };
+
+    let dataStr, fileName, mimeType;
+    
+    if (exportFormat === 'csv') {
+      // Convert to CSV format
+      const csvRows = [];
+      csvRows.push(['Metric', 'Value', 'Time Range']);
+      csvRows.push(['AI Confidence', `${Math.round(analytics.aiPerformance.averageConfidence * 100)}%`, timeRange]);
+      csvRows.push(['PPE Compliance', `${analytics.safetyMetrics.ppeComplianceRate}%`, timeRange]);
+      csvRows.push(['Processing Speed', `${analytics.aiPerformance.processingTime}ms`, timeRange]);
+      csvRows.push(['Safety Score', `${analytics.safetyMetrics.safetyScore}/10`, timeRange]);
+      
+      dataStr = csvRows.map(row => row.join(',')).join('\n');
+      fileName = `ai_analytics_${timeRange}_${new Date().toISOString().split('T')[0]}.csv`;
+      mimeType = 'text/csv';
+    } else {
+      dataStr = JSON.stringify(exportData, null, 2);
+      fileName = `ai_analytics_${timeRange}_${new Date().toISOString().split('T')[0]}.json`;
+      mimeType = 'application/json';
+    }
+
+    const dataUri = `data:${mimeType};charset=utf-8,${encodeURIComponent(dataStr)}`;
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', fileName);
+    linkElement.click();
+    
+    setShowExportModal(false);
+  };
+
+  const handleTableSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc');
+    }
+  };
+
+  const filteredCameraData = chartData.cameraPerformance.filter(camera =>
+    camera.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    camera.location.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((a, b) => {
+    const aValue = a[sortBy];
+    const bValue = b[sortBy];
+    const multiplier = sortOrder === 'asc' ? 1 : -1;
+    return (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) * multiplier;
+  });
+
+  // Real-time updates simulation
+  useEffect(() => {
+    if (!realTimeEnabled) return;
+    
+    const interval = setInterval(() => {
+      // Simulate real-time metric updates
+      const randomChange = () => Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+      
+      // This would typically trigger a re-fetch of analytics data
+      console.log('Real-time update:', new Date().toLocaleTimeString());
+    }, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [realTimeEnabled]);
+
   // Mock chart data
   const chartData = {
     hourlyDetections: [
