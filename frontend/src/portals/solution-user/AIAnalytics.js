@@ -19,6 +19,18 @@ const AIAnalytics = () => {
   const [timeRange, setTimeRange] = useState('24h'); // '1h', '24h', '7d', '30d'
   const [selectedMetric, setSelectedMetric] = useState('safety');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [chartType, setChartType] = useState('bar'); // 'bar', 'line', 'pie'
+  const [selectedCamera, setSelectedCamera] = useState('all');
+  const [selectedChartData, setSelectedChartData] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportFormat, setExportFormat] = useState('csv');
+  const [realTimeEnabled, setRealTimeEnabled] = useState(true);
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [comparisonPeriod, setComparisonPeriod] = useState('prev_week');
+  const [selectedDataPoints, setSelectedDataPoints] = useState(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('detections');
+  const [sortOrder, setSortOrder] = useState('desc');
   
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
