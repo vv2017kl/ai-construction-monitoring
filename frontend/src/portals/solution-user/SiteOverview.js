@@ -801,6 +801,73 @@ const SiteOverview = () => {
                 {showLayers.equipment && equipmentPositions.map((equipment) => (
                   <EquipmentMarker key={equipment.id} equipment={equipment} />
                 ))}
+
+                {/* Drawing Overlay */}
+                {isDrawingMode && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Temporary Shapes */}
+                    {tempShapes.map((shape, index) => (
+                      <div key={index} className="absolute">
+                        <svg className="w-full h-full absolute inset-0" style={{ width: '100%', height: '100%' }}>
+                          <polygon
+                            points={shape.coordinates.map(point => `${point.x}%,${point.y}%`).join(' ')}
+                            fill="rgba(59, 130, 246, 0.2)"
+                            stroke="#3b82f6"
+                            strokeWidth="2"
+                            strokeDasharray="5,5"
+                          />
+                        </svg>
+                      </div>
+                    ))}
+
+                    {/* Current Drawing Path for Polygon */}
+                    {drawingTool === 'polygon' && drawingPath.length > 0 && (
+                      <div className="absolute inset-0">
+                        <svg className="w-full h-full" style={{ width: '100%', height: '100%' }}>
+                          {/* Draw lines between points */}
+                          {drawingPath.map((point, index) => (
+                            <g key={index}>
+                              {/* Point marker */}
+                              <circle
+                                cx={`${point.x}%`}
+                                cy={`${point.y}%`}
+                                r="3"
+                                fill="#3b82f6"
+                                stroke="white"
+                                strokeWidth="2"
+                              />
+                              {/* Line to next point */}
+                              {index < drawingPath.length - 1 && (
+                                <line
+                                  x1={`${point.x}%`}
+                                  y1={`${point.y}%`}
+                                  x2={`${drawingPath[index + 1].x}%`}
+                                  y2={`${drawingPath[index + 1].y}%`}
+                                  stroke="#3b82f6"
+                                  strokeWidth="2"
+                                  strokeDasharray="5,5"
+                                />
+                              )}
+                            </g>
+                          ))}
+                          {/* Closing line preview */}
+                          {drawingPath.length >= 3 && (
+                            <line
+                              x1={`${drawingPath[drawingPath.length - 1].x}%`}
+                              y1={`${drawingPath[drawingPath.length - 1].y}%`}
+                              x2={`${drawingPath[0].x}%`}
+                              y2={`${drawingPath[0].y}%`}
+                              stroke="#3b82f6"
+                              strokeWidth="2"
+                              strokeDasharray="5,5"
+                              opacity="0.5"
+                            />
+                          )}
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
