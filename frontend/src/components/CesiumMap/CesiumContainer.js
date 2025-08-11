@@ -43,17 +43,6 @@ const CesiumContainer = ({
         vrButton: false
       });
 
-      // Load terrain asynchronously (optional)
-      createWorldTerrainAsync({
-        requestVertexNormals: true,
-        requestWaterMask: true,
-      }).then(terrain => {
-        cesiumViewer.terrainProvider = terrain;
-      }).catch(error => {
-        console.warn('Failed to load terrain:', error);
-        // Continue without terrain
-      });
-
       // Set initial camera position (global view)
       cesiumViewer.camera.setView({
         destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000), // Between Dubai and India
