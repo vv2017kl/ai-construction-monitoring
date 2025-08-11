@@ -537,6 +537,38 @@ const TimeLapse = () => {
               </div>
             </div>
 
+            {/* Bookmarks */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-900">Bookmarks</h3>
+                <span className="text-xs text-gray-500">{bookmarks.length}</span>
+              </div>
+              
+              {bookmarks.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">No bookmarks added</p>
+              ) : (
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {bookmarks.map((bookmark) => (
+                    <div key={bookmark.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+                      <button
+                        onClick={() => handleJumpToBookmark(bookmark.time)}
+                        className="flex-1 text-left"
+                      >
+                        <p className="font-medium text-sm text-gray-900">{bookmark.name}</p>
+                        <p className="text-xs text-gray-500">{formatTime(bookmark.time)}</p>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteBookmark(bookmark.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Quick Stats */}
             <div className="p-4 flex-1">
               <h3 className="font-semibold text-gray-900 mb-3">Session Statistics</h3>
@@ -548,6 +580,10 @@ const TimeLapse = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Events:</span>
                   <span className="font-medium">{timelineData.events.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Bookmarks:</span>
+                  <span className="font-medium">{bookmarks.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Compression:</span>
