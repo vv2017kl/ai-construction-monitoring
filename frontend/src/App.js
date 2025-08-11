@@ -104,6 +104,7 @@ function App() {
             <Route path="/historical-street" element={<SolutionUserHistoricalStreetView />} />
             <Route path="/street-comparison" element={<SolutionUserStreetViewComparison />} />
             <Route path="/path-admin" element={<SolutionUserPathAdministration />} />
+            <Route path="/cesium-dashboard" element={<CesiumDashboard />} />
             
             {/* Solution Admin Portal Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
