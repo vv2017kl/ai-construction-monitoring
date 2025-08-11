@@ -266,20 +266,36 @@ const SiteOverview = () => {
     const maxX = Math.max(...coords.map(c => c.x));
     const minY = Math.min(...coords.map(c => c.y));
     const maxY = Math.max(...coords.map(c => c.y));
+    const isSelected = selectedItems.has(`zones-${zone.id}`);
 
     return (
       <div
         className={`absolute border-2 cursor-pointer transition-all hover:bg-opacity-40 ${
           zoneColors[zone.type] || 'border-gray-500 bg-gray-500/20'
-        } ${selectedZone === zone.id ? 'ring-2 ring-blue-600' : ''}`}
+        } ${selectedZone === zone.id ? 'ring-2 ring-blue-600' : ''} ${
+          isSelected ? 'ring-2 ring-green-600' : ''
+        }`}
         style={{
           left: `${minX}%`,
           top: `${minY}%`,
           width: `${maxX - minX}%`,
           height: `${maxY - minY}%`
         }}
-        onClick={() => onClick(zone)}
       >
+        {/* Selection checkbox */}
+        <div className="absolute top-1 left-1 z-30">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleSelectItem(zone.id, 'zones');
+            }}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+        </div>
+
+        <div onClick={() => onClick(zone)} className="w-full h-full">
         {/* Zone label */}
         <div className="absolute top-2 left-2">
           <div className="bg-black/70 text-white px-2 py-1 rounded text-xs">
