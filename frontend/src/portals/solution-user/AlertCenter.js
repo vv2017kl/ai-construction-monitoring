@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
-import { mockAlerts, mockSites, mockUser, mockCameras } from '../../data/mockData';
+import { mockAlerts, mockSites, mockUser, mockCameras, mockPersonnel } from '../../data/mockData';
 
 const AlertCenter = () => {
   const navigate = useNavigate();
