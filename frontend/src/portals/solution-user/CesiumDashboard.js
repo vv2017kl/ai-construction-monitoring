@@ -10,7 +10,7 @@ import { ArrowLeft, Home, Navigation2, Maximize } from 'lucide-react';
 
 const CesiumDashboard = () => {
   const navigate = useNavigate();
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useTheme();
   
   // Map state
   const [viewMode, setViewMode] = useState('global'); // 'global', 'regional', 'site'
