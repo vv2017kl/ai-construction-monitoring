@@ -236,10 +236,22 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
                       className={`w-full flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
                         isActiveRoute(item.path)
                           ? 'text-white shadow-md'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'text-white/80 hover:text-white'
                       } ${isCollapsed ? 'justify-center' : ''}`}
                       style={{
-                        backgroundColor: isActiveRoute(item.path) ? theme.primary[500] : 'transparent'
+                        backgroundColor: isActiveRoute(item.path) 
+                          ? 'rgba(255, 255, 255, 0.2)' 
+                          : 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActiveRoute(item.path)) {
+                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActiveRoute(item.path)) {
+                          e.target.style.backgroundColor = 'transparent';
+                        }
                       }}
                     >
                       <item.icon className="w-5 h-5 flex-shrink-0" />
