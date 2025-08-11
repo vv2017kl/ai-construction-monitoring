@@ -207,7 +207,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
             <div key={section.id}>
               {/* Section Header */}
               <div
-                className={`flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer hover:text-gray-700 ${
+                className={`flex items-center justify-between px-3 py-2 text-xs font-semibold text-white/80 uppercase tracking-wide cursor-pointer hover:text-white ${
                   isCollapsed ? 'justify-center' : ''
                 }`}
                 onClick={() => !isCollapsed && toggleSection(section.id)}
