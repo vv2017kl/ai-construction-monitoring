@@ -913,7 +913,15 @@ const PersonnelManagement = () => {
                 </thead>
                 <tbody>
                   {filteredPersonnel.map((person) => (
-                    <tr key={person.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={person.id} className={`border-b border-gray-100 hover:bg-gray-50 ${selectedPersonnel.has(person.id) ? 'bg-blue-50' : ''}`}>
+                      <td className="py-4 px-6">
+                        <input
+                          type="checkbox"
+                          checked={selectedPersonnel.has(person.id)}
+                          onChange={() => handleSelectPersonnel(person.id)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
