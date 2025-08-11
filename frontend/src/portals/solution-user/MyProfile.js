@@ -301,13 +301,29 @@ const MyProfile = () => {
                 </h2>
                 <p className="text-gray-600">{formData.role} • {formData.department}</p>
               </div>
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                <span>{isEditing ? 'Save Changes' : 'Edit Profile'}</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                {isEditing && (
+                  <div className="text-sm text-gray-500">
+                    Last saved: {lastSaved.toLocaleTimeString()}
+                  </div>
+                )}
+                <button
+                  onClick={isEditing ? handleSave : () => setIsEditing(true)}
+                  disabled={isSaving}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {isSaving ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : isEditing ? (
+                    <Save className="w-4 h-4" />
+                  ) : (
+                    <Edit className="w-4 h-4" />
+                  )}
+                  <span>
+                    {isSaving ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}
+                  </span>
+                </button>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
