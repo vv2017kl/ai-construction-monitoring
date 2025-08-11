@@ -150,21 +150,21 @@ const CesiumContainer = ({
       
       const cameraEntity = viewer.entities.add({
         id: `camera-${camera.id}`,
-        position: CesiumMath.Cartesian3.fromDegrees(longitude, latitude, height),
+        position: Cartesian3.fromDegrees(longitude, latitude, height),
         billboard: {
           image: createCameraPinImage(pinColor, camera.type),
           scale: 0.6,
-          verticalOrigin: CesiumMath.VerticalOrigin.BOTTOM,
-          heightReference: CesiumMath.HeightReference.CLAMP_TO_GROUND
+          verticalOrigin: VerticalOrigin.BOTTOM,
+          heightReference: HeightReference.CLAMP_TO_GROUND
         },
         label: {
           text: camera.name,
           font: '10pt sans-serif',
-          fillColor: CesiumMath.Color.WHITE,
-          outlineColor: CesiumMath.Color.BLACK,
+          fillColor: Color.WHITE,
+          outlineColor: Color.BLACK,
           outlineWidth: 1,
-          style: CesiumMath.LabelStyle.FILL_AND_OUTLINE,
-          pixelOffset: new CesiumMath.Cartesian2(0, -30),
+          style: LabelStyle.FILL_AND_OUTLINE,
+          pixelOffset: new Cartesian2(0, -30),
           show: true
         },
         description: createCameraDescription(camera),
