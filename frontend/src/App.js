@@ -30,6 +30,7 @@ import DepartmentManagement from "./portals/solution-admin/DepartmentManagement"
 import AccessControl from "./portals/solution-admin/AccessControl";
 import SiteConfiguration from "./portals/solution-admin/SiteConfiguration";
 import EquipmentManagement from "./portals/solution-admin/EquipmentManagement";
+import AIModelManagement from "./portals/solution-admin/AIModelManagement";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
