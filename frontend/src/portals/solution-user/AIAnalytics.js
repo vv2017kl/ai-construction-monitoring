@@ -263,17 +263,91 @@ const AIAnalytics = () => {
   );
 
   const CameraPerformanceTable = () => (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-gray-200">
-            <th className="text-left py-3 px-4 font-semibold text-gray-900">Camera</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-900">Detections</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-900">Accuracy</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-900">Uptime</th>
-            <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-          </tr>
-        </thead>
+    <div className="space-y-4">
+      {/* Table Controls */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search cameras..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': theme.primary[500] + '40' }}
+            />
+          </div>
+          <select
+            value={selectedCamera}
+            onChange={(e) => setSelectedCamera(e.target.value)}
+            className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+          >
+            <option value="all">All Cameras</option>
+            {chartData.cameraPerformance.map(camera => (
+              <option key={camera.id} value={camera.id}>{camera.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="text-sm text-gray-600">
+          Showing {filteredCameraData.length} of {chartData.cameraPerformance.length} cameras
+        </div>
+      </div>
+
+      {/* Enhanced Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th 
+                className="text-left py-3 px-4 font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleTableSort('name')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Camera</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th 
+                className="text-left py-3 px-4 font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleTableSort('location')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Location</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th 
+                className="text-left py-3 px-4 font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleTableSort('detections')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Detections</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th 
+                className="text-left py-3 px-4 font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleTableSort('accuracy')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Accuracy</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th 
+                className="text-left py-3 px-4 font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleTableSort('uptime')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Uptime</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
+              <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
+            </tr>
+          </thead>
         <tbody>
           {chartData.cameraPerformance.map((camera, index) => (
             <tr key={camera.id} className="border-b border-gray-100 hover:bg-gray-50">
