@@ -880,6 +880,138 @@ const SiteOverview = () => {
 
       {/* Camera Preview Modal */}
       <CameraPreviewModal />
+
+      {/* Zone Management Modal */}
+      {showZoneModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingZone ? 'Edit Zone' : 'Create New Zone'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowZoneModal(false);
+                  setEditingZone(null);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Zone Name</label>
+                <input
+                  type="text"
+                  value={editingZone ? editingZone.name : newZone.name}
+                  onChange={(e) => editingZone 
+                    ? setEditingZone(prev => ({ ...prev, name: e.target.value }))
+                    : setNewZone(prev => ({ ...prev, name: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                  placeholder="Enter zone name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Zone Type</label>
+                <select
+                  value={editingZone ? editingZone.type : newZone.type}
+                  onChange={(e) => editingZone 
+                    ? setEditingZone(prev => ({ ...prev, type: e.target.value }))
+                    : setNewZone(prev => ({ ...prev, type: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                >
+                  <option value="work_area">Work Area</option>
+                  <option value="safety">Safety Zone</option>
+                  <option value="restricted">Restricted Area</option>
+                  <option value="equipment">Equipment Zone</option>
+                  <option value="hazardous">Hazardous Area</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Safety Level</label>
+                <select
+                  value={editingZone ? editingZone.safetyLevel : newZone.safetyLevel}
+                  onChange={(e) => editingZone 
+                    ? setEditingZone(prev => ({ ...prev, safetyLevel: e.target.value }))
+                    : setNewZone(prev => ({ ...prev, safetyLevel: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Occupancy</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={editingZone ? editingZone.maxOccupancy : newZone.maxOccupancy}
+                  onChange={(e) => editingZone 
+                    ? setEditingZone(prev => ({ ...prev, maxOccupancy: parseInt(e.target.value) }))
+                    : setNewZone(prev => ({ ...prev, maxOccupancy: parseInt(e.target.value) }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="requiresPPE"
+                  checked={editingZone ? editingZone.requiresPPE : newZone.requiresPPE}
+                  onChange={(e) => editingZone 
+                    ? setEditingZone(prev => ({ ...prev, requiresPPE: e.target.checked }))
+                    : setNewZone(prev => ({ ...prev, requiresPPE: e.target.checked }))
+                  }
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="requiresPPE" className="ml-2 text-sm text-gray-700">
+                  Requires PPE
+                </label>
+              </div>
+              
+              {!editingZone && (
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    After creating the zone, use the drawing tools to define its boundaries on the map.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowZoneModal(false);
+                  setEditingZone(null);
+                }}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={editingZone ? handleUpdateZone : handleCreateZone}
+                disabled={editingZone ? !editingZone.name : !newZone.name}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save className="w-4 h-4" />
+                <span>{editingZone ? 'Update Zone' : 'Create Zone'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
