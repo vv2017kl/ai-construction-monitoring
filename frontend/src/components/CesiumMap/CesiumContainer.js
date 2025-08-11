@@ -1,5 +1,15 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Viewer, Terrain, createWorldTerrain, IonResource, BingMapsStyle, Math as CesiumMath } from 'cesium';
+import { 
+  Viewer, 
+  createWorldTerrain, 
+  Cartesian3, 
+  Math as CesiumMath, 
+  VerticalOrigin, 
+  HeightReference,
+  LabelStyle,
+  Cartesian2,
+  Color
+} from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './cesium-overrides.css';
 
