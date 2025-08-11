@@ -5,7 +5,8 @@ import {
   Filter, Search, Download, RefreshCw, CheckCircle, X,
   Eye, Play, ExternalLink, MessageSquare, User, Bell,
   Calendar, TrendingUp, BarChart3, Settings, ChevronDown,
-  Zap, AlertCircle, Info, CheckCircle2, XCircle
+  Zap, AlertCircle, Info, CheckCircle2, XCircle, Plus,
+  Trash2, UserPlus, Send, FileText, Archive, MoreHorizontal
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
