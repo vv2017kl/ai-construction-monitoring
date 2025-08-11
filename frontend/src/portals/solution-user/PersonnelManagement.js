@@ -836,6 +836,56 @@ const PersonnelManagement = () => {
           </div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {showBulkActions && (
+          <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedPersonnel.size} personnel selected
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedPersonnel(new Set());
+                    setShowBulkActions(false);
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Clear selection
+                </button>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleBulkStatusUpdate('active')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-sm"
+                >
+                  <UserCheck className="w-3 h-3" />
+                  <span>Check In</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusUpdate('break')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors text-sm"
+                >
+                  <Clock className="w-3 h-3" />
+                  <span>On Break</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusUpdate('off-site')}
+                  className="flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                >
+                  <UserX className="w-3 h-3" />
+                  <span>Off-Site</span>
+                </button>
+                <button className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm">
+                  <Send className="w-3 h-3" />
+                  <span>Send Alert</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Personnel List */}
         <div className="flex-1 overflow-auto">
           {viewMode === 'table' ? (
