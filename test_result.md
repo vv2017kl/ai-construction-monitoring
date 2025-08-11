@@ -259,9 +259,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User Directory screen implementation"
-    - "Admin Portal routing setup"
-    - "Test admin portal accessibility and functionality"
+    - "Alert Center interactive enhancements"
+    - "Personnel Management screen enhancements (next)"
+    - "Site Overview interactive enhancements (next)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
