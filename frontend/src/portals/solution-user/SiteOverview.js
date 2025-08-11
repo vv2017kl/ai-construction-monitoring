@@ -481,6 +481,46 @@ const SiteOverview = () => {
           </div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {showBulkActions && (
+          <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedItems.size} item{selectedItems.size !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedItems(new Set());
+                    setShowBulkActions(false);
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Clear selection
+                </button>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-sm">
+                  <Eye className="w-3 h-3" />
+                  <span>Monitor</span>
+                </button>
+                <button className="flex items-center space-x-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors text-sm">
+                  <Settings className="w-3 h-3" />
+                  <span>Configure</span>
+                </button>
+                <button
+                  onClick={handleExportSiteData}
+                  className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Export</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Map Area */}
