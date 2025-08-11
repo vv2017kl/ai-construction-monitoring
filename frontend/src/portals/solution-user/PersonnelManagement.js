@@ -893,6 +893,14 @@ const PersonnelManagement = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
+                    <th className="text-left py-3 px-6 font-semibold text-gray-900 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedPersonnel.size === filteredPersonnel.length && filteredPersonnel.length > 0}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                    </th>
                     <th className="text-left py-3 px-6 font-semibold text-gray-900">Personnel</th>
                     <th className="text-left py-3 px-6 font-semibold text-gray-900">Role & Department</th>
                     <th className="text-left py-3 px-6 font-semibold text-gray-900">Status</th>
