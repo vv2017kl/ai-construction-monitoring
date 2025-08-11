@@ -275,7 +275,7 @@ const EquipmentManagement = () => {
       case 'bulldozer': return Construction;
       case 'generator': return Zap;
       case 'monitor': return Monitor;
-      default: return Tool;
+      default: return Wrench;
     }
   };
 
