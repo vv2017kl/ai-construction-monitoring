@@ -161,12 +161,21 @@ const AIAnalytics = () => {
       { category: 'Safety Glasses', compliance: 86, violations: 14 },
       { category: 'Gloves', compliance: 78, violations: 22 }
     ],
-    cameraPerformance: mockCameras.map(camera => ({
-      ...camera,
-      detections: Math.floor(Math.random() * 50) + 10,
-      uptime: Math.floor(Math.random() * 10) + 90,
-      accuracy: Math.floor(Math.random() * 15) + 85
-    }))
+    cameraPerformance: [
+      { id: 'cam001', name: 'Camera 01', location: 'Main Entrance', detections: 156, accuracy: 94, uptime: 99.2, status: 'online' },
+      { id: 'cam002', name: 'Camera 02', location: 'Construction Zone A', detections: 203, accuracy: 91, uptime: 98.7, status: 'online' },
+      { id: 'cam003', name: 'Camera 03', location: 'Equipment Storage', detections: 89, accuracy: 96, uptime: 99.8, status: 'online' },
+      { id: 'cam004', name: 'Camera 04', location: 'Safety Office', detections: 45, accuracy: 98, uptime: 97.3, status: 'online' },
+      { id: 'cam005', name: 'Camera 05', location: 'Loading Dock', detections: 178, accuracy: 88, uptime: 95.1, status: 'maintenance' },
+      { id: 'cam006', name: 'Camera 06', location: 'Break Area', detections: 67, accuracy: 93, uptime: 99.5, status: 'online' }
+    ],
+    ppeCompliance: [
+      { category: 'Hard Hat', violations: 12, compliance: 94 },
+      { category: 'Safety Vest', violations: 8, compliance: 96 },
+      { category: 'Safety Boots', violations: 5, compliance: 98 },
+      { category: 'Gloves', violations: 15, compliance: 92 },
+      { category: 'Eye Protection', violations: 3, compliance: 99 }
+    ]
   };
 
   const MetricCard = ({ title, value, change, icon: Icon, color, subtitle, onClick, isSelected = false, showTrend = false }) => (
