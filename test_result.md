@@ -251,6 +251,18 @@ frontend:
         agent: "main"
         comment: "Successfully enhanced Alert Center with bulk operations (select all, bulk actions bar with Investigate/Resolve/Assign/Archive), assignment modal with personnel selection, comment system with modals, enhanced evidence viewer, export to JSON functionality, real-time alert simulation, and improved detail modal. All features tested via screenshots and working perfectly."
 
+  - task: "Personnel Management interactive enhancements"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/portals/solution-user/PersonnelManagement.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Implemented comprehensive Personnel Management enhancements: CRUD operations (Add/Edit/Delete), bulk selection with actions, location tracking modals, real-time updates, export functionality, enhanced detail modals with status controls. Troubleshooter resolved temporal dead zone error but runtime issue remains - page renders blank despite successful compilation. All features coded and should work once runtime issue is resolved."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
