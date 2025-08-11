@@ -34,6 +34,27 @@ const TimeLapse = () => {
   const [compressionLevel, setCompressionLevel] = useState('medium'); // 'low', 'medium', 'high'
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [timelineHover, setTimelineHover] = useState(null);
+  
+  // Enhanced interactive features
+  const [bookmarks, setBookmarks] = useState([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportSettings, setExportSettings] = useState({
+    format: 'mp4',
+    quality: 'high',
+    startTime: 0,
+    endTime: 3600,
+    includeAnnotations: true,
+    fps: 30
+  });
+  const [isLooping, setIsLooping] = useState(false);
+  const [comparisonCamera, setComparisonCamera] = useState(null);
+  const [showBookmarkModal, setShowBookmarkModal] = useState(false);
+  const [newBookmark, setNewBookmark] = useState({ time: 0, name: '', description: '' });
+  const [selectedCameras, setSelectedCameras] = useState(new Set([mockCameras[0].id]));
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [playbackHistory, setPlaybackHistory] = useState([]);
+  const [autoRewind, setAutoRewind] = useState(false);
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
   const availableCameras = mockCameras.filter(camera => camera.location.includes(currentSite.name));
