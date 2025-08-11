@@ -117,12 +117,23 @@ const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
       <div className="flex items-center space-x-4">
         {/* Global Search */}
         <div className="hidden md:flex items-center relative">
-          <Search className="w-4 h-4 absolute left-3 text-gray-400" />
+          <Search className="w-4 h-4 absolute left-3 text-white/60" />
           <input
             type="text"
             placeholder="Search cameras, alerts..."
-            className="pl-10 pr-4 py-2 w-64 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:border-transparent"
-            style={{ '--tw-ring-color': theme.primary[500] + '40' }}
+            className="pl-10 pr-4 py-2 w-64 text-sm rounded-lg text-white placeholder-white/60"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}
+            onFocus={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            }}
+            onBlur={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            }}
           />
         </div>
 
@@ -130,9 +141,12 @@ const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="relative p-2 rounded-lg transition-colors"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5 text-white" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {unreadCount}
