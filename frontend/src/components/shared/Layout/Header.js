@@ -52,23 +52,34 @@ const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
   );
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between relative z-20">
+    <header 
+      className="border-b px-6 py-4 flex items-center justify-between relative z-20"
+      style={{ 
+        backgroundColor: theme.primary[600],
+        borderBottomColor: theme.primary[700]
+      }}
+    >
       {/* Left Section */}
       <div className="flex items-center space-x-4">
         <button
           onClick={onToggleSidebar}
-          className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="lg:hidden p-2 rounded-lg transition-colors"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-5 h-5 text-white" />
         </button>
         
         <div className="flex items-center space-x-3">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{getPortalTitle(portal)}</h1>
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <h1 className="text-xl font-bold text-white">{getPortalTitle(portal)}</h1>
+            <div className="flex items-center space-x-2 text-sm text-white/80">
               <MapPin className="w-3 h-3" />
               <span>{currentSite.name}</span>
-              <span className="text-gray-400">•</span>
+              <span className="text-white/60">•</span>
               <Clock className="w-3 h-3" />
               <span>{new Date().toLocaleTimeString()}</span>
             </div>
@@ -83,18 +94,18 @@ const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
         {/* Site Status */}
         <div className="flex items-center space-x-4">
           <div className="text-center">
-            <div className="text-lg font-bold text-gray-900">{currentSite.personnel}</div>
-            <div className="text-xs text-gray-500">Personnel</div>
+            <div className="text-lg font-bold text-white">{currentSite.personnel}</div>
+            <div className="text-xs text-white/70">Personnel</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-gray-900">{currentSite.cameras}</div>
-            <div className="text-xs text-gray-500">Cameras</div>
+            <div className="text-lg font-bold text-white">{currentSite.cameras}</div>
+            <div className="text-xs text-white/70">Cameras</div>
           </div>
           <div className="text-center">
-            <div className={`text-lg font-bold ${currentSite.activeAlerts > 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <div className={`text-lg font-bold ${currentSite.activeAlerts > 0 ? 'text-red-300' : 'text-green-300'}`}>
               {currentSite.activeAlerts}
             </div>
-            <div className="text-xs text-gray-500">Alerts</div>
+            <div className="text-xs text-white/70">Alerts</div>
           </div>
         </div>
       </div>
