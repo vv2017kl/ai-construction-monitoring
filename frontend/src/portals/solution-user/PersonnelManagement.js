@@ -141,6 +141,149 @@ const PersonnelManagement = () => {
 
   const personnelData = generateMockPersonnel();
 
+  // CRUD Operations
+  const handleAddPersonnel = () => {
+    if (!newPersonForm.name || !newPersonForm.role || !newPersonForm.department) return;
+    
+    const newPerson = {
+      id: `p${Date.now()}`,
+      ...newPersonForm,
+      status: 'active',
+      currentLocation: 'Main Office',
+      lastSeen: new Date(),
+      safetyScore: 100,
+      hoursWorked: 0,
+      checkInTime: null,
+      ppeCompliance: 100,
+      avatar: null,
+      certifications: newPersonForm.certifications.filter(cert => cert.trim())
+    };
+    
+    setPersonnel(prev => [...prev, newPerson]);
+    setNewPersonForm({
+      name: '',
+      role: '',
+      department: '',
+      email: '',
+      phone: '',
+      certifications: []
+    });
+    setShowAddModal(false);
+  };
+
+  const handleEditPersonnel = () => {
+    if (!editingPerson) return;
+    
+    setPersonnel(prev => prev.map(person => 
+      person.id === editingPerson.id ? editingPerson : person
+    ));
+    setShowEditModal(false);
+    setEditingPerson(null);
+  };
+
+  const handleDeletePersonnel = (personId) => {
+    setPersonnel(prev => prev.filter(person => person.id !== personId));
+    if (selectedPerson?.id === personId) {
+      setShowDetailModal(false);
+      setSelectedPerson(null);
+    }
+  };
+
+  // Bulk Operations
+  const handleSelectPersonnel = (personId) => {
+    const newSelected = new Set(selectedPersonnel);
+    if (newSelected.has(personId)) {
+      newSelected.delete(personId);
+    } else {
+      newSelected.add(personId);
+    }
+    setSelectedPersonnel(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedPersonnel.size === filteredPersonnel.length) {
+      setSelectedPersonnel(new Set());
+      setShowBulkActions(false);
+    } else {
+      setSelectedPersonnel(new Set(filteredPersonnel.map(person => person.id)));
+      setShowBulkActions(true);
+    }
+  };
+
+  const handleBulkStatusUpdate = (newStatus) => {
+    setPersonnel(prev => prev.map(person => 
+      selectedPersonnel.has(person.id) 
+        ? { ...person, status: newStatus, lastSeen: new Date() }
+        : person
+    ));
+    setSelectedPersonnel(new Set());
+    setShowBulkActions(false);
+  };
+
+  // Status and Location Updates
+  const handleStatusUpdate = (personId, newStatus) => {
+    setPersonnel(prev => prev.map(person => 
+      person.id === personId 
+        ? { ...person, status: newStatus, lastSeen: new Date() }
+        : person
+    ));
+  };
+
+  const handleLocationUpdate = (personId, newLocation) => {
+    setPersonnel(prev => prev.map(person => 
+      person.id === personId 
+        ? { ...person, currentLocation: newLocation, lastSeen: new Date() }
+        : person
+    ));
+  };
+
+  // Export functionality
+  const handleExportPersonnel = () => {
+    const exportData = filteredPersonnel.map(person => ({
+      ID: person.id,
+      Name: person.name,
+      Role: person.role,
+      Department: person.department,
+      Email: person.email,
+      Phone: person.phone,
+      Status: person.status,
+      Location: person.currentLocation,
+      SafetyScore: person.safetyScore,
+      PPECompliance: person.ppeCompliance,
+      HoursWorked: person.hoursWorked,
+      LastSeen: person.lastSeen,
+      Certifications: person.certifications.join('; ')
+    }));
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `personnel_export_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Real-time updates simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Simulate location updates for active personnel
+      setPersonnel(prev => prev.map(person => {
+        if (person.status === 'active' && Math.random() < 0.3) {
+          const locations = ['Zone A - Foundation', 'Zone B - Steel Frame', 'Zone C - Excavation', 'Safety Office', 'Equipment Storage'];
+          const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+          return { ...person, currentLocation: randomLocation, lastSeen: new Date() };
+        }
+        return person;
+      }));
+    }, 15000); // Update every 15 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Filter and sort personnel
   const filteredPersonnel = personnelData
     .filter(person => {
