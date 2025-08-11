@@ -209,23 +209,46 @@ const LiveView = () => {
         <div className="grid grid-cols-3 gap-2">
           {/* PTZ Direction Controls */}
           <div></div>
-          <button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button 
+            onClick={() => handlePTZControl(camera.id, 'up')}
+            className={`p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ${
+              ptzActive === camera.id ? 'bg-blue-200' : ''
+            }`}
+          >
             <ArrowUp className="w-4 h-4 mx-auto" />
           </button>
           <div></div>
           
-          <button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button 
+            onClick={() => handlePTZControl(camera.id, 'left')}
+            className={`p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ${
+              ptzActive === camera.id ? 'bg-blue-200' : ''
+            }`}
+          >
             <ArrowLeft className="w-4 h-4 mx-auto" />
           </button>
-          <button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button 
+            onClick={() => handlePTZControl(camera.id, 'home')}
+            className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
             <RotateCcw className="w-4 h-4 mx-auto" />
           </button>
-          <button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button 
+            onClick={() => handlePTZControl(camera.id, 'right')}
+            className={`p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ${
+              ptzActive === camera.id ? 'bg-blue-200' : ''
+            }`}
+          >
             <ArrowRight className="w-4 h-4 mx-auto" />
           </button>
           
           <div></div>
-          <button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button 
+            onClick={() => handlePTZControl(camera.id, 'down')}
+            className={`p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ${
+              ptzActive === camera.id ? 'bg-blue-200' : ''
+            }`}
+          >
             <ArrowDown className="w-4 h-4 mx-auto" />
           </button>
           <div></div>
