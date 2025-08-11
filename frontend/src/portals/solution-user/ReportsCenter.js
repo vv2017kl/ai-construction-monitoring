@@ -5,7 +5,10 @@ import {
   BarChart3, TrendingUp, Clock, MapPin, Users, Shield,
   AlertTriangle, CheckCircle, Eye, Edit, Trash2, Plus,
   Layout, PieChart, LineChart, Activity, Building2,
-  Camera, HardHat, Wrench, Zap, RefreshCw, Settings
+  Camera, HardHat, Wrench, Zap, RefreshCw, Settings, X,
+  Send, Copy, Link2, Bookmark, Star, Archive, Repeat,
+  FileSpreadsheet, Image, Play, Pause, Monitor, Save,
+  UserPlus, Mail, Calendar as CalendarIcon, Globe
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
