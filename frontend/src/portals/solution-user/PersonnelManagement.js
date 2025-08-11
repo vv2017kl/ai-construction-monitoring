@@ -948,8 +948,144 @@ const PersonnelManagement = () => {
         </div>
       </div>
 
+      {/* Add Personnel Modal */}
+      <AddPersonnelModal />
+
       {/* Personnel Detail Modal */}
       <PersonnelDetailModal />
+
+      {/* Edit Personnel Modal */}
+      {showEditModal && editingPerson && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Personnel</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={editingPerson.name}
+                  onChange={(e) => setEditingPerson(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <input
+                  type="text"
+                  value={editingPerson.role}
+                  onChange={(e) => setEditingPerson(prev => ({ ...prev, role: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <select
+                  value={editingPerson.department}
+                  onChange={(e) => setEditingPerson(prev => ({ ...prev, department: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                >
+                  <option value="Construction">Construction</option>
+                  <option value="Safety">Safety</option>
+                  <option value="Equipment">Equipment</option>
+                  <option value="Quality Assurance">Quality Assurance</option>
+                  <option value="Electrical">Electrical</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={editingPerson.email}
+                  onChange={(e) => setEditingPerson(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={editingPerson.phone}
+                  onChange={(e) => setEditingPerson(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditPersonnel}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Location Update Modal */}
+      {showLocationModal && selectedPerson && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Update Location</h3>
+              <button
+                onClick={() => setShowLocationModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">
+              Update location for: <span className="font-medium">{selectedPerson.name}</span>
+            </p>
+            
+            <div className="space-y-2">
+              {['Zone A - Foundation', 'Zone B - Steel Frame', 'Zone C - Excavation', 'Safety Office', 'Equipment Storage', 'Break Room', 'Main Entrance', 'Off-Site'].map((location) => (
+                <button
+                  key={location}
+                  onClick={() => {
+                    handleLocationUpdate(selectedPerson.id, location);
+                    setShowLocationModal(false);
+                    setSelectedPerson(prev => ({ ...prev, currentLocation: location }));
+                  }}
+                  className={`w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left ${
+                    selectedPerson.currentLocation === location ? 'bg-blue-50 ring-2 ring-blue-500' : ''
+                  }`}
+                >
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-900">{location}</span>
+                  {selectedPerson.currentLocation === location && (
+                    <CheckCircle className="w-4 h-4 text-blue-600 ml-auto" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
