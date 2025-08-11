@@ -482,9 +482,12 @@ const MyProfile = () => {
               style={{ '--tw-ring-color': theme.primary[500] + '40' }}
             />
           </div>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => setShowChangePasswordModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
             <Key className="w-4 h-4" />
-            <span>Update Password</span>
+            <span>Change Password</span>
           </button>
         </div>
       </div>
