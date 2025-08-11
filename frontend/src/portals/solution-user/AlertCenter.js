@@ -281,18 +281,31 @@ const AlertCenter = () => {
     const statusColors = getStatusColor(alert.status);
     const PriorityIcon = getPriorityIcon(alert.priority);
     const StatusIcon = statusColors.icon;
+    const isCardSelected = selectedAlerts.has(alert.id);
     
     return (
       <div 
         className={`p-4 rounded-lg border cursor-pointer hover:shadow-md transition-all duration-200 ${
-          isSelected ? 'ring-2 ring-blue-500 border-blue-200 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
+          isSelected ? 'ring-2 ring-blue-500 border-blue-200 bg-blue-50' : 
+          isCardSelected ? 'ring-2 ring-green-500 border-green-200 bg-green-50' :
+          'border-gray-200 bg-white hover:border-gray-300'
         }`}
-        onClick={() => onClick(alert)}
       >
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3 flex-1">
-            <div className={`p-2 rounded-lg ${priorityColors.bg}`}>
-              <PriorityIcon className={`w-5 h-5 ${priorityColors.icon}`} />
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={isCardSelected}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleSelectAlert(alert.id);
+                }}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <div className={`p-2 rounded-lg ${priorityColors.bg}`}>
+                <PriorityIcon className={`w-5 h-5 ${priorityColors.icon}`} />
+              </div>
             </div>
             
             <div className="flex-1 min-w-0">
