@@ -999,11 +999,9 @@ const PersonnelManagement = () => {
               {filteredPersonnel.map((person) => (
                 <div
                   key={person.id}
-                  className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
-                  onClick={() => {
-                    setSelectedPerson(person);
-                    setShowDetailModal(true);
-                  }}
+                  className={`bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
+                    selectedPersonnel.has(person.id) ? 'ring-2 ring-blue-500 border-blue-200 bg-blue-50' : ''
+                  }`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
