@@ -46,6 +46,12 @@ const SiteOverview = () => {
     coordinates: []
   });
 
+  // Drawing state
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawingPath, setDrawingPath] = useState([]);
+  const [tempShapes, setTempShapes] = useState([]);
+  const [drawingStartPoint, setDrawingStartPoint] = useState(null);
+
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
   // Simulate live personnel positions
