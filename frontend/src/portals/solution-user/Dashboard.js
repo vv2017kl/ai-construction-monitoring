@@ -236,7 +236,11 @@ const Dashboard = () => {
             <div className="p-6">
               <div className="space-y-4">
                 {mockDetections.map((detection, index) => (
-                  <div key={detection.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                  <div 
+                    key={detection.id} 
+                    className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowActivityModal(true)}
+                  >
                     <div 
                       className="w-12 h-12 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: theme.primary[100] }}
