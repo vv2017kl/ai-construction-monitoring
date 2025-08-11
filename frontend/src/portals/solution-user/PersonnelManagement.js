@@ -141,6 +141,38 @@ const PersonnelManagement = () => {
 
   const personnelData = generateMockPersonnel();
 
+  // Filter and sort personnel
+  const filteredPersonnel = personnelData
+    .filter(person => {
+      const nameMatch = person.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const emailMatch = person.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const roleMatch = person.role.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchMatch = nameMatch || emailMatch || roleMatch;
+      
+      const departmentMatch = filterDepartment === 'all' || person.department === filterDepartment;
+      const statusMatch = filterStatus === 'all' || person.status === filterStatus;
+      const roleFilterMatch = filterRole === 'all' || person.role === filterRole;
+      
+      return searchMatch && departmentMatch && statusMatch && roleFilterMatch;
+    })
+    .sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+      
+      if (sortBy === 'lastSeen') {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+      
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
   // CRUD Operations
   const handleAddPersonnel = () => {
     if (!newPersonForm.name || !newPersonForm.role || !newPersonForm.department) return;
