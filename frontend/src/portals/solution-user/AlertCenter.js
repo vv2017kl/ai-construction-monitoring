@@ -308,7 +308,7 @@ const AlertCenter = () => {
               </div>
             </div>
             
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0" onClick={() => onClick(alert)}>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-gray-900 truncate">{alert.title}</h3>
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors.bg} ${statusColors.text}`}>
