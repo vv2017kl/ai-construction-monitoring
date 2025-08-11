@@ -553,6 +553,340 @@ const LiveView = () => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Camera Modal */}
+      {fullscreenCamera && (
+        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+          <div className="relative w-full h-full">
+            {/* Fullscreen Camera View */}
+            <div className="absolute inset-0">
+              {(() => {
+                const camera = mockCameras.find(c => c.id === fullscreenCamera);
+                const detection = liveDetections.find(d => d.camera === camera?.name);
+                return (
+                  <div className="relative w-full h-full bg-gray-900">
+                    {/* Video Stream */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                      <div className="relative w-full h-full bg-gray-700">
+                        {/* Simulated construction site scene */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-blue-200 via-gray-300 to-amber-100 opacity-80"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-amber-600 to-amber-400 opacity-60"></div>
+                        
+                        {/* AI Detection Overlays */}
+                        {showAIOverlay && detection && (
+                          <>
+                            {Array.from({ length: detection.personCount }, (_, i) => (
+                              <div
+                                key={`person-${i}`}
+                                className="absolute border-2 border-green-400 bg-green-400/20 cursor-pointer"
+                                style={{
+                                  left: `${20 + i * 25}%`,
+                                  top: `${40 + (i % 2) * 15}%`,
+                                  width: '120px',
+                                  height: '160px'
+                                }}
+                                onClick={() => showDetectionDetails(detection)}
+                              >
+                                <div className="absolute -top-8 left-0 bg-green-400 text-black text-sm px-2 py-1 rounded">
+                                  Person {detection.confidence}%
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Fullscreen Controls */}
+                    <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                      <div className="bg-black/60 text-white px-4 py-2 rounded-lg">
+                        <h3 className="font-semibold">{camera?.name}</h3>
+                        <div className="text-sm opacity-80">{camera?.location}</div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setShowAIOverlay(!showAIOverlay)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                            showAIOverlay ? 'bg-green-600 text-white' : 'bg-white/20 text-white'
+                          }`}
+                        >
+                          AI Detection {showAIOverlay ? 'ON' : 'OFF'}
+                        </button>
+                        <button
+                          onClick={() => toggleRecording(fullscreenCamera)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                            recordingCameras.has(fullscreenCamera) ? 'bg-red-600 text-white' : 'bg-white/20 text-white'
+                          }`}
+                        >
+                          {recordingCameras.has(fullscreenCamera) ? 'Recording...' : 'Record'}
+                        </button>
+                        <button
+                          onClick={() => setFullscreenCamera(null)}
+                          className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors"
+                        >
+                          <Maximize2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Bottom Controls for PTZ */}
+                    {camera?.type === 'ptz' && (
+                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-black/60 p-4 rounded-lg">
+                          <div className="grid grid-cols-3 gap-2">
+                            <div></div>
+                            <button 
+                              onClick={() => handlePTZControl(camera.id, 'up')}
+                              className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
+                            >
+                              <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <div></div>
+                            <button 
+                              onClick={() => handlePTZControl(camera.id, 'left')}
+                              className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
+                            >
+                              <ArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handlePTZControl(camera.id, 'home')}
+                              className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handlePTZControl(camera.id, 'right')}
+                              className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
+                            >
+                              <ArrowRight className="w-4 h-4" />
+                            </button>
+                            <div></div>
+                            <button 
+                              onClick={() => handlePTZControl(camera.id, 'down')}
+                              className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
+                            >
+                              <ArrowDown className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex justify-center space-x-2 mt-3">
+                            <button 
+                              onClick={() => handleZoom(camera.id, false)}
+                              className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded transition-colors text-sm"
+                            >
+                              <ZoomOut className="w-4 h-4 inline mr-1" />
+                              Zoom Out
+                            </button>
+                            <button 
+                              onClick={() => handleZoom(camera.id, true)}
+                              className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded transition-colors text-sm"
+                            >
+                              <ZoomIn className="w-4 h-4 inline mr-1" />
+                              Zoom In
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Camera Settings Modal */}
+      {showCameraSettings && selectedCameraForSettings && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Camera Settings</h2>
+                <p className="text-sm text-gray-600">{selectedCameraForSettings.name}</p>
+              </div>
+              <button 
+                onClick={() => setShowCameraSettings(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Maximize2 className="w-5 h-5 transform rotate-45" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-6">
+                {/* Basic Settings */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-4">Basic Settings</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Resolution</label>
+                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg">
+                        <option>1920x1080 (Full HD)</option>
+                        <option>1280x720 (HD)</option>
+                        <option>4096x2160 (4K)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Frame Rate</label>
+                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg">
+                        <option>30 FPS</option>
+                        <option>24 FPS</option>
+                        <option>60 FPS</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Detection Settings */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-4">AI Detection</h3>
+                  <div className="space-y-4">
+                    <label className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Person Detection</span>
+                      <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">PPE Compliance</span>
+                      <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Equipment Detection</span>
+                      <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                    </label>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Confidence Threshold</label>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        defaultValue="85" 
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0%</span>
+                        <span>85%</span>
+                        <span>100%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recording Settings */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-4">Recording</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Recording Quality</label>
+                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg">
+                        <option>High Quality</option>
+                        <option>Medium Quality</option>
+                        <option>Low Quality</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storage Duration (days)</label>
+                      <input 
+                        type="number" 
+                        defaultValue="30" 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+              <button 
+                onClick={() => setShowCameraSettings(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detection Detail Modal */}
+      {showDetectionDetail && selectedDetection && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-xl w-full">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Detection Details</h2>
+                <p className="text-sm text-gray-600">{selectedDetection.camera}</p>
+              </div>
+              <button 
+                onClick={() => setShowDetectionDetail(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Maximize2 className="w-5 h-5 transform rotate-45" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Personnel Count:</span>
+                    <span className="ml-2 font-bold text-green-600">{selectedDetection.personCount}</span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Confidence:</span>
+                    <span className="ml-2 font-bold text-blue-600">{selectedDetection.confidence}%</span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">PPE Compliance:</span>
+                    <span className={`ml-2 font-bold ${selectedDetection.ppeCompliance >= 90 ? 'text-green-600' : 'text-orange-600'}`}>
+                      {selectedDetection.ppeCompliance}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Zone:</span>
+                    <span className="ml-2 font-medium text-gray-900">{selectedDetection.zone}</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Detection Time:</span>
+                  <span className="ml-2 text-gray-900">{new Date(selectedDetection.timestamp).toLocaleString()}</span>
+                </div>
+                
+                {selectedDetection.ppeCompliance < 90 && (
+                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className="w-4 h-4 text-orange-600" />
+                      <span className="text-sm font-medium text-orange-800">PPE Compliance Warning</span>
+                    </div>
+                    <p className="text-sm text-orange-700 mt-1">
+                      Some personnel may not be wearing proper safety equipment.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+              <button 
+                onClick={() => navigate('/alert-center')}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Create Alert
+              </button>
+              <button 
+                onClick={() => setShowDetectionDetail(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
