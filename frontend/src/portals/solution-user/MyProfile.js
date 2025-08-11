@@ -19,6 +19,23 @@ const MyProfile = () => {
   const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'security', 'preferences', 'activity'
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Enhanced interactive features
+  const [showProfilePictureModal, setShowProfilePictureModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  });
+  const [activityFilter, setActivityFilter] = useState('all');
+  const [activitySearch, setActivitySearch] = useState('');
+  const [profileCompletion, setProfileCompletion] = useState(85);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(new Date());
+  const [exportFormat, setExportFormat] = useState('json');
   const [formData, setFormData] = useState({
     firstName: mockUser.firstName,
     lastName: mockUser.lastName,
