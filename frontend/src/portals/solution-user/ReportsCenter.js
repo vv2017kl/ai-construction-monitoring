@@ -587,6 +587,33 @@ const ReportsCenter = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Bulk Actions */}
+              <button
+                onClick={handleSelectAll}
+                className="flex items-center space-x-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>{selectedReports.size === filteredReports.length ? 'Deselect All' : 'Select All'}</span>
+              </button>
+
+              {/* Templates */}
+              <button
+                onClick={() => setShowTemplateModal(true)}
+                className="flex items-center space-x-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+              >
+                <Layout className="w-4 h-4" />
+                <span>Templates</span>
+              </button>
+
+              {/* Schedule */}
+              <button
+                onClick={() => setShowScheduleModal(true)}
+                className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+              >
+                <Repeat className="w-4 h-4" />
+                <span>Schedule</span>
+              </button>
+
               {/* View Mode Toggle */}
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
                 <button
