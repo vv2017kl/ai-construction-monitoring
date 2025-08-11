@@ -816,6 +816,164 @@ const AlertCenter = () => {
 
       {/* Alert Detail Modal */}
       <AlertDetailModal />
+
+      {/* Assignment Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Assign Alerts</h3>
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">
+              Assign {selectedAlerts.size} selected alert{selectedAlerts.size !== 1 ? 's' : ''} to:
+            </p>
+            
+            <div className="space-y-2">
+              {mockPersonnel.slice(0, 5).map((person) => (
+                <button
+                  key={person.id}
+                  onClick={() => handleBulkAssign(person.name)}
+                  className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{person.name}</p>
+                    <p className="text-sm text-gray-500">{person.role}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Evidence Viewer Modal */}
+      {showEvidenceModal && currentEvidence && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Evidence Viewer</h3>
+              <button
+                onClick={() => setShowEvidenceModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="bg-gray-100 rounded-lg p-8 text-center">
+              {currentEvidence.includes('.jpg') || currentEvidence.includes('.png') ? (
+                <>
+                  <Eye className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">Evidence Image Preview</p>
+                  <p className="text-sm text-gray-500 mt-2">{currentEvidence}</p>
+                </>
+              ) : (
+                <>
+                  <Play className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">Evidence Video Preview</p>
+                  <p className="text-sm text-gray-500 mt-2">{currentEvidence}</p>
+                </>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowEvidenceModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <Download className="w-4 h-4 inline mr-2" />
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comment Modal */}
+      {showCommentModal && selectedAlert && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Add Comment</h3>
+              <button
+                onClick={() => setShowCommentModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">
+              Add a comment to: <span className="font-medium">{selectedAlert.title}</span>
+            </p>
+            
+            {/* Existing Comments */}
+            {alertComments[selectedAlert.id] && alertComments[selectedAlert.id].length > 0 && (
+              <div className="mb-4 max-h-40 overflow-y-auto">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Previous Comments</h4>
+                <div className="space-y-2">
+                  {alertComments[selectedAlert.id].map((comment) => (
+                    <div key={comment.id} className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                          <User className="w-3 h-3 text-blue-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{comment.author}</span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(comment.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 ml-8">{comment.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* New Comment Input */}
+            <div className="space-y-3">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Enter your comment..."
+                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+                rows={3}
+                style={{ '--tw-ring-color': theme.primary[500] + '40' }}
+              />
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowCommentModal(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleAddComment(selectedAlert.id)}
+                  disabled={!newComment.trim()}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Add Comment</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
