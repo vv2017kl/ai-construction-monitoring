@@ -240,32 +240,7 @@ const SiteOverview = () => {
             />
           </div>
         </div>
-        <div className={`relative p-2 rounded-full shadow-lg ${
-          isOnline ? 'bg-green-500' : 'bg-red-500'
-        } ${selectedCamera === camera.id ? 'ring-4 ring-blue-500' : ''}`}>
-          <Camera className="w-4 h-4 text-white" />
-          
-          {/* Alert indicator */}
-          {hasAlerts && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full flex items-center justify-center">
-              <span className="text-xs text-white font-bold">{camera.alerts}</span>
-            </div>
-          )}
-          
-          {/* Field of view indicator */}
-          <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-30 ${
-            selectedCamera === camera.id ? 'block' : 'hidden'
-          }`}>
-            <div 
-              className="border-2 border-blue-500"
-              style={{
-                width: '100px',
-                height: '60px',
-                clipPath: 'polygon(0 0, 100% 0, 80% 100%, 20% 100%)'
-              }}
-            />
-          </div>
-        </div>
+
         
         {/* Camera label */}
         <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
