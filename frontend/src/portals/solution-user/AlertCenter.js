@@ -101,6 +101,130 @@ const AlertCenter = () => {
     ));
   };
 
+  // Bulk operations
+  const handleSelectAlert = (alertId) => {
+    const newSelected = new Set(selectedAlerts);
+    if (newSelected.has(alertId)) {
+      newSelected.delete(alertId);
+    } else {
+      newSelected.add(alertId);
+    }
+    setSelectedAlerts(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedAlerts.size === filteredAlerts.length) {
+      setSelectedAlerts(new Set());
+      setShowBulkActions(false);
+    } else {
+      setSelectedAlerts(new Set(filteredAlerts.map(alert => alert.id)));
+      setShowBulkActions(true);
+    }
+  };
+
+  const handleBulkStatusUpdate = (newStatus) => {
+    setAlerts(prev => prev.map(alert => 
+      selectedAlerts.has(alert.id) 
+        ? { ...alert, status: newStatus, responseTime: newStatus !== 'open' ? (alert.responseTime || Math.floor(Math.random() * 30) + 5) : null }
+        : alert
+    ));
+    setSelectedAlerts(new Set());
+    setShowBulkActions(false);
+  };
+
+  const handleBulkAssign = (assignee) => {
+    setAlerts(prev => prev.map(alert => 
+      selectedAlerts.has(alert.id) ? { ...alert, assignedTo: assignee } : alert
+    ));
+    setSelectedAlerts(new Set());
+    setShowBulkActions(false);
+    setShowAssignModal(false);
+  };
+
+  // Comments functionality
+  const handleAddComment = (alertId) => {
+    if (newComment.trim()) {
+      const comment = {
+        id: Date.now(),
+        text: newComment,
+        author: mockUser.displayName,
+        timestamp: new Date().toISOString(),
+        avatar: mockUser.avatar
+      };
+      
+      setAlertComments(prev => ({
+        ...prev,
+        [alertId]: [...(prev[alertId] || []), comment]
+      }));
+      
+      setNewComment('');
+      if (alertId === selectedAlert?.id) {
+        setShowCommentModal(false);
+      }
+    }
+  };
+
+  // Evidence viewer
+  const handleViewEvidence = (evidence) => {
+    setCurrentEvidence(evidence);
+    setShowEvidenceModal(true);
+  };
+
+  // Export functionality
+  const handleExportAlerts = () => {
+    const exportData = filteredAlerts.map(alert => ({
+      ID: alert.id,
+      Type: alert.type,
+      Priority: alert.priority,
+      Title: alert.title,
+      Message: alert.message,
+      Location: alert.location,
+      Camera: alert.camera,
+      Status: alert.status,
+      AssignedTo: alert.assignedTo,
+      Timestamp: alert.timestamp,
+      ResponseTime: alert.responseTime
+    }));
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `alerts_export_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Simulate real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Simulate new alert occasionally
+      if (Math.random() < 0.1) { // 10% chance every 10 seconds
+        const newAlert = {
+          id: `alert-${Date.now()}`,
+          type: ['safety_violation', 'equipment_violation', 'access_violation'][Math.floor(Math.random() * 3)],
+          priority: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)],
+          title: `New Alert - ${new Date().toLocaleTimeString()}`,
+          message: 'Automatically generated alert for demonstration',
+          location: ['Zone A', 'Zone B', 'Zone C'][Math.floor(Math.random() * 3)],
+          camera: 'Camera ' + Math.floor(Math.random() * 10 + 1),
+          timestamp: new Date().toISOString(),
+          status: 'open',
+          assignedTo: 'Unassigned',
+          evidence: [],
+          responseTime: null
+        };
+        
+        setAlerts(prev => [newAlert, ...prev]);
+      }
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'critical': return { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200', icon: 'text-red-600' };
