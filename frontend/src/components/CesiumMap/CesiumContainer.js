@@ -47,7 +47,7 @@ const CesiumContainer = ({
 
       // Set initial camera position (global view)
       cesiumViewer.camera.setView({
-        destination: CesiumMath.Cartesian3.fromDegrees(65.0000, 20.0000, 5000000), // Between Dubai and India
+        destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000), // Between Dubai and India
         orientation: {
           heading: 0.0,
           pitch: -CesiumMath.PI_OVER_TWO,
