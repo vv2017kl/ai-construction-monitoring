@@ -658,8 +658,25 @@ const TimeLapse = () => {
                   </button>
                   
                   <button
+                    onClick={() => handleSeek(0)}
+                    className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Go to start"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </button>
+                  
+                  <button
+                    onClick={() => handleFrameStep(-1)}
+                    className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Previous frame"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  
+                  <button
                     onClick={() => handleSeek(Math.max(0, currentTime - 60))}
                     className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Back 60 seconds"
                   >
                     <SkipBack className="w-5 h-5" />
                   </button>
@@ -667,8 +684,27 @@ const TimeLapse = () => {
                   <button
                     onClick={() => handleSeek(Math.min(duration, currentTime + 60))}
                     className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Forward 60 seconds"
                   >
                     <SkipForward className="w-5 h-5" />
+                  </button>
+                  
+                  <button
+                    onClick={() => handleFrameStep(1)}
+                    className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Next frame"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    onClick={() => setIsLooping(!isLooping)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      isLooping ? 'bg-green-600 text-white' : 'hover:bg-gray-700'
+                    }`}
+                    title="Loop playback"
+                  >
+                    <Repeat className="w-5 h-5" />
                   </button>
 
                   <div className="text-sm text-gray-300">
