@@ -1023,8 +1023,12 @@ const PersonnelManagement = () => {
                     </span>
                   </div>
                   
-                  <h3 className="font-semibold text-gray-900 mb-1">{person.name}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{person.role}</p>
+                  <div onClick={() => {
+                    setSelectedPerson(person);
+                    setShowDetailModal(true);
+                  }}>
+                    <h3 className="font-semibold text-gray-900 mb-1">{person.name}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{person.role}</p>
                   
                   <div className="space-y-2 text-xs text-gray-600">
                     <div className="flex items-center space-x-2">
