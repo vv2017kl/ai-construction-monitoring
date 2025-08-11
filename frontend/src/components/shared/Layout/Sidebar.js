@@ -139,38 +139,56 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
   };
 
   return (
-    <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-30 flex flex-col ${
-      isCollapsed ? 'w-16' : 'w-64'
-    }`}>
+    <div 
+      className={`fixed left-0 top-0 h-full border-r transition-all duration-300 z-30 flex flex-col ${
+        isCollapsed ? 'w-16' : 'w-64'
+      }`}
+      style={{ 
+        backgroundColor: theme.primary[700],
+        borderRightColor: theme.primary[800]
+      }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div 
+        className="flex items-center justify-between p-4 border-b"
+        style={{ borderBottomColor: theme.primary[800] }}
+      >
         <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          <Shield className="w-8 h-8" style={{ color: theme.primary[500] }} />
+          <Shield className="w-8 h-8 text-white" />
           {!isCollapsed && (
             <div>
-              <h1 className="text-lg font-bold text-gray-900">ConstructionAI</h1>
-              <p className="text-xs text-gray-500">{mockUser.company}</p>
+              <h1 className="text-lg font-bold text-white">ConstructionAI</h1>
+              <p className="text-xs text-white/70">{mockUser.company}</p>
             </div>
           )}
         </div>
         <button
           onClick={onToggleCollapse}
-          className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-1 rounded-lg transition-colors"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
         >
-          {isCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          {isCollapsed ? <Menu className="w-5 h-5 text-white" /> : <X className="w-5 h-5 text-white" />}
         </button>
       </div>
 
       {/* Site Selector */}
       {!isCollapsed && (
-        <div className="p-4 border-b border-gray-100">
+        <div 
+          className="p-4 border-b"
+          style={{ borderBottomColor: theme.primary[800] }}
+        >
           <select 
-            className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:border-transparent"
-            style={{ '--tw-ring-color': theme.primary[500] + '40' }}
+            className="w-full text-sm px-3 py-2 rounded-lg text-white"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}
             defaultValue={mockUser.currentSite}
           >
             {mockSites.map(site => (
-              <option key={site.id} value={site.name}>{site.name}</option>
+              <option key={site.id} value={site.name} style={{ color: '#000' }}>{site.name}</option>
             ))}
           </select>
         </div>
