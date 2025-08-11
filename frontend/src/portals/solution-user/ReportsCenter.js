@@ -757,6 +757,53 @@ const ReportsCenter = () => {
           </div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {showBulkActions && (
+          <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedReports.size} report{selectedReports.size !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedReports(new Set());
+                    setShowBulkActions(false);
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Clear selection
+                </button>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleBulkDownload}
+                  className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-sm"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Download</span>
+                </button>
+                <button className="flex items-center space-x-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors text-sm">
+                  <Share2 className="w-3 h-3" />
+                  <span>Share</span>
+                </button>
+                <button className="flex items-center space-x-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors text-sm">
+                  <Archive className="w-3 h-3" />
+                  <span>Archive</span>
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-sm"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Reports List/Grid */}
         <div className="flex-1 overflow-auto p-6">
           {filteredReports.length === 0 ? (
