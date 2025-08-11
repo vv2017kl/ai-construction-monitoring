@@ -66,6 +66,121 @@ const SiteOverview = () => {
   // Camera feed preview modal
   const [previewCamera, setPreviewCamera] = useState(null);
 
+  // Zone Management Functions
+  const handleCreateZone = () => {
+    if (!newZone.name || newZone.coordinates.length === 0) return;
+    
+    const zone = {
+      id: `zone-${Date.now()}`,
+      ...newZone,
+      status: 'active',
+      currentOccupancy: 0
+    };
+    
+    setZones(prev => [...prev, zone]);
+    setNewZone({
+      name: '',
+      type: 'work_area',
+      safetyLevel: 'medium',
+      maxOccupancy: 10,
+      requiresPPE: true,
+      coordinates: []
+    });
+    setShowZoneModal(false);
+    setIsDrawingMode(false);
+  };
+
+  const handleEditZone = (zone) => {
+    setEditingZone({ ...zone });
+    setShowZoneModal(true);
+  };
+
+  const handleUpdateZone = () => {
+    if (!editingZone) return;
+    
+    setZones(prev => prev.map(zone => 
+      zone.id === editingZone.id ? editingZone : zone
+    ));
+    setEditingZone(null);
+    setShowZoneModal(false);
+  };
+
+  const handleDeleteZone = (zoneId) => {
+    setZones(prev => prev.filter(zone => zone.id !== zoneId));
+    if (selectedZone === zoneId) {
+      setSelectedZone(null);
+    }
+  };
+
+  // Multi-selection functions
+  const handleSelectItem = (id, type) => {
+    const itemKey = `${type}-${id}`;
+    const newSelected = new Set(selectedItems);
+    
+    if (newSelected.has(itemKey)) {
+      newSelected.delete(itemKey);
+    } else {
+      newSelected.add(itemKey);
+    }
+    
+    setSelectedItems(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  const handleSelectAll = (type) => {
+    const items = type === 'cameras' ? mockCameras : zones;
+    const allSelected = items.every(item => selectedItems.has(`${type}-${item.id}`));
+    
+    const newSelected = new Set(selectedItems);
+    
+    if (allSelected) {
+      // Deselect all of this type
+      items.forEach(item => newSelected.delete(`${type}-${item.id}`));
+    } else {
+      // Select all of this type
+      items.forEach(item => newSelected.add(`${type}-${item.id}`));
+    }
+    
+    setSelectedItems(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  // Export functionality
+  const handleExportSiteData = () => {
+    const siteData = {
+      site: currentSite,
+      cameras: mockCameras,
+      zones: zones,
+      personnel: personnelPositions,
+      equipment: equipmentPositions,
+      exportDate: new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(siteData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `site_overview_${currentSite.code}_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Real-time updates simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Simulate personnel movement
+      setPersonnelPositions(prev => prev.map(person => ({
+        ...person,
+        x: Math.max(5, Math.min(95, person.x + (Math.random() - 0.5) * 5)),
+        y: Math.max(5, Math.min(95, person.y + (Math.random() - 0.5) * 5))
+      })));
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const CameraIcon = ({ camera, onClick }) => {
     const isOnline = camera.status === 'online';
     const hasAlerts = camera.alerts > 0;
