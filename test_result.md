@@ -271,10 +271,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Alert Center interactive enhancements"
-    - "Personnel Management screen enhancements (next)"
+    - "Personnel Management interactive enhancements"
     - "Site Overview interactive enhancements (next)"
-  stuck_tasks: []
+    - "AI Analytics interactive enhancements (next)"
+  stuck_tasks:
+    - "Personnel Management runtime issue - page renders blank"
   test_all: false
   test_priority: "high_first"
 
