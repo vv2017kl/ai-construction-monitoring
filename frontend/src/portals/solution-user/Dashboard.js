@@ -278,7 +278,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">Priority Alerts</h2>
                   <button 
-                    onClick={() => navigate('/alert-center')}
+                    onClick={() => setShowAlertsModal(true)}
                     className="text-sm font-medium hover:underline"
                     style={{ color: theme.primary[500] }}
                   >
