@@ -23,9 +23,27 @@ const ReportsCenter = () => {
   const [filterDateRange, setFilterDateRange] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedReports, setSelectedReports] = useState([]);
+  const [selectedReports, setSelectedReports] = useState(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid', 'list'
+  
+  // Enhanced interactive features
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewReport, setPreviewReport] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareReport, setShareReport] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [reportTemplates, setReportTemplates] = useState([]);
+  const [newSchedule, setNewSchedule] = useState({
+    reportType: 'safety',
+    frequency: 'daily',
+    time: '09:00',
+    recipients: [],
+    format: 'PDF'
+  });
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
