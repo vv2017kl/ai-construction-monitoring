@@ -1004,8 +1004,19 @@ const PersonnelManagement = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-gray-600" />
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedPersonnel.has(person.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleSelectPersonnel(person.id);
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-gray-600" />
+                      </div>
                     </div>
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(person.status).bg} ${getStatusColor(person.status).text}`}>
                       {person.status.toUpperCase()}
