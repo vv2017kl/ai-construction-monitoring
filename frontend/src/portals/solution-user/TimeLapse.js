@@ -421,25 +421,48 @@ const TimeLapse = () => {
             {/* Camera Selection */}
             <div className="p-4 border-b border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-3">Camera Selection</h3>
+              
+              {/* Multi-camera toggle for comparison */}
+              {selectedView === 'comparison' && (
+                <div className="mb-3 p-2 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-700 mb-2">Select cameras to compare:</p>
+                </div>
+              )}
+              
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {availableCameras.map((camera) => (
                   <div
                     key={camera.id}
-                    onClick={() => setSelectedCamera(camera)}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                    className={`p-3 rounded-lg transition-colors border ${
                       selectedCamera.id === camera.id 
-                        ? 'bg-blue-50 border-blue-200 border' 
-                        : 'hover:bg-gray-50 border border-transparent'
+                        ? 'bg-blue-50 border-blue-200' 
+                        : selectedCameras.has(camera.id)
+                        ? 'bg-green-50 border-green-200'
+                        : 'hover:bg-gray-50 border-transparent'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div>
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => setSelectedCamera(camera)}
+                      >
                         <p className="font-medium text-gray-900">{camera.name}</p>
                         <p className="text-sm text-gray-600">{camera.location}</p>
                       </div>
-                      <div className={`w-2 h-2 rounded-full ${
-                        camera.status === 'online' ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
+                      
+                      <div className="flex items-center space-x-2">
+                        {selectedView === 'comparison' && (
+                          <input
+                            type="checkbox"
+                            checked={selectedCameras.has(camera.id)}
+                            onChange={(e) => handleCameraSelection(camera.id, e.target.checked)}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                          />
+                        )}
+                        <div className={`w-2 h-2 rounded-full ${
+                          camera.status === 'online' ? 'bg-green-500' : 'bg-red-500'
+                        }`} />
+                      </div>
                     </div>
                   </div>
                 ))}
