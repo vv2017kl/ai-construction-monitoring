@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { mockCameras, mockSites } from '../../data/cesiumMockData';
 import { 
   ArrowLeft, MapPin, Camera, AlertTriangle, Maximize, 
