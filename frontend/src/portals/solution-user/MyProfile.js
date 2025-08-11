@@ -56,7 +56,11 @@ const MyProfile = () => {
     smsNotifications: false,
     weeklyReports: true,
     safetyAlerts: true,
-    autoSave: true
+    autoSave: true,
+    defaultDashboard: 'standard', // 'standard' or 'cesium'
+    mapViewLevel: 'global', // 'global', 'regional', 'site'
+    autoZoomToAlerts: true,
+    showCameraLabels: true
   });
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
