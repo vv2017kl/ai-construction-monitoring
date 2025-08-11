@@ -348,46 +348,110 @@ const AIAnalytics = () => {
               <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>
             </tr>
           </thead>
-        <tbody>
-          {chartData.cameraPerformance.map((camera, index) => (
-            <tr key={camera.id} className="border-b border-gray-100 hover:bg-gray-50">
-              <td className="py-3 px-4">
-                <div>
-                  <p className="font-medium text-gray-900">{camera.name}</p>
-                  <p className="text-sm text-gray-600">{camera.location}</p>
-                </div>
-              </td>
-              <td className="py-3 px-4">
-                <span className="text-lg font-bold text-gray-900">{camera.detections}</span>
-                <span className="text-sm text-gray-500 ml-1">today</span>
-              </td>
-              <td className="py-3 px-4">
-                <span className={`font-medium ${
-                  camera.accuracy >= 90 ? 'text-green-600' : 
-                  camera.accuracy >= 80 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {camera.accuracy}%
-                </span>
-              </td>
-              <td className="py-3 px-4">
-                <span className={`font-medium ${
-                  camera.uptime >= 95 ? 'text-green-600' : 
-                  camera.uptime >= 90 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {camera.uptime}%
-                </span>
-              </td>
-              <td className="py-3 px-4">
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  camera.status === 'online' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                }`}>
-                  {camera.status.toUpperCase()}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <tbody>
+            {filteredCameraData.map((camera, index) => (
+              <tr key={camera.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="py-3 px-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <div>
+                      <p className="font-medium text-gray-900">{camera.name}</p>
+                      <p className="text-xs text-gray-500">ID: {camera.id}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-900">{camera.location}</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4">
+                  <div>
+                    <span className="text-lg font-bold text-gray-900">{camera.detections}</span>
+                    <span className="text-sm text-gray-500 ml-1">today</span>
+                  </div>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-12 bg-gray-200 rounded-full h-1.5">
+                      <div 
+                        className="h-1.5 rounded-full"
+                        style={{ 
+                          width: `${camera.accuracy}%`,
+                          backgroundColor: camera.accuracy >= 90 ? theme.success[500] : 
+                                         camera.accuracy >= 80 ? theme.warning[500] : theme.danger[500]
+                        }}
+                      ></div>
+                    </div>
+                    <span className={`font-medium text-sm ${
+                      camera.accuracy >= 90 ? 'text-green-600' : 
+                      camera.accuracy >= 80 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {camera.accuracy}%
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-12 bg-gray-200 rounded-full h-1.5">
+                      <div 
+                        className="h-1.5 rounded-full"
+                        style={{ 
+                          width: `${camera.uptime}%`,
+                          backgroundColor: camera.uptime >= 95 ? theme.success[500] : 
+                                         camera.uptime >= 90 ? theme.warning[500] : theme.danger[500]
+                        }}
+                      ></div>
+                    </div>
+                    <span className={`font-medium text-sm ${
+                      camera.uptime >= 95 ? 'text-green-600' : 
+                      camera.uptime >= 90 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {camera.uptime}%
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      camera.status === 'online' ? 'bg-green-500' : 'bg-red-500'
+                    }`}></div>
+                    <span className={`text-sm font-medium ${
+                      camera.status === 'online' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {camera.status.charAt(0).toUpperCase() + camera.status.slice(1)}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => navigate(`/camera/${camera.id}`)}
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="View Camera"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                      title="Camera Settings"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      title="Download Footage"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 
