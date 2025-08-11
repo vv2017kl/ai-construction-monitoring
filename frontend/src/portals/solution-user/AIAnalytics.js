@@ -728,6 +728,154 @@ const AIAnalytics = () => {
           </ChartContainer>
         </div>
       </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Export Analytics Data</h3>
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="exportFormat"
+                      value="csv"
+                      checked={exportFormat === 'csv'}
+                      onChange={(e) => setExportFormat(e.target.value)}
+                      className="w-4 h-4 text-blue-600 border-gray-300"
+                    />
+                    <div className="flex items-center space-x-2">
+                      <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                      <span>CSV (Excel compatible)</span>
+                    </div>
+                  </label>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="exportFormat"
+                      value="json"
+                      checked={exportFormat === 'json'}
+                      onChange={(e) => setExportFormat(e.target.value)}
+                      className="w-4 h-4 text-blue-600 border-gray-300"
+                    />
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span>JSON (Raw data)</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-900">Current: {timeRange}</span>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Data Preview</label>
+                <div className="p-3 bg-gray-50 rounded-lg max-h-32 overflow-y-auto">
+                  <div className="text-xs text-gray-600">
+                    • AI Performance Metrics<br/>
+                    • Safety Compliance Data<br/>
+                    • Camera Performance Statistics<br/>
+                    • Chart Data Points<br/>
+                    • Time Series Information
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExportData}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chart Data Detail Modal */}
+      {selectedChartData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Data Point Details</h3>
+              <button
+                onClick={() => setSelectedChartData(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-blue-900">Chart: {selectedChartData.chart}</p>
+                  <p className="text-sm text-blue-600">Interactive data exploration</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(selectedChartData).filter(([key]) => key !== 'chart').map(([key, value]) => (
+                  <div key={key} className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                    <p className="text-lg font-semibold text-gray-900">{value}</p>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex items-center space-x-2 p-3 bg-yellow-50 rounded-lg">
+                <Target className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm text-yellow-700">
+                  Click on chart elements to explore detailed analytics
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => navigate('/live-view')}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                <span>View Live</span>
+              </button>
+              <button
+                onClick={() => setSelectedChartData(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
