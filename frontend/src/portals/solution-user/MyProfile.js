@@ -255,6 +255,26 @@ const MyProfile = () => {
 
   const ProfileTab = () => (
     <div className="space-y-8">
+      {/* Profile Completion */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Profile Completion</h3>
+            <p className="text-sm text-gray-600">Complete your profile to unlock all features</p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-blue-600">{profileCompletion}%</div>
+            <div className="text-sm text-gray-500">Complete</div>
+          </div>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+            style={{ width: `${profileCompletion}%` }}
+          ></div>
+        </div>
+      </div>
+
       {/* Profile Header */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <div className="flex items-start space-x-6">
@@ -265,7 +285,10 @@ const MyProfile = () => {
             >
               {formData.firstName[0]}{formData.lastName[0]}
             </div>
-            <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={() => setShowProfilePictureModal(true)}
+              className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+            >
               <Camera className="w-4 h-4" />
             </button>
           </div>
