@@ -195,19 +195,22 @@ const Header = ({ onToggleSidebar, portal = 'solution-user' }) => {
         <div className="relative">
           <button
             onClick={() => setShowProfile(!showProfile)}
-            className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center space-x-2 p-2 rounded-lg transition-colors"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
           >
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-              style={{ backgroundColor: theme.primary[500] }}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)', color: theme.primary[600] }}
             >
               {mockUser.firstName[0]}{mockUser.lastName[0]}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium text-gray-900">{mockUser.displayName}</p>
-              <p className="text-xs text-gray-500">{mockUser.role}</p>
+              <p className="text-sm font-medium text-white">{mockUser.displayName}</p>
+              <p className="text-xs text-white/70">{mockUser.role}</p>
             </div>
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-4 h-4 text-white" />
           </button>
 
           {showProfile && (
