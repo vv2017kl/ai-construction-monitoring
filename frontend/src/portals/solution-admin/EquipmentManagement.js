@@ -5,7 +5,7 @@ import {
   XCircle, Clock, Calendar, Plus, Search, Filter, Edit3,
   Trash2, Eye, MoreVertical, Download, Upload, RefreshCw,
   Grid, List, TrendingUp, TrendingDown, MapPin, User,
-  Battery, Wifi, Signal, Zap, Tool, Construction, 
+  Battery, Wifi, Signal, Zap, Construction, 
   Truck, HardDrive, Monitor, Globe, Target,
   Award, BarChart3, Users, Building2, Crown
 } from 'lucide-react';
