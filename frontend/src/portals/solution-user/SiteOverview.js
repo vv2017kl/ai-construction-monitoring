@@ -686,7 +686,7 @@ const SiteOverview = () => {
                     </span>
                     <span className="text-xs text-gray-500 ml-auto">
                       {layer === 'cameras' ? mockCameras.length :
-                       layer === 'zones' ? mockZones.length :
+                       layer === 'zones' ? zones.length :
                        layer === 'personnel' ? personnelPositions.length :
                        layer === 'equipment' ? equipmentPositions.length :
                        layer === 'alerts' ? mockCameras.reduce((acc, c) => acc + c.alerts, 0) : 0}
