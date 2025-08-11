@@ -213,7 +213,7 @@ const CesiumContainer = ({
     switch (viewMode) {
       case 'global':
         viewer.camera.setView({
-          destination: CesiumMath.Cartesian3.fromDegrees(65.0000, 20.0000, 5000000),
+          destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000),
           orientation: {
             heading: 0.0,
             pitch: -CesiumMath.PI_OVER_TWO,
@@ -226,7 +226,7 @@ const CesiumContainer = ({
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
           viewer.camera.setView({
-            destination: CesiumMath.Cartesian3.fromDegrees(longitude, latitude, 50000),
+            destination: Cartesian3.fromDegrees(longitude, latitude, 50000),
             orientation: {
               heading: 0.0,
               pitch: -CesiumMath.PI_OVER_FOUR,
@@ -240,7 +240,7 @@ const CesiumContainer = ({
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
           viewer.camera.setView({
-            destination: CesiumMath.Cartesian3.fromDegrees(longitude, latitude, 1000),
+            destination: Cartesian3.fromDegrees(longitude, latitude, 1000),
             orientation: {
               heading: 0.0,
               pitch: -CesiumMath.PI_OVER_FOUR,
