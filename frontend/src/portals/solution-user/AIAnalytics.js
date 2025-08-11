@@ -168,6 +168,19 @@ const AIAnalytics = () => {
     ]
   };
 
+  // Filtered and sorted camera data (calculated after chartData is available)
+  const filteredCameraData = chartData.cameraPerformance.filter(camera => {
+    const matchesSearch = camera.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         camera.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCamera = selectedCamera === 'all' || camera.id === selectedCamera;
+    return matchesSearch && matchesCamera;
+  }).sort((a, b) => {
+    const aValue = a[sortBy];
+    const bValue = b[sortBy];
+    const multiplier = sortOrder === 'asc' ? 1 : -1;
+    return (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) * multiplier;
+  });
+
   const MetricCard = ({ title, value, change, icon: Icon, color, subtitle, onClick, isSelected = false, showTrend = false }) => (
     <div 
       className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 cursor-pointer ${
