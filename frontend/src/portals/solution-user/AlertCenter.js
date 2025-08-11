@@ -26,6 +26,14 @@ const AlertCenter = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list', 'cards', 'timeline'
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedAlerts, setSelectedAlerts] = useState(new Set());
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showEvidenceModal, setShowEvidenceModal] = useState(false);
+  const [currentEvidence, setCurrentEvidence] = useState(null);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [alertComments, setAlertComments] = useState({});
+  const [newComment, setNewComment] = useState('');
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
