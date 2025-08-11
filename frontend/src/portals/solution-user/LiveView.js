@@ -528,7 +528,19 @@ const LiveView = () => {
                 </button>
                 
                 <button
+                  onClick={() => navigate('/alert-center')}
+                  className="w-full flex items-center space-x-3 p-3 text-left bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                >
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                  <div>
+                    <div className="font-medium text-red-900">Alert Center</div>
+                    <div className="text-xs text-red-600">{mockAlerts.length} active alerts</div>
+                  </div>
+                </button>
+                
+                <button
                   className="w-full flex items-center space-x-3 p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={() => console.log('Export evidence for all cameras')}
                 >
                   <Download className="w-5 h-5 text-gray-600" />
                   <div>
