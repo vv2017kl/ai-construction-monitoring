@@ -111,17 +111,7 @@ const AIAnalytics = () => {
     }
   };
 
-  const filteredCameraData = chartData.cameraPerformance.filter(camera => {
-    const matchesSearch = camera.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         camera.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCamera = selectedCamera === 'all' || camera.id === selectedCamera;
-    return matchesSearch && matchesCamera;
-  }).sort((a, b) => {
-    const aValue = a[sortBy];
-    const bValue = b[sortBy];
-    const multiplier = sortOrder === 'asc' ? 1 : -1;
-    return (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) * multiplier;
-  });
+
 
   // Real-time updates simulation
   useEffect(() => {
