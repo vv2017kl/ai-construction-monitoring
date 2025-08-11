@@ -740,6 +740,252 @@ const TimeLapse = () => {
           </div>
         </div>
       </div>
+
+      {/* Bookmark Modal */}
+      {showBookmarkModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Add Bookmark</h3>
+              <button
+                onClick={() => setShowBookmarkModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
+                <Clock className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-700">
+                  Current time: {formatTime(currentTime)}
+                </span>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bookmark Name</label>
+                <input
+                  type="text"
+                  value={newBookmark.name}
+                  onChange={(e) => setNewBookmark(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder={`Bookmark ${bookmarks.length + 1}`}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={newBookmark.description}
+                  onChange={(e) => setNewBookmark(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Optional description..."
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+                  rows={3}
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowBookmarkModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddBookmark}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Bookmark className="w-4 h-4" />
+                <span>Add Bookmark</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Export Time Lapse</h3>
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                  <select
+                    value={exportSettings.format}
+                    onChange={(e) => setExportSettings(prev => ({ ...prev, format: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                  >
+                    <option value="mp4">MP4 (Video)</option>
+                    <option value="gif">GIF (Animated)</option>
+                    <option value="webm">WebM (Web)</option>
+                    <option value="avi">AVI (Legacy)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Quality</label>
+                  <select
+                    value={exportSettings.quality}
+                    onChange={(e) => setExportSettings(prev => ({ ...prev, quality: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                  >
+                    <option value="low">Low (720p)</option>
+                    <option value="medium">Medium (1080p)</option>
+                    <option value="high">High (4K)</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={duration}
+                    value={exportSettings.startTime}
+                    onChange={(e) => setExportSettings(prev => ({ ...prev, startTime: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={duration}
+                    value={exportSettings.endTime}
+                    onChange={(e) => setExportSettings(prev => ({ ...prev, endTime: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">Include Annotations</label>
+                <button
+                  onClick={() => setExportSettings(prev => ({ ...prev, includeAnnotations: !prev.includeAnnotations }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    exportSettings.includeAnnotations ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      exportSettings.includeAnnotations ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  Export duration: {formatTime(exportSettings.endTime - exportSettings.startTime)}
+                  <br />
+                  Estimated file size: {exportSettings.quality === 'high' ? '2.1GB' : exportSettings.quality === 'medium' ? '840MB' : '320MB'}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExportClip}
+                disabled={isGenerating}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {isGenerating ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>{isGenerating ? 'Generating...' : 'Export'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Share Time Lapse</h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Link2 className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">Shareable Link</span>
+                </div>
+                <p className="text-xs text-blue-700">
+                  Generate a link that includes current playback position and settings
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Current Time:</span>
+                  <span className="font-medium">{formatTime(currentTime)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Camera:</span>
+                  <span className="font-medium">{selectedCamera.name}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Bookmarks:</span>
+                  <span className="font-medium">{bookmarks.length} included</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleGenerateShareLink();
+                  setShowShareModal(false);
+                }}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Copy className="w-4 h-4" />
+                <span>Copy Link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
