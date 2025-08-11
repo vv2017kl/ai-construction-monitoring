@@ -23,11 +23,24 @@ const PersonnelManagement = () => {
   const [filterRole, setFilterRole] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [selectedPersonnel, setSelectedPersonnel] = useState([]);
+  const [selectedPersonnel, setSelectedPersonnel] = useState(new Set());
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [viewMode, setViewMode] = useState('table'); // 'table', 'cards'
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [editingPerson, setEditingPerson] = useState(null);
+  const [newPersonForm, setNewPersonForm] = useState({
+    name: '',
+    role: '',
+    department: '',
+    email: '',
+    phone: '',
+    certifications: []
+  });
 
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
