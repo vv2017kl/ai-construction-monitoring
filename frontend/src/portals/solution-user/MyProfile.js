@@ -106,10 +106,106 @@ const MyProfile = () => {
   };
 
   const handleSave = () => {
-    // Here you would typically save to backend
-    setIsEditing(false);
-    // Show success message
+    setIsSaving(true);
+    
+    // Simulate save process
+    setTimeout(() => {
+      setIsEditing(false);
+      setIsSaving(false);
+      setLastSaved(new Date());
+      
+      // Calculate profile completion
+      const fields = [formData.firstName, formData.lastName, formData.email, formData.phone, formData.bio, formData.emergencyContact];
+      const completedFields = fields.filter(field => field && field.trim()).length;
+      setProfileCompletion(Math.round((completedFields / fields.length) * 100));
+    }, 1500);
   };
+
+  // Enhanced functions
+  const handleProfilePictureUpload = (file) => {
+    // Simulate file upload
+    console.log('Uploading profile picture:', file.name);
+    setShowProfilePictureModal(false);
+  };
+
+  const handlePasswordChange = () => {
+    if (passwordData.new !== passwordData.confirm) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    // Simulate password change
+    setShowChangePasswordModal(false);
+    setPasswordData({ current: '', new: '', confirm: '' });
+  };
+
+  const handleExportData = () => {
+    const exportData = {
+      profile: formData,
+      preferences: preferences,
+      activity: recentActivity,
+      exportDate: new Date().toISOString()
+    };
+
+    let dataStr, fileName, mimeType;
+    
+    if (exportFormat === 'json') {
+      dataStr = JSON.stringify(exportData, null, 2);
+      fileName = `profile_data_${new Date().toISOString().split('T')[0]}.json`;
+      mimeType = 'application/json';
+    } else {
+      // CSV format
+      const csvRows = [];
+      csvRows.push(['Field', 'Value']);
+      Object.entries(formData).forEach(([key, value]) => {
+        csvRows.push([key, value]);
+      });
+      
+      dataStr = csvRows.map(row => row.join(',')).join('\n');
+      fileName = `profile_data_${new Date().toISOString().split('T')[0]}.csv`;
+      mimeType = 'text/csv';
+    }
+
+    const dataUri = `data:${mimeType};charset=utf-8,${encodeURIComponent(dataStr)}`;
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', fileName);
+    linkElement.click();
+    
+    setShowExportModal(false);
+  };
+
+  const handleRevokeSession = (sessionId) => {
+    // Simulate session revocation
+    console.log('Revoking session:', sessionId);
+  };
+
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: 'None', color: 'gray' };
+    
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    
+    const strengthMap = {
+      0: { strength: 0, label: 'Very Weak', color: 'red' },
+      1: { strength: 25, label: 'Weak', color: 'red' },
+      2: { strength: 50, label: 'Fair', color: 'yellow' },
+      3: { strength: 75, label: 'Good', color: 'blue' },
+      4: { strength: 100, label: 'Strong', color: 'green' }
+    };
+    
+    return strengthMap[score];
+  };
+
+  const filteredActivity = recentActivity.filter(activity => {
+    const matchesSearch = activity.description.toLowerCase().includes(activitySearch.toLowerCase()) ||
+                         activity.location.toLowerCase().includes(activitySearch.toLowerCase());
+    const matchesFilter = activityFilter === 'all' || activity.type === activityFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   const getActivityIcon = (type) => {
     switch (type) {
