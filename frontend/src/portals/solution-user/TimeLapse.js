@@ -6,7 +6,10 @@ import {
   Volume2, VolumeX, Settings, Layers, MapPin, 
   FastForward, Rewind, Square, Filter, 
   ChevronLeft, ChevronRight, ZoomIn, ZoomOut,
-  Grid3X3, BarChart3, Eye, Fullscreen, Monitor
+  Grid3X3, BarChart3, Eye, Fullscreen, Monitor, X,
+  Bookmark, BookmarkPlus, Trash2, Copy, Link2,
+  Repeat, Scissors, Save, Upload, RefreshCw,
+  ChevronUp, ChevronDown, CheckCircle, AlertCircle
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
