@@ -102,6 +102,114 @@ const TimeLapse = () => {
     setPlaybackSpeed(speed);
   };
 
+  // Enhanced interactive functions
+  const handleAddBookmark = () => {
+    const bookmark = {
+      id: Date.now(),
+      time: currentTime,
+      name: newBookmark.name || `Bookmark ${bookmarks.length + 1}`,
+      description: newBookmark.description,
+      camera: selectedCamera.id,
+      timestamp: new Date().toISOString()
+    };
+    
+    setBookmarks(prev => [...prev, bookmark].sort((a, b) => a.time - b.time));
+    setNewBookmark({ time: 0, name: '', description: '' });
+    setShowBookmarkModal(false);
+  };
+
+  const handleDeleteBookmark = (bookmarkId) => {
+    setBookmarks(prev => prev.filter(b => b.id !== bookmarkId));
+  };
+
+  const handleJumpToBookmark = (time) => {
+    setCurrentTime(time);
+    setPlaybackHistory(prev => [...prev, { time, action: 'bookmark_jump', timestamp: new Date() }]);
+  };
+
+  const handleFrameStep = (direction) => {
+    const frameTime = 1 / 30; // 30 FPS
+    const newTime = direction > 0 
+      ? Math.min(duration, currentTime + frameTime)
+      : Math.max(0, currentTime - frameTime);
+    setCurrentTime(newTime);
+  };
+
+  const handleExportClip = () => {
+    setIsGenerating(true);
+    
+    // Simulate export process
+    setTimeout(() => {
+      const filename = `timelapse_${selectedCamera.name}_${new Date().toISOString().split('T')[0]}.${exportSettings.format}`;
+      
+      // Create mock download
+      const element = document.createElement('a');
+      element.setAttribute('href', `data:text/plain;charset=utf-8,Mock time-lapse export: ${filename}`);
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      setIsGenerating(false);
+      setShowExportModal(false);
+    }, 3000);
+  };
+
+  const handleCameraSelection = (cameraId, isSelected) => {
+    const newSelected = new Set(selectedCameras);
+    if (isSelected) {
+      newSelected.add(cameraId);
+    } else {
+      newSelected.delete(cameraId);
+    }
+    setSelectedCameras(newSelected);
+  };
+
+  const handleGenerateShareLink = () => {
+    const shareData = {
+      camera: selectedCamera.id,
+      startTime: currentTime,
+      dateRange: selectedDateRange,
+      bookmarks: bookmarks,
+      settings: { playbackSpeed, compressionLevel, showAnnotations }
+    };
+    
+    const shareUrl = `${window.location.origin}/time-lapse/share/${btoa(JSON.stringify(shareData))}`;
+    navigator.clipboard.writeText(shareUrl);
+    
+    return shareUrl;
+  };
+
+  // Auto-play functionality
+  useEffect(() => {
+    let interval;
+    
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setCurrentTime(prev => {
+          const newTime = prev + playbackSpeed;
+          
+          if (newTime >= duration) {
+            if (isLooping) {
+              return 0;
+            } else if (autoRewind) {
+              setIsPlaying(false);
+              return 0;
+            } else {
+              setIsPlaying(false);
+              return duration;
+            }
+          }
+          
+          return newTime;
+        });
+      }, 1000);
+    }
+    
+    return () => clearInterval(interval);
+  }, [isPlaying, playbackSpeed, duration, isLooping, autoRewind]);
+
   const getActivityColor = (type) => {
     switch (type) {
       case 'preparation': return theme.warning[400];
