@@ -5,7 +5,9 @@ import {
   Car, Wrench, Shield, AlertTriangle, CheckCircle, 
   Calendar, Clock, Camera, Eye, Download, RefreshCw,
   Filter, Settings, Zap, Activity, Target, Cpu, 
-  PieChart, LineChart, BarChart, MapPin, Layers
+  PieChart, LineChart, BarChart, MapPin, Layers, X,
+  Play, Pause, Search, ArrowUpDown, FileText, FileSpreadsheet,
+  Compare, Maximize2, Minimize2, RotateCcw, ChevronDown
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
