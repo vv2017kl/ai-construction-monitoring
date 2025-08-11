@@ -598,7 +598,7 @@ const SiteOverview = () => {
                 )}
 
                 {/* Site Zones */}
-                {showLayers.zones && mockZones.map((zone) => (
+                {showLayers.zones && zones.map((zone) => (
                   <ZoneOverlay
                     key={zone.id}
                     zone={zone}
