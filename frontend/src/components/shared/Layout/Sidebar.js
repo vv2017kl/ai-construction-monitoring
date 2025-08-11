@@ -113,10 +113,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
       {
         id: 'ai_management',
         title: 'AI MANAGEMENT',
-        icon: BarChart3,
+        icon: Brain,
         items: [
-          { name: 'AI Models', path: '/admin/ai-models', icon: BarChart3 },
-          { name: 'Detection Rules', path: '/admin/detection-rules', icon: Settings }
+          { name: 'AI Models', path: '/admin/ai-models', icon: Brain },
+          { name: 'System Monitoring', path: '/admin/monitoring', icon: Monitor }
         ]
       },
       {
