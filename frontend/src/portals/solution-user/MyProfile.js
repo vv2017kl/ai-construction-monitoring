@@ -608,6 +608,114 @@ const MyProfile = () => {
         </div>
       </div>
 
+      {/* Dashboard Preferences */}
+      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <Monitor className="w-5 h-5 mr-2" />
+          Dashboard Preferences
+        </h3>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Home className="w-5 h-5 text-gray-600" />
+              <div>
+                <p className="font-medium">Default Dashboard</p>
+                <p className="text-sm text-gray-600">Choose your preferred dashboard view on login</p>
+              </div>
+            </div>
+            <select
+              value={preferences.defaultDashboard}
+              onChange={(e) => handlePreferenceChange('defaultDashboard', e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+            >
+              <option value="standard">Standard Dashboard</option>
+              <option value="cesium">Cesium Map Dashboard</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Globe className="w-5 h-5 text-gray-600" />
+              <div>
+                <p className="font-medium">Map View Level</p>
+                <p className="text-sm text-gray-600">Default zoom level for map dashboard</p>
+              </div>
+            </div>
+            <select
+              value={preferences.mapViewLevel}
+              onChange={(e) => handlePreferenceChange('mapViewLevel', e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:border-transparent"
+              disabled={preferences.defaultDashboard !== 'cesium'}
+            >
+              <option value="global">Global View</option>
+              <option value="regional">Regional View</option>
+              <option value="site">Site View</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Auto-zoom to Alerts</p>
+              <p className="text-sm text-gray-600">Automatically zoom to locations with active alerts</p>
+            </div>
+            <button
+              onClick={() => handlePreferenceChange('autoZoomToAlerts', !preferences.autoZoomToAlerts)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                preferences.autoZoomToAlerts ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+              disabled={preferences.defaultDashboard !== 'cesium'}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  preferences.autoZoomToAlerts ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Show Camera Labels</p>
+              <p className="text-sm text-gray-600">Display camera names on the map</p>
+            </div>
+            <button
+              onClick={() => handlePreferenceChange('showCameraLabels', !preferences.showCameraLabels)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                preferences.showCameraLabels ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+              disabled={preferences.defaultDashboard !== 'cesium'}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  preferences.showCameraLabels ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {preferences.defaultDashboard === 'cesium' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <Globe className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-blue-900">Cesium Map Dashboard</h4>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Experience a powerful 3D geospatial view of your construction sites with interactive cameras, 
+                    real-time alerts, and drill-down capabilities from global to site-specific views.
+                  </p>
+                  <button
+                    onClick={() => navigate('/cesium-dashboard')}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Preview Cesium Dashboard →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Notification Preferences */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-6">Notifications</h3>
