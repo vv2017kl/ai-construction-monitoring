@@ -42,12 +42,7 @@ const CesiumContainer = ({
         animation: false,
         timeline: false,
         fullscreenButton: false,
-        vrButton: false,
-        imageryProvider: new BingMapsStyle({
-          url: 'https://dev.virtualearth.net',
-          key: process.env.REACT_APP_BING_MAPS_KEY || '', // Optional Bing Maps key
-          mapStyle: BingMapsStyle.AERIAL_WITH_LABELS
-        })
+        vrButton: false
       });
 
       // Set initial camera position (global view)
