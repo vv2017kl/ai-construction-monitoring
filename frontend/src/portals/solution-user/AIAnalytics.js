@@ -548,7 +548,7 @@ const AIAnalytics = () => {
                   comparisonMode ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                <Compare className="w-4 h-4" />
+                <GitCompare className="w-4 h-4" />
                 <span>Compare</span>
               </button>
 
