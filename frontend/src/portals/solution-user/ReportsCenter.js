@@ -864,6 +864,253 @@ const ReportsCenter = () => {
 
       {/* Create Report Modal */}
       <CreateReportModal />
+
+      {/* Template Modal */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">Report Templates</h3>
+              <button
+                onClick={() => setShowTemplateModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {reportTemplates.map((template) => {
+                const IconComponent = template.icon;
+                return (
+                  <div key={template.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-purple-100 rounded-lg">
+                        <IconComponent className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">{template.name}</h4>
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="text-sm text-gray-600">{template.popularity}%</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>⏱️ {template.estimatedTime}</span>
+                            <span>📊 {template.sections.length} sections</span>
+                          </div>
+                          <button
+                            onClick={() => handleGenerateFromTemplate(template)}
+                            disabled={isGenerating}
+                            className="flex items-center space-x-2 px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+                          >
+                            {isGenerating ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Plus className="w-3 h-3" />
+                            )}
+                            <span>Generate</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Schedule Report</h3>
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+                <select
+                  value={newSchedule.reportType}
+                  onChange={(e) => setNewSchedule(prev => ({ ...prev, reportType: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                >
+                  <option value="safety">Safety Dashboard</option>
+                  <option value="personnel">Personnel Summary</option>
+                  <option value="ai_analytics">AI Analytics</option>
+                  <option value="progress">Progress Report</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+                <select
+                  value={newSchedule.frequency}
+                  onChange={(e) => setNewSchedule(prev => ({ ...prev, frequency: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                <input
+                  type="time"
+                  value={newSchedule.time}
+                  onChange={(e) => setNewSchedule(prev => ({ ...prev, time: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                <select
+                  value={newSchedule.format}
+                  onChange={(e) => setNewSchedule(prev => ({ ...prev, format: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                >
+                  <option value="PDF">PDF</option>
+                  <option value="Excel">Excel</option>
+                  <option value="CSV">CSV</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleScheduleReport}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <CalendarIcon className="w-4 h-4" />
+                <span>Schedule</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreviewModal && previewReport && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full h-[90vh] p-6 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Preview: {previewReport.title}</h3>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 bg-gray-100 rounded-lg p-8 flex items-center justify-center">
+              <div className="text-center">
+                <Monitor className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h4 className="text-lg font-medium text-gray-900 mb-2">Report Preview</h4>
+                <p className="text-gray-600 mb-4">
+                  {previewReport.description}
+                </p>
+                <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                  <span>📄 {previewReport.pages} pages</span>
+                  <span>📁 {previewReport.fileSize}</span>
+                  <span>📅 {formatDate(previewReport.createdAt)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-4">
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <Download className="w-4 h-4" />
+                <span>Download</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && shareReport && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Share Report</h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <FileText className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">{shareReport.title}</span>
+                </div>
+                <p className="text-xs text-blue-700">{shareReport.description}</p>
+              </div>
+              
+              <div className="space-y-3">
+                <button className="w-full flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Link2 className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm text-gray-900">Copy shareable link</span>
+                </button>
+                
+                <button className="w-full flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Mail className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm text-gray-900">Send via email</span>
+                </button>
+                
+                <button className="w-full flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <UserPlus className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm text-gray-900">Share with team members</span>
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <Share2 className="w-4 h-4" />
+                <span>Share</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
