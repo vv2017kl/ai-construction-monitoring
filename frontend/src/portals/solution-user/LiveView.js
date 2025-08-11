@@ -45,6 +45,44 @@ const LiveView = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // PTZ Control Functions
+  const handlePTZControl = (cameraId, direction) => {
+    setPtzActive(cameraId);
+    console.log(`PTZ Control: Camera ${cameraId} moving ${direction}`);
+    setTimeout(() => setPtzActive(null), 1000);
+  };
+
+  const handleZoom = (cameraId, zoomIn) => {
+    console.log(`Zoom: Camera ${cameraId} ${zoomIn ? 'zoom in' : 'zoom out'}`);
+  };
+
+  // Recording Functions
+  const toggleRecording = (cameraId) => {
+    setRecordingCameras(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cameraId)) {
+        newSet.delete(cameraId);
+        console.log(`Recording stopped for camera ${cameraId}`);
+      } else {
+        newSet.add(cameraId);
+        console.log(`Recording started for camera ${cameraId}`);
+      }
+      return newSet;
+    });
+  };
+
+  // Camera Settings Functions
+  const openCameraSettings = (camera) => {
+    setSelectedCameraForSettings(camera);
+    setShowCameraSettings(true);
+  };
+
+  // Detection Detail Functions
+  const showDetectionDetails = (detection) => {
+    setSelectedDetection(detection);
+    setShowDetectionDetail(true);
+  };
+
   const gridLayouts = {
     '1x1': { cols: 1, rows: 1 },
     '2x2': { cols: 2, rows: 2 },
