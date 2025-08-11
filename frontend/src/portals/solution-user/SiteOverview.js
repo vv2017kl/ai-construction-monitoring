@@ -495,6 +495,64 @@ const SiteOverview = () => {
                 </button>
               </div>
 
+              {/* Drawing Tools */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {
+                    setIsDrawingMode(!isDrawingMode);
+                    if (!isDrawingMode) {
+                      setDrawingTool('rectangle');
+                    }
+                  }}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${
+                    isDrawingMode 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  <Pen className="w-4 h-4" />
+                  <span>Draw</span>
+                </button>
+
+                {isDrawingMode && (
+                  <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setDrawingTool('rectangle')}
+                      className={`p-1 rounded transition-colors ${
+                        drawingTool === 'rectangle' 
+                          ? 'bg-white shadow-sm text-blue-600' 
+                          : 'hover:bg-gray-200'
+                      }`}
+                      title="Rectangle"
+                    >
+                      <Square className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => setDrawingTool('circle')}
+                      className={`p-1 rounded transition-colors ${
+                        drawingTool === 'circle' 
+                          ? 'bg-white shadow-sm text-blue-600' 
+                          : 'hover:bg-gray-200'
+                      }`}
+                      title="Circle"
+                    >
+                      <Circle className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => setDrawingTool('polygon')}
+                      className={`p-1 rounded transition-colors ${
+                        drawingTool === 'polygon' 
+                          ? 'bg-white shadow-sm text-blue-600' 
+                          : 'hover:bg-gray-200'
+                      }`}
+                      title="Polygon"
+                    >
+                      <Pen className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Quick Actions */}
               <button
                 onClick={() => navigate('/path-admin')}
