@@ -165,9 +165,11 @@ const AIAnalytics = () => {
     }))
   };
 
-  const MetricCard = ({ title, value, change, icon: Icon, color, subtitle, onClick }) => (
+  const MetricCard = ({ title, value, change, icon: Icon, color, subtitle, onClick, isSelected = false, showTrend = false }) => (
     <div 
-      className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer"
+      className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 cursor-pointer ${
+        isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-100 hover:shadow-md'
+      }`}
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
