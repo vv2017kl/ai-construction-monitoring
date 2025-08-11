@@ -105,21 +105,21 @@ const CesiumContainer = ({
       
       const siteEntity = viewer.entities.add({
         id: `site-${site.id}`,
-        position: CesiumMath.Cartesian3.fromDegrees(longitude, latitude, height + 100),
+        position: Cartesian3.fromDegrees(longitude, latitude, height + 100),
         billboard: {
           image: createSitePinImage(pinColor, site.project_type),
           scale: 0.8,
-          verticalOrigin: CesiumMath.VerticalOrigin.BOTTOM,
-          heightReference: CesiumMath.HeightReference.CLAMP_TO_GROUND
+          verticalOrigin: VerticalOrigin.BOTTOM,
+          heightReference: HeightReference.CLAMP_TO_GROUND
         },
         label: {
           text: site.name,
           font: '12pt sans-serif',
-          fillColor: CesiumMath.Color.WHITE,
-          outlineColor: CesiumMath.Color.BLACK,
+          fillColor: Color.WHITE,
+          outlineColor: Color.BLACK,
           outlineWidth: 2,
-          style: CesiumMath.LabelStyle.FILL_AND_OUTLINE,
-          pixelOffset: new CesiumMath.Cartesian2(0, -50),
+          style: LabelStyle.FILL_AND_OUTLINE,
+          pixelOffset: new Cartesian2(0, -50),
           show: viewMode === 'global' || viewMode === 'regional'
         },
         description: createSiteDescription(site),
