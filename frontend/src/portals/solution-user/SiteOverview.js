@@ -49,7 +49,7 @@ const SiteOverview = () => {
   const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
 
   // Simulate live personnel positions
-  const [personnelPositions] = useState([
+  const [personnelPositions, setPersonnelPositions] = useState([
     { id: 1, x: 25, y: 30, name: 'Worker A', status: 'working', ppe: 95 },
     { id: 2, x: 45, y: 60, name: 'Worker B', status: 'moving', ppe: 100 },
     { id: 3, x: 70, y: 40, name: 'Supervisor', status: 'inspecting', ppe: 100 },
