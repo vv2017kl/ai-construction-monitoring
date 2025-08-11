@@ -110,6 +110,7 @@ function App() {
             <Route path="/admin/access-control" element={<AccessControl />} />
             <Route path="/admin/site-config" element={<SiteConfiguration />} />
             <Route path="/admin/equipment" element={<EquipmentManagement />} />
+            <Route path="/admin/ai-models" element={<AIModelManagement />} />
             
             {/* Future Portal Routes will be added here */}
             {/* VMS User Portal: /vms/operations/* */}
