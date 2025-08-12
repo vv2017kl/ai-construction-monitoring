@@ -310,6 +310,11 @@ CREATE TABLE cameras (
     night_vision BOOLEAN DEFAULT FALSE,
     weather_resistant BOOLEAN DEFAULT FALSE,
     
+    -- ✅ LIVE VIEW ENHANCEMENTS
+    audio_enabled BOOLEAN DEFAULT FALSE,
+    ptz_capabilities JSON, -- PTZ range, presets, speed settings
+    recording_capabilities JSON, -- Max resolution, frame rates, bitrate limits
+    
     -- Network & streaming
     ip_address INET,
     mac_address VARCHAR(17),
