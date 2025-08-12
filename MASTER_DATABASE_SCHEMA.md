@@ -1490,6 +1490,20 @@ CREATE TABLE department_assignments (
 - **Focus**: Historical video review, forensic analysis, evidence management, compliance auditing
 - **Next update**: Screen Analysis #09 (Next screen analysis)
 
+### **Version 1.6.0 (2025-01-12)**
+- **Updated from**: Screen Analysis #09 (Reports Center)
+- **Tables added**: 5 new tables (`report_templates`, `report_schedules`, `report_generation_logs`, `report_shares`, `report_data_sources`)
+- **Tables enhanced**: None (comprehensive reporting infrastructure through new dedicated tables)
+- **New features added**:
+  - Advanced report template management with usage tracking and popularity metrics
+  - Automated report scheduling with frequency, timing, and recipient configuration
+  - Comprehensive report generation logging with performance and quality metrics
+  - Report sharing system with access control, expiration, and usage tracking
+  - Data source management with connection configuration and performance monitoring
+- **New indexes**: Comprehensive reporting performance indexes for template, schedule, and generation operations
+- **Focus**: Business intelligence, compliance reporting, automated report generation, data analytics
+- **Next update**: Screen Analysis #10 (Next screen analysis)
+
 ---
 
 ## 🔄 **Change History**
