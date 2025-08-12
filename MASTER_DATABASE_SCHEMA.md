@@ -3505,20 +3505,332 @@ CREATE TABLE path_templates (
 
 ---
 
-### **Version 1.10.0 (2025-01-12) - PHASE 2 CONTINUES**
-- **Updated from**: Screen Analysis #17 (Path Administration)
-- **Tables added**: 5 new tables (`inspection_paths`, `path_waypoints`, `path_executions`, `path_execution_waypoints`, `path_templates`)
-- **New section added**: Path Administration & Routing (5 tables)
+## 🏢 **ADMIN DASHBOARD & SYSTEM MANAGEMENT**
+
+### **admin_dashboard_metrics**
+```sql
+CREATE TABLE admin_dashboard_metrics (
+    id UUID PRIMARY KEY,
+    metric_date DATE NOT NULL,
+    metric_hour INTEGER, -- 0-23 for hourly granularity
+    aggregation_level ENUM('hourly', 'daily', 'weekly', 'monthly') NOT NULL,
+    
+    -- System-wide metrics
+    total_users INTEGER DEFAULT 0,
+    active_users_24h INTEGER DEFAULT 0,
+    total_sites INTEGER DEFAULT 0,
+    active_sites INTEGER DEFAULT 0,
+    total_cameras INTEGER DEFAULT 0,
+    online_cameras INTEGER DEFAULT 0,
+    
+    -- Performance metrics
+    system_uptime_percentage DECIMAL(5,2) DEFAULT 100.00,
+    avg_response_time_ms INTEGER DEFAULT 0,
+    total_api_calls BIGINT DEFAULT 0,
+    data_processed_gb DECIMAL(10,2) DEFAULT 0.00,
+    
+    -- Alert metrics
+    total_alerts_generated INTEGER DEFAULT 0,
+    alerts_resolved INTEGER DEFAULT 0,
+    alerts_pending INTEGER DEFAULT 0,
+    avg_resolution_time_minutes INTEGER DEFAULT 0,
+    
+    -- Safety and compliance
+    overall_safety_score DECIMAL(5,2) DEFAULT 100.00,
+    ppe_compliance_rate DECIMAL(5,2) DEFAULT 100.00,
+    incident_count INTEGER DEFAULT 0,
+    near_miss_count INTEGER DEFAULT 0,
+    
+    -- AI and detection metrics
+    ai_model_accuracy_avg DECIMAL(5,2) DEFAULT 0.00,
+    total_detections BIGINT DEFAULT 0,
+    detection_accuracy_rate DECIMAL(5,2) DEFAULT 0.00,
+    false_positive_rate DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Resource utilization
+    cpu_usage_avg DECIMAL(5,2) DEFAULT 0.00,
+    memory_usage_avg DECIMAL(5,2) DEFAULT 0.00,
+    disk_usage_avg DECIMAL(5,2) DEFAULT 0.00,
+    network_utilization_avg DECIMAL(5,2) DEFAULT 0.00,
+    database_performance_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_admin_metrics_date (metric_date DESC, aggregation_level),
+    INDEX idx_admin_metrics_performance (system_uptime_percentage, avg_response_time_ms),
+    INDEX idx_admin_metrics_safety (overall_safety_score, ppe_compliance_rate),
+    UNIQUE KEY unique_metric_period (metric_date, metric_hour, aggregation_level)
+);
+```
+
+### **site_performance_summary**
+```sql
+CREATE TABLE site_performance_summary (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    summary_date DATE NOT NULL,
+    summary_period ENUM('daily', 'weekly', 'monthly') NOT NULL,
+    
+    -- Site operations
+    personnel_count INTEGER DEFAULT 0,
+    active_personnel INTEGER DEFAULT 0,
+    camera_count INTEGER DEFAULT 0,
+    online_cameras INTEGER DEFAULT 0,
+    
+    -- Performance indicators
+    site_uptime_percentage DECIMAL(5,2) DEFAULT 100.00,
+    ai_accuracy_percentage DECIMAL(5,2) DEFAULT 0.00,
+    safety_score DECIMAL(5,2) DEFAULT 100.00,
+    compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Alert statistics
+    alerts_generated INTEGER DEFAULT 0,
+    alerts_resolved INTEGER DEFAULT 0,
+    critical_alerts INTEGER DEFAULT 0,
+    avg_alert_resolution_minutes INTEGER DEFAULT 0,
+    
+    -- Activity metrics
+    total_detections INTEGER DEFAULT 0,
+    ppe_violations INTEGER DEFAULT 0,
+    safety_incidents INTEGER DEFAULT 0,
+    equipment_issues INTEGER DEFAULT 0,
+    
+    -- Resource usage
+    data_storage_usage_gb DECIMAL(10,2) DEFAULT 0.00,
+    bandwidth_usage_gb DECIMAL(10,2) DEFAULT 0.00,
+    processing_time_hours DECIMAL(8,2) DEFAULT 0.00,
+    
+    -- Quality metrics
+    inspection_completion_rate DECIMAL(5,2) DEFAULT 100.00,
+    maintenance_completion_rate DECIMAL(5,2) DEFAULT 100.00,
+    documentation_completeness DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Trend indicators
+    performance_trend ENUM('improving', 'stable', 'declining', 'volatile') DEFAULT 'stable',
+    safety_trend ENUM('improving', 'stable', 'declining') DEFAULT 'stable',
+    efficiency_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Metadata
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calculated_by VARCHAR(100), -- System or admin user ID
+    notes TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    
+    INDEX idx_site_performance_site_date (site_id, summary_date DESC),
+    INDEX idx_site_performance_period (summary_period, summary_date DESC),
+    INDEX idx_site_performance_scores (safety_score DESC, efficiency_score DESC),
+    UNIQUE KEY unique_site_summary (site_id, summary_date, summary_period)
+);
+```
+
+### **system_health_logs**
+```sql
+CREATE TABLE system_health_logs (
+    id UUID PRIMARY KEY,
+    server_id VARCHAR(100) NOT NULL, -- Server/service identifier
+    component_type ENUM('cpu', 'memory', 'disk', 'network', 'database', 'ai_service', 'web_service') NOT NULL,
+    measurement_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Resource metrics
+    cpu_usage_percentage DECIMAL(5,2),
+    memory_usage_percentage DECIMAL(5,2),
+    disk_usage_percentage DECIMAL(5,2),
+    network_usage_percentage DECIMAL(5,2),
+    
+    -- Performance metrics
+    response_time_ms INTEGER,
+    throughput_ops_per_second INTEGER,
+    error_rate_percentage DECIMAL(5,2),
+    uptime_percentage DECIMAL(5,2),
+    
+    -- Database specific metrics
+    db_connection_count INTEGER,
+    db_query_time_avg_ms INTEGER,
+    db_slow_queries_count INTEGER,
+    db_deadlock_count INTEGER DEFAULT 0,
+    
+    -- AI service metrics
+    model_inference_time_ms INTEGER,
+    model_accuracy_score DECIMAL(5,2),
+    queue_size INTEGER,
+    processing_backlog INTEGER,
+    
+    -- Service health
+    service_status ENUM('healthy', 'degraded', 'unhealthy', 'offline') DEFAULT 'healthy',
+    alert_threshold_exceeded BOOLEAN DEFAULT FALSE,
+    requires_attention BOOLEAN DEFAULT FALSE,
+    maintenance_required BOOLEAN DEFAULT FALSE,
+    
+    -- Error tracking
+    error_count INTEGER DEFAULT 0,
+    warning_count INTEGER DEFAULT 0,
+    last_error_message TEXT,
+    last_error_timestamp TIMESTAMP,
+    
+    -- Metadata
+    monitoring_source VARCHAR(100), -- Source of monitoring data
+    tags JSON, -- Additional metadata tags
+    raw_metrics JSON, -- Complete metrics dump
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_system_health_server_time (server_id, measurement_timestamp DESC),
+    INDEX idx_system_health_component (component_type, service_status),
+    INDEX idx_system_health_status (service_status, requires_attention),
+    INDEX idx_system_health_performance (response_time_ms, error_rate_percentage)
+);
+```
+
+### **admin_activity_log**
+```sql
+CREATE TABLE admin_activity_log (
+    id UUID PRIMARY KEY,
+    admin_user_id UUID NOT NULL,
+    activity_type ENUM('user_management', 'site_configuration', 'system_settings', 'alert_management', 'report_generation', 'data_export', 'security_action', 'maintenance') NOT NULL,
+    action VARCHAR(255) NOT NULL, -- Specific action performed
+    
+    -- Activity details
+    resource_type VARCHAR(100), -- Type of resource affected
+    resource_id UUID, -- ID of affected resource
+    resource_name VARCHAR(255), -- Human-readable name
+    
+    -- Change tracking
+    old_values JSON, -- Previous values (for updates)
+    new_values JSON, -- New values (for updates)
+    change_summary TEXT, -- Human-readable change description
+    
+    -- Context information
+    site_id UUID, -- Site context if applicable
+    ip_address INET NOT NULL,
+    user_agent TEXT,
+    session_id VARCHAR(255),
+    
+    -- Impact assessment
+    impact_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    affected_users_count INTEGER DEFAULT 0,
+    affected_sites_count INTEGER DEFAULT 0,
+    system_wide_impact BOOLEAN DEFAULT FALSE,
+    
+    -- Approval and review
+    requires_approval BOOLEAN DEFAULT FALSE,
+    approved_by UUID, -- Reference to approving admin
+    approved_at TIMESTAMP,
+    approval_notes TEXT,
+    
+    -- Status and outcome
+    action_status ENUM('pending', 'completed', 'failed', 'rolled_back') DEFAULT 'completed',
+    error_message TEXT, -- If action failed
+    rollback_possible BOOLEAN DEFAULT TRUE,
+    
+    -- Compliance and audit
+    compliance_category VARCHAR(100), -- Compliance framework category
+    audit_trail_required BOOLEAN DEFAULT TRUE,
+    retention_period_days INTEGER DEFAULT 2555, -- 7 years default
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (admin_user_id) REFERENCES users(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    
+    INDEX idx_admin_activity_user_time (admin_user_id, created_at DESC),
+    INDEX idx_admin_activity_type (activity_type, action_status),
+    INDEX idx_admin_activity_impact (impact_level, system_wide_impact),
+    INDEX idx_admin_activity_resource (resource_type, resource_id),
+    INDEX idx_admin_activity_approval (requires_approval, approved_by)
+);
+```
+
+### **executive_reports**
+```sql
+CREATE TABLE executive_reports (
+    id UUID PRIMARY KEY,
+    report_name VARCHAR(255) NOT NULL,
+    report_type ENUM('performance_summary', 'safety_audit', 'financial_overview', 'resource_utilization', 'compliance_report', 'executive_dashboard') NOT NULL,
+    reporting_period_start DATE NOT NULL,
+    reporting_period_end DATE NOT NULL,
+    
+    -- Report generation
+    generated_by UUID NOT NULL,
+    generation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    generation_duration_seconds INTEGER,
+    report_status ENUM('generating', 'completed', 'failed', 'archived') DEFAULT 'generating',
+    
+    -- Report content
+    executive_summary TEXT,
+    key_metrics JSON, -- Key performance indicators
+    trend_analysis JSON, -- Trend data and insights
+    recommendations JSON, -- Action items and recommendations
+    risk_assessment JSON, -- Risk factors and mitigation strategies
+    
+    -- Data sources
+    included_sites JSON, -- Array of site IDs included
+    data_quality_score DECIMAL(5,2) DEFAULT 100.00,
+    data_completeness_percentage DECIMAL(5,2) DEFAULT 100.00,
+    data_sources JSON, -- List of data sources used
+    
+    -- Distribution and access
+    recipient_list JSON, -- Array of user IDs who should receive report
+    confidentiality_level ENUM('public', 'internal', 'confidential', 'restricted') DEFAULT 'internal',
+    access_permissions JSON, -- Detailed access control
+    
+    -- File information
+    report_file_path VARCHAR(500),
+    report_file_format ENUM('pdf', 'excel', 'powerpoint', 'html', 'json') DEFAULT 'pdf',
+    report_file_size_mb DECIMAL(10,2),
+    
+    -- Versioning and history
+    version VARCHAR(20) DEFAULT '1.0',
+    previous_report_id UUID, -- Reference to previous version
+    is_latest_version BOOLEAN DEFAULT TRUE,
+    
+    -- Scheduling and automation
+    is_automated BOOLEAN DEFAULT FALSE,
+    next_generation_date DATE,
+    automation_schedule VARCHAR(100), -- Cron expression
+    
+    -- Performance metrics
+    view_count INTEGER DEFAULT 0,
+    download_count INTEGER DEFAULT 0,
+    last_accessed TIMESTAMP,
+    user_feedback_score DECIMAL(3,1), -- 1-10 rating
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    archived_at TIMESTAMP,
+    
+    FOREIGN KEY (generated_by) REFERENCES users(id),
+    FOREIGN KEY (previous_report_id) REFERENCES executive_reports(id),
+    
+    INDEX idx_executive_reports_type_period (report_type, reporting_period_end DESC),
+    INDEX idx_executive_reports_generator (generated_by, generation_timestamp DESC),
+    INDEX idx_executive_reports_status (report_status, is_latest_version),
+    INDEX idx_executive_reports_automation (is_automated, next_generation_date),
+    FULLTEXT INDEX idx_executive_reports_search (report_name, executive_summary)
+);
+```
+
+---
+
+### **Version 1.11.0 (2025-01-12) - PHASE 2 CONTINUES - ADMIN PORTAL START**
+- **Updated from**: Screen Analysis #18 (Admin Dashboard)
+- **Tables added**: 5 new tables (`admin_dashboard_metrics`, `site_performance_summary`, `system_health_logs`, `admin_activity_log`, `executive_reports`)
+- **New section added**: Admin Dashboard & System Management (5 tables)
 - **New features added**:
-  - Comprehensive inspection path management with multiple path types and scheduling
-  - Detailed waypoint system with GPS tracking and inspection checklists
-  - Real-time path execution monitoring with performance metrics and compliance tracking
-  - Template-based path creation with industry-specific configurations
-  - Advanced execution analytics with quality scoring and route optimization
-- **New indexes**: Path administration performance indexes for execution tracking and route management
-- **Focus**: Inspection workflow optimization, GPS-guided navigation, execution monitoring, template standardization
-- **Updated table count**: **68 → 73 tables**
-- **Next update**: Screen Analysis #18 (Phase 2 continues)
+  - Comprehensive system-wide metrics aggregation with multi-site performance tracking
+  - Executive-level dashboard with KPI monitoring and trend analysis
+  - System health monitoring with resource utilization and service status tracking  
+  - Administrative activity logging with audit trail and compliance tracking
+  - Executive report generation with automated scheduling and distribution
+- **New indexes**: Admin dashboard performance indexes for real-time metrics and executive reporting
+- **Focus**: System administration, executive insights, performance monitoring, compliance tracking
+- **Updated table count**: **73 → 78 tables**
+- **Next update**: Screen Analysis #19 (Admin Portal continues)
 
 ---
 
