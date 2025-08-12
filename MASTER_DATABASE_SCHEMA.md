@@ -1536,6 +1536,280 @@ CREATE TABLE department_assignments (
 
 ---
 
+## 🎥 **VIDEO & EVIDENCE MANAGEMENT**
+
+### **video_bookmarks**
+```sql
+CREATE TABLE video_bookmarks (
+    id UUID PRIMARY KEY,
+    camera_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    
+    -- Temporal information
+    bookmark_date DATE NOT NULL,
+    timestamp_seconds INT NOT NULL, -- Seconds from start of day
+    duration_seconds INT DEFAULT 10, -- Bookmark duration for clips
+    
+    -- Bookmark details
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    bookmark_type ENUM('safety_incident', 'ppe_violation', 'equipment_issue', 'person_activity', 'vehicle_activity', 'custom', 'alert_related', 'compliance_check') NOT NULL,
+    
+    -- Classification and priority
+    priority_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    severity ENUM('info', 'warning', 'error', 'critical') DEFAULT 'info',
+    
+    -- Evidence and correlation
+    related_alert_id UUID,
+    related_detection_id UUID,
+    evidence_quality ENUM('poor', 'fair', 'good', 'excellent') DEFAULT 'good',
+    
+    -- User interaction
+    is_shared BOOLEAN DEFAULT FALSE,
+    share_permissions JSON, -- Array of user IDs or roles with access
+    
+    -- Visual markers
+    thumbnail_timestamp INT, -- Best representative frame
+    color_code VARCHAR(7) DEFAULT '#FFA500', -- Hex color for timeline display
+    
+    -- Metadata
+    video_quality_at_time VARCHAR(50), -- Resolution/quality at bookmark time
+    weather_conditions VARCHAR(100),
+    lighting_conditions ENUM('excellent', 'good', 'fair', 'poor', 'very_poor'),
+    
+    -- Workflow status
+    status ENUM('active', 'reviewed', 'resolved', 'archived') DEFAULT 'active',
+    reviewed_by UUID,
+    reviewed_at TIMESTAMP,
+    review_notes TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (related_alert_id) REFERENCES alerts(id),
+    FOREIGN KEY (related_detection_id) REFERENCES ai_detections(id),
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    
+    INDEX idx_video_bookmarks_camera_date (camera_id, bookmark_date DESC),
+    INDEX idx_video_bookmarks_user (user_id, created_at DESC),
+    INDEX idx_video_bookmarks_type (bookmark_type, priority_level),
+    INDEX idx_video_bookmarks_timestamp (bookmark_date, timestamp_seconds),
+    INDEX idx_video_bookmarks_status (status, created_at DESC),
+    INDEX idx_video_bookmarks_shared (is_shared),
+    UNIQUE KEY unique_user_camera_timestamp (user_id, camera_id, bookmark_date, timestamp_seconds)
+);
+```
+
+### **video_access_logs**
+```sql
+CREATE TABLE video_access_logs (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    camera_id UUID NOT NULL,
+    
+    -- Access session details
+    session_id UUID NOT NULL,
+    access_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    access_end TIMESTAMP,
+    session_duration_minutes INT,
+    
+    -- Video details accessed
+    video_date DATE NOT NULL,
+    start_timestamp_seconds INT NOT NULL, -- Start time in video
+    end_timestamp_seconds INT, -- End time (if session completed)
+    total_video_watched_seconds INT DEFAULT 0,
+    
+    -- Access method and context
+    access_method ENUM('web_browser', 'mobile_app', 'api', 'export') DEFAULT 'web_browser',
+    access_reason ENUM('routine_review', 'incident_investigation', 'compliance_audit', 'training', 'maintenance', 'legal_request') NOT NULL,
+    
+    -- User activity during session
+    bookmarks_created INT DEFAULT 0,
+    screenshots_taken INT DEFAULT 0,
+    clips_exported INT DEFAULT 0,
+    playback_speed_changes INT DEFAULT 0,
+    
+    -- Technical details
+    ip_address INET,
+    user_agent TEXT,
+    browser_info JSON,
+    
+    -- Legal and compliance
+    legal_hold_flag BOOLEAN DEFAULT FALSE,
+    audit_flag BOOLEAN DEFAULT FALSE,
+    retention_period_override INT, -- Days to retain this access record
+    
+    -- Performance metrics
+    initial_load_time_ms INT,
+    average_seek_time_ms INT,
+    total_pause_time_seconds INT DEFAULT 0,
+    
+    -- Access outcome
+    session_complete BOOLEAN DEFAULT FALSE,
+    premature_termination_reason ENUM('user_logout', 'session_timeout', 'technical_error', 'policy_violation', 'system_maintenance'),
+    
+    -- Data export tracking
+    export_count INT DEFAULT 0,
+    export_details JSON, -- Details of any exports performed
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    
+    INDEX idx_video_access_user_time (user_id, access_start DESC),
+    INDEX idx_video_access_camera_date (camera_id, video_date DESC),
+    INDEX idx_video_access_session (session_id),
+    INDEX idx_video_access_legal (legal_hold_flag, audit_flag),
+    INDEX idx_video_access_reason (access_reason, access_start DESC)
+);
+```
+
+### **video_exports**
+```sql
+CREATE TABLE video_exports (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    camera_id UUID NOT NULL,
+    
+    -- Export source details
+    source_video_date DATE NOT NULL,
+    start_timestamp_seconds INT NOT NULL,
+    end_timestamp_seconds INT NOT NULL,
+    export_duration_seconds INT NOT NULL,
+    
+    -- Export configuration
+    export_type ENUM('video_clip', 'screenshot', 'evidence_package', 'compliance_report', 'share_link') NOT NULL,
+    export_format VARCHAR(20) NOT NULL, -- mp4, jpg, png, pdf, zip
+    resolution VARCHAR(20), -- Original, 1080p, 720p, 480p
+    quality_setting ENUM('high', 'medium', 'low') DEFAULT 'high',
+    include_audio BOOLEAN DEFAULT TRUE,
+    
+    -- Evidence and legal
+    export_purpose ENUM('evidence', 'training', 'analysis', 'compliance', 'documentation', 'legal_proceeding') NOT NULL,
+    chain_of_custody JSON, -- Evidence handling chain
+    hash_verification VARCHAR(128), -- File integrity hash
+    digital_signature VARCHAR(512), -- Legal authentication
+    
+    -- File information
+    original_filename VARCHAR(255),
+    stored_filename VARCHAR(255),
+    file_path VARCHAR(500),
+    file_size_bytes BIGINT,
+    
+    -- Processing status
+    export_status ENUM('requested', 'processing', 'completed', 'failed', 'expired') DEFAULT 'requested',
+    processing_started_at TIMESTAMP,
+    processing_completed_at TIMESTAMP,
+    processing_time_seconds INT,
+    error_message TEXT,
+    
+    -- Access and sharing
+    download_url VARCHAR(500),
+    share_token VARCHAR(255) UNIQUE,
+    download_expires_at TIMESTAMP,
+    download_count INT DEFAULT 0,
+    max_download_count INT DEFAULT 5,
+    
+    -- Metadata preservation
+    original_metadata JSON, -- Camera settings, weather, etc.
+    bookmark_data JSON, -- Any bookmarks within the export timeframe
+    incident_data JSON, -- Related alerts and detections
+    
+    -- Audit and compliance
+    export_justification TEXT NOT NULL,
+    approval_required BOOLEAN DEFAULT FALSE,
+    approved_by UUID,
+    approved_at TIMESTAMP,
+    legal_hold_applied BOOLEAN DEFAULT FALSE,
+    retention_period_days INT DEFAULT 90,
+    
+    -- Performance tracking
+    compression_ratio DECIMAL(5,2), -- Original size vs final size
+    processing_efficiency_score DECIMAL(3,1), -- 1-10 efficiency rating
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    
+    INDEX idx_video_exports_user_date (user_id, created_at DESC),
+    INDEX idx_video_exports_camera (camera_id, source_video_date DESC),
+    INDEX idx_video_exports_status (export_status, created_at DESC),
+    INDEX idx_video_exports_purpose (export_purpose, created_at DESC),
+    INDEX idx_video_exports_legal (legal_hold_applied, retention_period_days),
+    INDEX idx_video_exports_share (share_token, download_expires_at)
+);
+```
+
+### **video_quality_metrics**
+```sql
+CREATE TABLE video_quality_metrics (
+    id UUID PRIMARY KEY,
+    camera_id UUID NOT NULL,
+    analysis_date DATE NOT NULL,
+    analysis_hour INT DEFAULT 0, -- 0-23 for hourly analysis
+    
+    -- Technical quality metrics
+    average_bitrate_kbps INT,
+    average_fps DECIMAL(5,2),
+    resolution_width INT,
+    resolution_height INT,
+    
+    -- Visual quality assessment
+    sharpness_score DECIMAL(5,2), -- 0-10 scale
+    brightness_score DECIMAL(5,2), -- 0-10 scale
+    contrast_score DECIMAL(5,2), -- 0-10 scale
+    color_accuracy_score DECIMAL(5,2), -- 0-10 scale
+    noise_level_score DECIMAL(5,2), -- 0-10 scale (lower is better)
+    
+    -- Environmental factors
+    lighting_condition ENUM('excellent', 'good', 'fair', 'poor', 'very_poor'),
+    weather_impact ENUM('none', 'minimal', 'moderate', 'significant', 'severe'),
+    obstruction_detected BOOLEAN DEFAULT FALSE,
+    camera_shake_detected BOOLEAN DEFAULT FALSE,
+    
+    -- Usability for analysis
+    forensic_quality_rating ENUM('excellent', 'good', 'acceptable', 'poor', 'unusable'),
+    person_identification_viability ENUM('clear', 'good', 'limited', 'poor', 'impossible'),
+    activity_recognition_viability ENUM('clear', 'good', 'limited', 'poor', 'impossible'),
+    
+    -- Storage and compression
+    compression_efficiency DECIMAL(5,2),
+    storage_size_mb DECIMAL(10,2),
+    file_corruption_detected BOOLEAN DEFAULT FALSE,
+    
+    -- Recording continuity
+    recording_gaps_detected BOOLEAN DEFAULT FALSE,
+    total_gap_duration_seconds INT DEFAULT 0,
+    frame_drops_count INT DEFAULT 0,
+    sync_issues_detected BOOLEAN DEFAULT FALSE,
+    
+    -- Analysis metadata
+    analysis_method ENUM('automated', 'manual', 'hybrid') DEFAULT 'automated',
+    analysis_tool VARCHAR(100),
+    analysis_confidence DECIMAL(5,2), -- Confidence in the quality assessment
+    
+    -- Improvement recommendations
+    recommended_adjustments JSON, -- Settings adjustments to improve quality
+    maintenance_flags JSON, -- Issues requiring camera maintenance
+    
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    
+    UNIQUE KEY unique_camera_datetime (camera_id, analysis_date, analysis_hour),
+    INDEX idx_video_quality_camera_date (camera_id, analysis_date DESC),
+    INDEX idx_video_quality_forensic (forensic_quality_rating, camera_id),
+    INDEX idx_video_quality_overall (sharpness_score, brightness_score, contrast_score),
+    INDEX idx_video_quality_issues (file_corruption_detected, recording_gaps_detected),
+    INDEX idx_video_quality_lighting (lighting_condition, analysis_date DESC)
+);
+```
+
+---
+
 **Document Maintained By**: AI Construction Management System Team
 **Last Review**: 2025-01-12  
 **Next Review**: After each screen analysis completion
