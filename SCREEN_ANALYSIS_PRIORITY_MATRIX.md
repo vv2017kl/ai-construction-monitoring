@@ -32,17 +32,11 @@ These screens are essential for daily operations and safety management:
 ### **🔥 TIER 2: Enhanced Operations (Medium-High Priority)**
 These screens provide enhanced functionality and specialized capabilities:
 
-**11. Live Street View** (`/live-street-view`) - **NEXT**
+**12. Equipment Dashboard** (`/equipment`) - **NEXT**
 - **Priority**: MEDIUM-HIGH 
-- **Rationale**: Enhanced live monitoring with street-level perspective and 360° views
-- **Dependencies**: Camera feeds, real-time streaming, enhanced visualization
-- **Integration**: ZoneMinder live streams, panoramic camera support, location mapping
-
-**12. Equipment Dashboard** (`/equipment`)
-- **Priority**: MEDIUM-HIGH
 - **Rationale**: Equipment management, tracking, maintenance, and utilization analytics
-- **Dependencies**: Equipment tracking, maintenance records, usage analytics
-- **Integration**: IoT sensors, maintenance systems, utilization tracking
+- **Dependencies**: Equipment tracking, maintenance records, usage analytics, IoT integration
+- **Integration**: IoT sensors, maintenance systems, utilization tracking, asset management
 
 ### **🎯 TIER 2: Operational Excellence (Medium-High Priority)**
 Important for comprehensive site management and compliance:
