@@ -48,11 +48,11 @@ const AlertSummaryPanel = ({
   };
 
   return (
-    <div className={`absolute top-4 right-4 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-20 ${className}`}>
+    <div className={`fixed top-4 right-4 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl border border-gray-200 z-20 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{site.name}</h3>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">{site.name}</h3>
           <p className="text-sm text-gray-500">{site.code} • {site.city}, {site.country}</p>
         </div>
         <button
