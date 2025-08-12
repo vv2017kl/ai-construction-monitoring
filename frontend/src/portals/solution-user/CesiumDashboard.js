@@ -88,6 +88,12 @@ const CesiumDashboard = () => {
     setSelectedCamera(null);
     setViewMode(site ? 'site' : 'global');
     setShowAlertPanel(!!site);
+    
+    // Force immediate camera zoom when site is selected for site view
+    if (site) {
+      console.log('Forcing immediate zoom to site:', site.name);
+      // Note: This will be picked up by the camera movement useEffect
+    }
   };
 
   const handleViewModeChange = (mode) => {
