@@ -19,9 +19,9 @@ const CesiumDashboard = () => {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [showAlertPanel, setShowAlertPanel] = useState(false);
   
-  // UI state
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
+  // UI state - Default to fullscreen with collapsed sidebar
+  const [isFullscreen, setIsFullscreen] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   // User context (mock - in real app this would come from auth context)
   const [userRole] = useState({
