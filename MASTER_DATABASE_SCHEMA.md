@@ -27,12 +27,12 @@ This document serves as the **single source of truth** for all database table de
 - **Sites & Locations**: 3 tables
 - **Personnel & Users**: 7 tables  
 - **Cameras & Monitoring**: 2 tables
-- **AI & Detection**: 4 tables
+- **AI & Detection**: 7 tables
 - **Alerts & Safety**: 6 tables
 - **Analytics & Reporting**: 2 tables
 - **System & Configuration**: 3 tables
 
-**Total Tables**: 27 tables
+**Total Tables**: 30 tables
 
 ---
 
