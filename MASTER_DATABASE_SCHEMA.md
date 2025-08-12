@@ -511,6 +511,61 @@ CREATE TABLE event_correlations (
 );
 ```
 
+### **recording_sessions**
+```sql
+CREATE TABLE recording_sessions (
+    id UUID PRIMARY KEY,
+    camera_id UUID NOT NULL,
+    site_id UUID NOT NULL,
+    
+    -- Session details
+    session_type ENUM('manual', 'scheduled', 'triggered', 'continuous') NOT NULL,
+    trigger_type ENUM('user_initiated', 'ai_detection', 'motion', 'alert', 'schedule') DEFAULT 'user_initiated',
+    trigger_event_id UUID, -- Reference to alert or detection that triggered recording
+    
+    -- Timing
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP NULL,
+    planned_duration_seconds INT,
+    actual_duration_seconds INT,
+    
+    -- Quality & Storage
+    recording_quality ENUM('low', 'medium', 'high', 'ultra') DEFAULT 'high',
+    resolution VARCHAR(20), -- '1920x1080'
+    frame_rate INT DEFAULT 30,
+    bitrate_kbps INT,
+    
+    -- File information
+    file_path VARCHAR(500),
+    file_size_mb DECIMAL(10,2),
+    segment_count INT DEFAULT 1,
+    current_segment INT DEFAULT 1,
+    storage_location VARCHAR(500),
+    
+    -- Status
+    status ENUM('starting', 'active', 'stopping', 'completed', 'failed', 'interrupted') DEFAULT 'starting',
+    error_message TEXT,
+    
+    -- Metadata
+    include_ai_overlay BOOLEAN DEFAULT FALSE,
+    retention_days INT DEFAULT 30,
+    created_by UUID,
+    
+    -- ZoneMinder Integration
+    zoneminder_event_id BIGINT,
+    
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (trigger_event_id) REFERENCES alerts(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    
+    INDEX idx_recording_camera_active (camera_id, status),
+    INDEX idx_recording_site_time (site_id, start_time DESC),
+    INDEX idx_recording_status (status),
+    INDEX idx_recording_trigger (trigger_type, trigger_event_id)
+);
+```
+
 ---
 
 ## 🚨 **ALERTS & SAFETY**
