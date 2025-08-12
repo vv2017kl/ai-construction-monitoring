@@ -73,6 +73,11 @@ CREATE TABLE sites (
     offline_cameras INT DEFAULT 0,
     maintenance_cameras INT DEFAULT 0,
     
+    -- ✅ GEOSPATIAL VIEW ENHANCEMENTS
+    region VARCHAR(100), -- Geographic region for map grouping
+    timezone VARCHAR(100), -- Site timezone for proper time display
+    site_boundary_coordinates POLYGON, -- Geographic boundary for 3D visualization
+    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
@@ -82,7 +87,10 @@ CREATE TABLE sites (
     INDEX idx_sites_type_phase (type, phase),
     INDEX idx_sites_coordinates (coordinates),
     INDEX idx_sites_manager (manager_id),
-    INDEX idx_sites_weather_updated (weather_last_updated)
+    INDEX idx_sites_weather_updated (weather_last_updated),
+    -- ✅ GEOSPATIAL INDEXES
+    INDEX idx_sites_region (region),
+    INDEX idx_sites_boundary (site_boundary_coordinates)
 );
 ```
 
