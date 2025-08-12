@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, MapPin, Camera, Globe, Building, Home, Navigation, Layers } from 'lucide-react';
+import { regions } from '../../data/cesiumMockData';
 
 const MapControls = ({
   sites = [],
