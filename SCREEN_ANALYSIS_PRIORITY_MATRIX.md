@@ -128,8 +128,8 @@ Profile and settings screens:
 
 ---
 
-**Next Screen**: **Reports Center** (`/reports`)  
-**Rationale**: Critical for compliance reporting, business intelligence, and audit trails - essential for regulatory compliance and business operations.
+**Next Screen**: **Time Lapse** (`/time-lapse`)  
+**Rationale**: Important for progress documentation, project management, and time-series analysis - completing Phase 1 core operational screens.
 
 **Document Created**: 2025-01-12  
 **Last Updated**: 2025-01-12 (After Video Review completion)
