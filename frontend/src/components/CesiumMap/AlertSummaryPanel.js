@@ -53,7 +53,7 @@ const AlertSummaryPanel = ({
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-gray-900 truncate">{site.name}</h3>
-          <p className="text-sm text-gray-500">{site.code} • {site.city}, {site.country}</p>
+          <p className="text-sm text-gray-500 truncate">{site.code} • {site.city}, {site.country}</p>
         </div>
         <button
           onClick={onClose}
