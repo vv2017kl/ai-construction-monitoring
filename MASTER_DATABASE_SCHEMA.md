@@ -875,6 +875,17 @@ CREATE TABLE notifications (
 - **Focus**: Dashboard functionality requirements
 - **Next update**: Screen Analysis #02 (GeoSpatial View)
 
+### **Version 1.1.0 (2025-01-12)**
+- **Updated from**: Screen Analysis #02 (GeoSpatial View)
+- **Tables added**: 1 new table (`user_site_access`)
+- **Tables enhanced**: `sites`, `site_cameras` with geospatial fields
+- **New fields added**:
+  - `sites`: region, timezone, site_boundary_coordinates
+  - `site_cameras`: region, zone_coverage, field_of_view, detection_range
+- **New indexes**: Geospatial performance indexes for coordinates and regions
+- **Focus**: 3D visualization and user permission requirements
+- **Next update**: Screen Analysis #03 (Next screen analysis)
+
 ---
 
 **Document Maintained By**: AI Construction Management System Team
