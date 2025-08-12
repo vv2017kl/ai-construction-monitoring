@@ -263,7 +263,7 @@ const CesiumContainer = ({
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
           viewer.camera.setView({
-            destination: Cartesian3.fromDegrees(longitude, latitude, 200), // Much closer for camera view
+            destination: Cartesian3.fromDegrees(longitude, latitude, 100), // Much closer - 100 meters
             orientation: {
               heading: 0.0,
               pitch: -CesiumMath.PI_OVER_SIX, // Less steep angle
