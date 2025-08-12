@@ -159,8 +159,11 @@ const CesiumContainer = ({
 
     // Add camera pins
     cameras.forEach(camera => {
-      const [longitude, latitude, height = 0] = camera.coordinates;
+      const [longitude, latitude] = camera.coordinates;
+      const height = 0; // Cameras at ground level
       const pinColor = getCameraPinColor(camera);
+      
+      console.log(`Adding camera ${camera.id} at [${longitude}, ${latitude}]`);
       
       const cameraEntity = viewer.entities.add({
         id: `camera-${camera.id}`,
