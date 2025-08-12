@@ -64,6 +64,7 @@ const CesiumDashboard = () => {
 
   // Event handlers
   const handleSiteClick = (site) => {
+    console.log('Site clicked:', site);
     setSelectedSite(site);
     setSelectedCamera(null);
     setViewMode('site');
@@ -71,12 +72,14 @@ const CesiumDashboard = () => {
   };
 
   const handleCameraClick = (camera) => {
+    console.log('Camera clicked:', camera);
     setSelectedCamera(camera);
     // Navigate to live view with collapsed sidebar
     navigate(`/live-view/${camera.id}?mapContext=true&sidebar=collapsed`);
   };
 
   const handleSiteSelect = (site) => {
+    console.log('Site selected from dropdown:', site);
     setSelectedSite(site);
     setSelectedCamera(null);
     setViewMode(site ? 'site' : 'global');
