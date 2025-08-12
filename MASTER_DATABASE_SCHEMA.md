@@ -1477,6 +1477,19 @@ CREATE TABLE department_assignments (
 - **Large BLOBs**: Store images/videos in object storage, reference URLs only
 - **Archive strategy**: Move old records to archive tables after 2+ years
 
+### **Version 1.5.0 (2025-01-12)**
+- **Updated from**: Screen Analysis #08 (Video Review)
+- **Tables added**: 4 new tables (`video_bookmarks`, `video_access_logs`, `video_exports`, `video_quality_metrics`)
+- **New section added**: Video & Evidence Management (4 tables)
+- **New features added**:
+  - Comprehensive video bookmarking system with evidence correlation
+  - Video access logging and audit trail capabilities
+  - Video export management with legal compliance support
+  - Video quality assessment and forensic analysis tracking
+- **New indexes**: Video management performance indexes for timeline and search operations
+- **Focus**: Historical video review, forensic analysis, evidence management, compliance auditing
+- **Next update**: Screen Analysis #09 (Next screen analysis)
+
 ---
 
 ## 🔄 **Change History**
