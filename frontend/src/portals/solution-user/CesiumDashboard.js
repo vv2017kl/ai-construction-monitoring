@@ -190,8 +190,8 @@ const CesiumDashboard = () => {
           </div>
         )}
 
-        {/* Fullscreen Controls */}
-        {isFullscreen && (
+        {/* Fullscreen Controls - Show when sidebar is hidden */}
+        {!showSidebar && (
           <div className="absolute top-4 right-4 z-30 flex items-center space-x-2">
             <button
               onClick={() => navigate('/dashboard')}
