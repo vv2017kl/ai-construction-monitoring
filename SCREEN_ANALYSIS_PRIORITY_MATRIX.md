@@ -129,7 +129,7 @@ Profile and settings screens:
 
 ---
 
-**Next Screen**: **Site Overview** (`/site-overview`)  
-**Rationale**: Central management hub that integrates with all core systems and provides comprehensive site operational control.
+**Next Screen**: **Video Review** (`/video-review`)  
+**Rationale**: Critical for historical analysis, compliance reporting, incident investigation, and forensic video analysis capabilities.
 
 **Document Created**: 2025-01-12
