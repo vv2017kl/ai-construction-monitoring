@@ -1118,7 +1118,19 @@ CREATE TABLE notifications (
   - `site_cameras`: current_zoom_level, recording_active, stream_quality
 - **New indexes**: Live view performance indexes for recording and PTZ state
 - **Focus**: Real-time video streaming, recording management, PTZ control
-- **Next update**: Screen Analysis #04 (Next screen analysis)
+- **Next update**: Screen Analysis #04 (Alert Center)
+
+### **Version 1.3.0 (2025-01-12)**
+- **Updated from**: Screen Analysis #04 (Alert Center)
+- **Tables added**: 3 new tables (`alert_comments`, `alert_evidence`, `alert_assignments`)
+- **Tables enhanced**: None (alert workflow extended through new tables)
+- **New features added**:
+  - Complete commenting system with threading and mentions
+  - Evidence management with AI analysis metadata and retention
+  - Assignment workflow tracking with performance metrics
+- **New indexes**: Alert management performance indexes for real-time operations
+- **Focus**: Alert workflow management, evidence tracking, collaboration systems
+- **Next update**: Screen Analysis #05 (Next screen analysis)
 
 ---
 
