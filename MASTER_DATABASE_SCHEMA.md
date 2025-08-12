@@ -1520,6 +1520,19 @@ CREATE TABLE department_assignments (
 - **Focus**: Alert workflow management, evidence tracking, collaboration systems
 - **Next update**: Screen Analysis #05 (Next screen analysis)
 
+### **Version 1.4.0 (2025-01-12)**
+- **Updated from**: Screen Analysis #07 (AI Analytics)
+- **Tables added**: 3 new tables (`ai_model_performance_logs`, `ai_detection_analytics`, `camera_ai_performance`)
+- **Tables enhanced**: None (new AI analytics capabilities through dedicated tables)
+- **New features added**:
+  - Comprehensive AI model performance tracking with evaluation metrics
+  - Detection analytics with time-based granularity and quality metrics
+  - Individual camera AI performance monitoring and ranking
+  - AI performance trend analysis and comparative metrics
+- **New indexes**: AI performance optimization indexes for analytics queries
+- **Focus**: AI model performance monitoring, detection analytics, camera-level AI tracking
+- **Next update**: Screen Analysis #08 (Next screen analysis)
+
 ---
 
 **Document Maintained By**: AI Construction Management System Team
