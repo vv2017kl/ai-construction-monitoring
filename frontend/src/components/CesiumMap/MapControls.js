@@ -65,13 +65,13 @@ const MapControls = ({
   };
 
   return (
-    <div className={`absolute top-4 left-4 z-10 ${className}`}>
+    <div className={`fixed top-4 left-4 z-10 ${className}`}>
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-2">
         {/* Site Selector Dropdown */}
         <div className="relative mb-2">
           <button
             onClick={() => setSiteDropdownOpen(!siteDropdownOpen)}
-            className="w-64 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+            className="w-64 max-w-[calc(100vw-6rem)] flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
           >
             <div className="flex items-center space-x-2">
               <Building className="w-4 h-4 text-gray-600" />
