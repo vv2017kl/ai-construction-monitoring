@@ -296,23 +296,40 @@ const CesiumContainer = ({
     }
   }, [viewer, viewMode, selectedSite]);
 
-  // Additional effect specifically for site selection
+  // Additional effect specifically for site selection - More aggressive zoom
   useEffect(() => {
     if (viewer && selectedSite && viewMode === 'site') {
-      console.log('Additional site zoom trigger for:', selectedSite.name);
+      console.log('AGGRESSIVE SITE ZOOM for:', selectedSite.name);
       const [longitude, latitude] = selectedSite.coordinates;
       
+      // Multiple zoom attempts to ensure it works
       setTimeout(() => {
         viewer.camera.flyTo({
-          destination: Cartesian3.fromDegrees(longitude, latitude, 200),
+          destination: Cartesian3.fromDegrees(longitude, latitude, 250), // 250m altitude
           orientation: {
             heading: 0.0,
-            pitch: -CesiumMath.PI_OVER_SIX,
+            pitch: -CesiumMath.PI_OVER_FOUR,
             roll: 0.0
           },
-          duration: 2.5
+          duration: 3.0
         });
-      }, 200);
+        console.log(`Aggressive zoom to ${selectedSite.name} at ${longitude}, ${latitude}`);
+      }, 500); // Longer delay
+      
+      // Backup zoom attempt
+      setTimeout(() => {
+        if (viewer && viewer.camera) {
+          viewer.camera.setView({
+            destination: Cartesian3.fromDegrees(longitude, latitude, 400),
+            orientation: {
+              heading: 0.0,
+              pitch: -CesiumMath.PI_OVER_FOUR,
+              roll: 0.0
+            }
+          });
+          console.log('Backup site zoom executed');
+        }
+      }, 2000);
     }
   }, [viewer, selectedSite, viewMode]);
 
