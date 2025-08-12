@@ -7,10 +7,17 @@ import {
   HeightReference,
   LabelStyle,
   Cartesian2,
-  Color
+  Color,
+  Ion
 } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './cesium-overrides.css';
+
+// Set Cesium Ion access token
+const CESIUM_ACCESS_TOKEN = process.env.REACT_APP_CESIUM_ACCESS_TOKEN;
+if (CESIUM_ACCESS_TOKEN) {
+  Ion.defaultAccessToken = CESIUM_ACCESS_TOKEN;
+}
 
 const CesiumContainer = ({
   sites = [],
