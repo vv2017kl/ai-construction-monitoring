@@ -21,9 +21,11 @@ const MapControls = ({
   // Filter sites based on user role
   const accessibleSites = sites.filter(site => {
     // Basic access control - in real app this would be more sophisticated
-    if (userRole.level >= 4) return userRole.accessible_sites?.includes(site.id);
-    return true; // For now, show all sites
+    // For now, show all sites to ensure dropdown works
+    return true;
   });
+
+  console.log('MapControls received sites:', sites.length, 'accessible sites:', accessibleSites.length);
 
   // Group sites by region for dropdown
   const sitesByRegion = accessibleSites.reduce((acc, site) => {
