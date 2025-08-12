@@ -268,53 +268,139 @@ const CesiumContainer = ({
     }
   }, [viewer, viewMode, selectedSite]);
 
-  // Helper functions
-  const createSitePinImage = (color, projectType) => {
+  // Helper functions for creating factory icons
+  const createFactoryIcon = (color) => {
     const canvas = document.createElement('canvas');
     canvas.width = 48;
-    canvas.height = 64;
+    canvas.height = 48;
     const ctx = canvas.getContext('2d');
     
-    // Draw pin shape
+    // Clear canvas
+    ctx.clearRect(0, 0, 48, 48);
+    
+    // Factory building base
     ctx.fillStyle = color;
+    ctx.fillRect(6, 25, 36, 18);
+    
+    // Factory chimney 1
+    ctx.fillRect(12, 15, 6, 28);
+    
+    // Factory chimney 2
+    ctx.fillRect(30, 10, 6, 33);
+    
+    // Factory roof
+    ctx.fillStyle = '#4A5568';
+    ctx.fillRect(6, 22, 36, 6);
+    
+    // Factory windows
+    ctx.fillStyle = '#E2E8F0';
+    ctx.fillRect(10, 30, 4, 4);
+    ctx.fillRect(18, 30, 4, 4);
+    ctx.fillRect(26, 30, 4, 4);
+    ctx.fillRect(34, 30, 4, 4);
+    
+    // Smoke from chimneys
+    ctx.fillStyle = '#A0AEC0';
     ctx.beginPath();
-    ctx.arc(24, 20, 18, 0, 2 * Math.PI);
+    ctx.arc(15, 12, 2, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(33, 7, 2, 0, 2 * Math.PI);
     ctx.fill();
     
-    // Draw pin point
-    ctx.beginPath();
-    ctx.moveTo(24, 38);
-    ctx.lineTo(12, 52);
-    ctx.lineTo(36, 52);
-    ctx.closePath();
-    ctx.fill();
-    
-    // Add project type icon
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(getProjectTypeIcon(projectType), 24, 26);
+    // White border for visibility
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(6, 25, 36, 18);
+    ctx.strokeRect(12, 15, 6, 28);
+    ctx.strokeRect(30, 10, 6, 33);
     
     return canvas.toDataURL();
   };
 
-  const createCameraPinImage = (color, cameraType) => {
+  const createCameraIcon = (color, cameraType) => {
     const canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 32;
+    canvas.width = 24;
+    canvas.height = 24;
     const ctx = canvas.getContext('2d');
     
-    // Draw camera circle
+    // Clear canvas
+    ctx.clearRect(0, 0, 24, 24);
+    
+    // Camera base circle
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(16, 16, 14, 0, 2 * Math.PI);
+    ctx.arc(12, 12, 10, 0, 2 * Math.PI);
     ctx.fill();
     
-    // Draw camera icon
+    // Camera lens (larger for fisheye type)
+    const lensSize = cameraType === 'fisheye' ? 6 : 4;
+    ctx.fillStyle = '#1A202C';
+    ctx.beginPath();
+    ctx.arc(12, 12, lensSize, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Camera lens reflection
+    ctx.fillStyle = '#4A5568';
+    ctx.beginPath();
+    ctx.arc(12, 12, lensSize - 1, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Lens highlight
+    ctx.fillStyle = '#E2E8F0';
+    ctx.beginPath();
+    ctx.arc(10, 10, 1, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Camera mounting bracket (if PTZ)
+    if (cameraType === 'ptz') {
+      ctx.fillStyle = '#4A5568';
+      ctx.fillRect(11, 20, 2, 3);
+    }
+    
+    // White border for visibility
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(12, 12, 10, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    return canvas.toDataURL();
+  };
+
+  const createAlertIcon = (alertType, count) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 20;
+    canvas.height = 20;
+    const ctx = canvas.getContext('2d');
+    
+    // Alert colors based on type
+    const colors = {
+      critical: '#DC2626',
+      high: '#EA580C', 
+      medium: '#D97706',
+      low: '#65A30D',
+      info: '#2563EB'
+    };
+    
+    // Alert circle
+    ctx.fillStyle = colors[alertType] || '#6B7280';
+    ctx.beginPath();
+    ctx.arc(10, 10, 8, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Alert count text
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 12px Arial';
+    ctx.font = 'bold 10px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('📹', 16, 20);
+    ctx.fillText(count.toString(), 10, 14);
+    
+    // White border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(10, 10, 8, 0, 2 * Math.PI);
+    ctx.stroke();
     
     return canvas.toDataURL();
   };
