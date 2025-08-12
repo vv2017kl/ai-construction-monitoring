@@ -1,6 +1,7 @@
 // Load configuration from environment or config file
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 
 // Environment variable overrides
 const config = {
@@ -34,6 +35,9 @@ module.exports = {
             },
           ],
         }),
+        new webpack.DefinePlugin({
+          CESIUM_BASE_URL: JSON.stringify('/cesium'),
+        }),
       ],
     },
     configure: (webpackConfig) => {
@@ -48,13 +52,6 @@ module.exports = {
           url: false,
         },
       };
-
-      // Set Cesium base URL
-      webpackConfig.plugins.push(
-        new webpackConfig.webpack.DefinePlugin({
-          CESIUM_BASE_URL: JSON.stringify('/cesium'),
-        })
-      );
       
       // Disable hot reload completely if environment variable is set
       if (config.disableHotReload) {
