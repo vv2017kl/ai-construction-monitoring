@@ -22,14 +22,22 @@ These screens are essential for daily operations and safety management:
 ### **🔥 TIER 1: Critical Operations (High Priority)**
 These screens are essential for daily operations and safety management:
 
-### **🔥 TIER 1: Critical Operations (High Priority)**
-These screens are essential for daily operations and safety management:
+## 🌟 **PHASE 2: ENHANCED FUNCTIONALITY**
 
-**10. Time Lapse** (`/time-lapse`) - **NEXT**
+### **🔥 TIER 2: Enhanced Operations (Medium-High Priority)**
+These screens provide enhanced functionality and specialized capabilities:
+
+**11. Live Street View** (`/live-street-view`) - **NEXT**
 - **Priority**: MEDIUM-HIGH 
-- **Rationale**: Progress documentation, project management, time-series analysis - important for project tracking
-- **Dependencies**: Camera feeds, time-series data, progress tracking, construction timeline analysis
-- **Integration**: ZoneMinder time-series, construction progress tracking, automated documentation
+- **Rationale**: Enhanced live monitoring with street-level perspective and 360° views
+- **Dependencies**: Camera feeds, real-time streaming, enhanced visualization
+- **Integration**: ZoneMinder live streams, panoramic camera support, location mapping
+
+**12. Equipment Dashboard** (`/equipment`)
+- **Priority**: MEDIUM-HIGH
+- **Rationale**: Equipment management, tracking, maintenance, and utilization analytics
+- **Dependencies**: Equipment tracking, maintenance records, usage analytics
+- **Integration**: IoT sensors, maintenance systems, utilization tracking
 
 ### **🎯 TIER 2: Operational Excellence (Medium-High Priority)**
 Important for comprehensive site management and compliance:
