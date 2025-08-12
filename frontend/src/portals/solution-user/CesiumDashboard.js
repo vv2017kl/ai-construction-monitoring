@@ -30,7 +30,7 @@ const CesiumDashboard = () => {
   });
 
   // Filter sites and cameras based on user permissions
-  const accessibleSites = mockSites.filter(site => {
+  const accessibleSites = constructionSites.filter(site => {
     if (userRole.level === 1) return true; // SysAdmin
     if (userRole.level === 2) return site.company_id === userRole.company_id;
     if (userRole.level === 3) return userRole.accessible_groups.includes(site.group_id);
