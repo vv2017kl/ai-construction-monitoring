@@ -1821,6 +1821,368 @@ CREATE TABLE video_quality_metrics (
 );
 ```
 
+### **report_templates**
+```sql
+CREATE TABLE report_templates (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    
+    -- Template configuration
+    template_type ENUM('safety', 'personnel', 'ai_analytics', 'equipment', 'progress', 'compliance', 'custom') NOT NULL,
+    category VARCHAR(100), -- Grouping for organization
+    subcategory VARCHAR(100),
+    
+    -- Template structure
+    sections JSON NOT NULL, -- Array of report sections and their configurations
+    data_sources JSON NOT NULL, -- Required data sources and queries
+    chart_configurations JSON, -- Chart and visualization settings
+    formatting_rules JSON, -- Layout and styling rules
+    
+    -- Generation settings
+    estimated_generation_time_minutes INT DEFAULT 5,
+    complexity_level ENUM('simple', 'moderate', 'complex', 'advanced') DEFAULT 'simple',
+    data_requirements JSON, -- Required data availability for generation
+    
+    -- Usage and popularity
+    usage_count INT DEFAULT 0,
+    success_rate DECIMAL(5,2) DEFAULT 100.00,
+    average_generation_time_minutes DECIMAL(5,2),
+    popularity_score DECIMAL(5,2) DEFAULT 0.00, -- Calculated popularity
+    
+    -- Template metadata
+    created_by UUID NOT NULL,
+    last_updated_by UUID,
+    version VARCHAR(20) DEFAULT '1.0',
+    changelog JSON, -- Version history and changes
+    
+    -- Status and availability
+    status ENUM('active', 'deprecated', 'draft', 'archived') DEFAULT 'active',
+    availability ENUM('public', 'private', 'team', 'site_specific') DEFAULT 'public',
+    
+    -- Customization options
+    customizable_fields JSON, -- Fields that can be modified by users
+    required_permissions JSON, -- Permissions required to use this template
+    
+    -- Preview and documentation
+    preview_image_url VARCHAR(500),
+    documentation_url VARCHAR(500),
+    sample_output_url VARCHAR(500),
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (last_updated_by) REFERENCES users(id),
+    
+    INDEX idx_report_templates_type (template_type, status),
+    INDEX idx_report_templates_popularity (popularity_score DESC, usage_count DESC),
+    INDEX idx_report_templates_category (category, subcategory),
+    INDEX idx_report_templates_creator (created_by, created_at DESC),
+    INDEX idx_report_templates_status (status, availability),
+    FULLTEXT INDEX idx_report_templates_search (name, description)
+);
+```
+
+### **report_schedules**
+```sql
+CREATE TABLE report_schedules (
+    id UUID PRIMARY KEY,
+    
+    -- Schedule identification
+    schedule_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    report_template_id UUID,
+    
+    -- Generation configuration
+    report_type ENUM('safety', 'personnel', 'ai_analytics', 'equipment', 'progress', 'compliance', 'custom') NOT NULL,
+    report_title VARCHAR(255), -- Title pattern for generated reports
+    output_format ENUM('pdf', 'excel', 'csv', 'json', 'html') DEFAULT 'pdf',
+    
+    -- Scheduling configuration
+    frequency ENUM('hourly', 'daily', 'weekly', 'bi_weekly', 'monthly', 'quarterly', 'yearly', 'custom') NOT NULL,
+    custom_cron_expression VARCHAR(100), -- For custom frequencies
+    
+    -- Timing configuration
+    scheduled_time TIME DEFAULT '09:00:00',
+    timezone VARCHAR(50) DEFAULT 'UTC',
+    
+    -- Date constraints
+    start_date DATE,
+    end_date DATE,
+    next_execution TIMESTAMP,
+    last_execution TIMESTAMP,
+    
+    -- Recipients and distribution
+    email_recipients JSON, -- Array of email addresses
+    user_recipients JSON, -- Array of user IDs
+    team_recipients JSON, -- Array of team/role IDs
+    
+    -- Content configuration
+    data_filters JSON, -- Filters applied to report data
+    date_range_type ENUM('fixed', 'relative', 'custom') DEFAULT 'relative',
+    relative_date_range VARCHAR(50), -- 'last_7_days', 'last_month', etc.
+    
+    -- Output and delivery
+    delivery_method ENUM('email', 'file_storage', 'both') DEFAULT 'email',
+    storage_location VARCHAR(500),
+    email_subject_pattern VARCHAR(255),
+    email_body_template TEXT,
+    
+    -- Status and monitoring
+    status ENUM('active', 'paused', 'disabled', 'error') DEFAULT 'active',
+    execution_count INT DEFAULT 0,
+    success_count INT DEFAULT 0,
+    failure_count INT DEFAULT 0,
+    last_error_message TEXT,
+    
+    -- Performance tracking
+    average_generation_time_seconds INT,
+    average_file_size_mb DECIMAL(10,2),
+    
+    -- Approval workflow
+    requires_approval BOOLEAN DEFAULT FALSE,
+    approval_required_by JSON, -- Array of user IDs who can approve
+    auto_approve BOOLEAN DEFAULT TRUE,
+    
+    -- Ownership and permissions
+    created_by UUID NOT NULL,
+    owned_by UUID NOT NULL,
+    shared_with JSON, -- Array of user/team IDs with access
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (report_template_id) REFERENCES report_templates(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (owned_by) REFERENCES users(id),
+    
+    INDEX idx_report_schedules_next_execution (next_execution, status),
+    INDEX idx_report_schedules_frequency (frequency, status),
+    INDEX idx_report_schedules_owner (owned_by, created_at DESC),
+    INDEX idx_report_schedules_type (report_type, status),
+    INDEX idx_report_schedules_status (status, next_execution)
+);
+```
+
+### **report_generation_logs**
+```sql
+CREATE TABLE report_generation_logs (
+    id UUID PRIMARY KEY,
+    
+    -- Generation context
+    report_id UUID, -- Links to reports table if applicable
+    schedule_id UUID, -- Links to report_schedules if scheduled
+    template_id UUID, -- Template used for generation
+    
+    -- Generation details
+    generation_type ENUM('manual', 'scheduled', 'api', 'bulk') NOT NULL,
+    initiated_by UUID, -- User who initiated the generation
+    generation_method ENUM('template', 'custom', 'quick', 'clone') NOT NULL,
+    
+    -- Timing information
+    generation_started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    generation_completed_at TIMESTAMP,
+    generation_duration_seconds INT,
+    
+    -- Content configuration
+    report_title VARCHAR(255),
+    report_type VARCHAR(100),
+    output_format VARCHAR(20),
+    data_range_start DATE,
+    data_range_end DATE,
+    
+    -- Data processing
+    data_sources_queried JSON, -- List of tables/sources accessed
+    total_records_processed INT DEFAULT 0,
+    data_processing_time_seconds INT,
+    
+    -- Generation status
+    status ENUM('started', 'processing_data', 'generating', 'formatting', 'completed', 'failed', 'cancelled') NOT NULL,
+    progress_percentage INT DEFAULT 0,
+    current_step VARCHAR(255),
+    
+    -- Output information
+    output_file_path VARCHAR(500),
+    output_file_size_bytes BIGINT,
+    output_page_count INT,
+    file_hash VARCHAR(128), -- For integrity verification
+    
+    -- Error handling
+    error_code VARCHAR(50),
+    error_message TEXT,
+    error_stack_trace TEXT,
+    retry_count INT DEFAULT 0,
+    max_retries INT DEFAULT 3,
+    
+    -- Performance metrics
+    cpu_usage_avg DECIMAL(5,2),
+    memory_usage_mb INT,
+    database_query_count INT,
+    database_query_time_seconds INT,
+    
+    -- Quality metrics
+    data_quality_score DECIMAL(5,2), -- 0-10 data quality rating
+    report_completeness DECIMAL(5,2), -- Percentage of expected data included
+    validation_errors_count INT DEFAULT 0,
+    
+    -- Notification and delivery
+    email_sent BOOLEAN DEFAULT FALSE,
+    email_sent_at TIMESTAMP,
+    notification_recipients JSON,
+    delivery_status ENUM('pending', 'delivered', 'failed', 'not_required') DEFAULT 'pending',
+    
+    FOREIGN KEY (report_id) REFERENCES reports(id),
+    FOREIGN KEY (schedule_id) REFERENCES report_schedules(id),
+    FOREIGN KEY (template_id) REFERENCES report_templates(id),
+    FOREIGN KEY (initiated_by) REFERENCES users(id),
+    
+    INDEX idx_generation_logs_status_time (status, generation_started_at DESC),
+    INDEX idx_generation_logs_report (report_id, generation_started_at DESC),
+    INDEX idx_generation_logs_schedule (schedule_id, generation_started_at DESC),
+    INDEX idx_generation_logs_user (initiated_by, generation_started_at DESC),
+    INDEX idx_generation_logs_performance (generation_duration_seconds, output_file_size_bytes)
+);
+```
+
+### **report_shares**
+```sql
+CREATE TABLE report_shares (
+    id UUID PRIMARY KEY,
+    report_id UUID NOT NULL,
+    
+    -- Sharing details
+    shared_by UUID NOT NULL,
+    share_type ENUM('link', 'email', 'team', 'public', 'download') NOT NULL,
+    
+    -- Recipients (depending on share_type)
+    shared_with_users JSON, -- Array of user IDs
+    shared_with_teams JSON, -- Array of team/role IDs
+    shared_with_emails JSON, -- Array of email addresses for external sharing
+    
+    -- Share configuration
+    share_token VARCHAR(255) UNIQUE, -- Unique token for link sharing
+    access_level ENUM('view', 'download', 'comment', 'edit') DEFAULT 'view',
+    password_protected BOOLEAN DEFAULT FALSE,
+    password_hash VARCHAR(255),
+    
+    -- Permissions and restrictions
+    allow_download BOOLEAN DEFAULT TRUE,
+    allow_sharing BOOLEAN DEFAULT FALSE, -- Allow recipients to share further
+    restrict_ip_addresses JSON, -- Array of allowed IP addresses/ranges
+    
+    -- Expiration and limits
+    expires_at TIMESTAMP,
+    max_views INT, -- Maximum number of views allowed
+    max_downloads INT, -- Maximum number of downloads allowed
+    
+    -- Usage tracking
+    view_count INT DEFAULT 0,
+    download_count INT DEFAULT 0,
+    last_accessed_at TIMESTAMP,
+    last_accessed_by VARCHAR(255), -- Email or user identifier
+    
+    -- Access logs summary
+    unique_viewers INT DEFAULT 0,
+    total_view_time_minutes INT DEFAULT 0,
+    
+    -- Notification settings
+    notify_on_access BOOLEAN DEFAULT FALSE,
+    access_notification_emails JSON, -- Who gets notified on access
+    
+    -- Status
+    status ENUM('active', 'expired', 'revoked', 'disabled') DEFAULT 'active',
+    revoked_at TIMESTAMP,
+    revoked_by UUID,
+    revoke_reason TEXT,
+    
+    -- Metadata
+    share_title VARCHAR(255), -- Custom title for the shared report
+    share_message TEXT, -- Message included with share
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (report_id) REFERENCES reports(id),
+    FOREIGN KEY (shared_by) REFERENCES users(id),
+    FOREIGN KEY (revoked_by) REFERENCES users(id),
+    
+    INDEX idx_report_shares_report (report_id, created_at DESC),
+    INDEX idx_report_shares_token (share_token, status),
+    INDEX idx_report_shares_sharer (shared_by, created_at DESC),
+    INDEX idx_report_shares_expires (expires_at, status),
+    INDEX idx_report_shares_status (status, created_at DESC)
+);
+```
+
+### **report_data_sources**
+```sql
+CREATE TABLE report_data_sources (
+    id UUID PRIMARY KEY,
+    
+    -- Data source identification
+    source_name VARCHAR(255) NOT NULL UNIQUE,
+    source_type ENUM('database_table', 'api_endpoint', 'file_import', 'external_service', 'calculated_metric') NOT NULL,
+    description TEXT,
+    
+    -- Connection configuration
+    connection_string VARCHAR(500), -- Database connection or API URL
+    authentication_method ENUM('none', 'api_key', 'oauth', 'database_credentials', 'token') DEFAULT 'none',
+    credentials_encrypted JSON, -- Encrypted authentication data
+    
+    -- Data structure
+    schema_definition JSON, -- Expected data structure and field types
+    primary_key_fields JSON, -- Array of primary key field names
+    required_fields JSON, -- Fields that must be present
+    optional_fields JSON, -- Optional fields that may be included
+    
+    -- Query configuration
+    base_query TEXT, -- Base SQL query or API parameters
+    filter_parameters JSON, -- Available filter options
+    aggregation_options JSON, -- Available aggregation methods
+    
+    -- Data quality and validation
+    validation_rules JSON, -- Data validation rules and checks
+    data_quality_threshold DECIMAL(5,2) DEFAULT 80.00, -- Minimum quality score
+    last_quality_check TIMESTAMP,
+    quality_score DECIMAL(5,2),
+    
+    -- Performance and caching
+    cache_duration_minutes INT DEFAULT 60,
+    enable_caching BOOLEAN DEFAULT TRUE,
+    query_timeout_seconds INT DEFAULT 300,
+    max_records_limit INT DEFAULT 100000,
+    
+    -- Usage and monitoring
+    usage_count INT DEFAULT 0,
+    last_accessed TIMESTAMP,
+    average_query_time_ms INT,
+    error_count INT DEFAULT 0,
+    last_error TIMESTAMP,
+    last_error_message TEXT,
+    
+    -- Availability and maintenance
+    status ENUM('active', 'inactive', 'maintenance', 'deprecated') DEFAULT 'active',
+    maintenance_window JSON, -- Scheduled maintenance times
+    health_check_url VARCHAR(500),
+    
+    -- Documentation
+    documentation TEXT,
+    sample_data JSON, -- Sample data for testing
+    field_descriptions JSON, -- Description of each field
+    
+    -- Access control
+    required_permissions JSON, -- Permissions needed to access this source
+    restricted_fields JSON, -- Fields with restricted access
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_data_sources_type (source_type, status),
+    INDEX idx_data_sources_status (status, last_accessed DESC),
+    INDEX idx_data_sources_performance (average_query_time_ms, usage_count),
+    FULLTEXT INDEX idx_data_sources_search (source_name, description)
+);
+```
+
 ---
 
 **Document Maintained By**: AI Construction Management System Team
