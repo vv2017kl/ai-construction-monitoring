@@ -235,12 +235,11 @@ const CesiumContainer = ({
     
     console.log(`Camera movement effect: viewMode=${viewMode}, selectedSite=${selectedSite?.name || 'none'}`);
 
-    // Force camera movement with animation duration
-    const moveCamera = (destination, orientation) => {
+    const moveCamera = (destination, orientation, duration = 2.0) => {
       viewer.camera.flyTo({
         destination: destination,
         orientation: orientation,
-        duration: 2.0 // 2 second animation
+        duration: duration
       });
     };
 
@@ -260,7 +259,7 @@ const CesiumContainer = ({
       case 'regional':
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
-          console.log(`Moving to regional view for ${selectedSite.name} at [${longitude}, ${latitude}]`);
+          console.log(`Moving to regional view for ${selectedSite.name}`);
           moveCamera(
             Cartesian3.fromDegrees(longitude, latitude, 50000),
             {
@@ -275,19 +274,47 @@ const CesiumContainer = ({
       case 'site':
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
-          console.log(`Moving to CLOSE site view for ${selectedSite.name} at [${longitude}, ${latitude}] - 150m altitude`);
-          moveCamera(
-            Cartesian3.fromDegrees(longitude, latitude, 150), // 150 meters for better camera visibility
-            {
-              heading: 0.0,
-              pitch: -CesiumMath.PI_OVER_SIX,
-              roll: 0.0
+          console.log(`SITE VIEW: Moving close to ${selectedSite.name} at [${longitude}, ${latitude}]`);
+          
+          // Force immediate close zoom for site view
+          setTimeout(() => {
+            if (viewer && viewer.camera) {
+              viewer.camera.flyTo({
+                destination: Cartesian3.fromDegrees(longitude, latitude, 200), // 200 meters altitude
+                orientation: {
+                  heading: 0.0,
+                  pitch: -CesiumMath.PI_OVER_SIX,
+                  roll: 0.0
+                },
+                duration: 3.0 // 3 second animation to site level
+              });
+              console.log('Site zoom animation started');
             }
-          );
+          }, 100); // Small delay to ensure state is updated
         }
         break;
     }
   }, [viewer, viewMode, selectedSite]);
+
+  // Additional effect specifically for site selection
+  useEffect(() => {
+    if (viewer && selectedSite && viewMode === 'site') {
+      console.log('Additional site zoom trigger for:', selectedSite.name);
+      const [longitude, latitude] = selectedSite.coordinates;
+      
+      setTimeout(() => {
+        viewer.camera.flyTo({
+          destination: Cartesian3.fromDegrees(longitude, latitude, 200),
+          orientation: {
+            heading: 0.0,
+            pitch: -CesiumMath.PI_OVER_SIX,
+            roll: 0.0
+          },
+          duration: 2.5
+        });
+      }, 200);
+    }
+  }, [viewer, selectedSite, viewMode]);
 
   // Helper functions for creating factory icons
   const createFactoryIcon = (color) => {
