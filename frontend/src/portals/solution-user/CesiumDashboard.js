@@ -101,38 +101,7 @@ const CesiumDashboard = () => {
     setShowAlertPanel(false);
   };
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-    setShowSidebar(isFullscreen); // Show sidebar when exiting fullscreen, hide when entering
-  };
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (event.key === 'Escape') {
-        if (isFullscreen && (selectedCamera || selectedSite)) {
-          // If in fullscreen with selection, clear selection first
-          if (selectedCamera) {
-            setSelectedCamera(null);
-          } else if (selectedSite) {
-            setSelectedSite(null);
-            setViewMode('global');
-            setShowAlertPanel(false);
-          }
-        } else if (isFullscreen) {
-          // If just in fullscreen with no selection, exit fullscreen
-          setIsFullscreen(false);
-          setShowSidebar(true);
-        }
-      } else if (event.key === 'F11') {
-        event.preventDefault();
-        toggleFullscreen();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isFullscreen, selectedCamera, selectedSite]);
 
   const breadcrumbItems = getBreadcrumb();
 
