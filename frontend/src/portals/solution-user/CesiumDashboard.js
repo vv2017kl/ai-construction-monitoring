@@ -103,6 +103,11 @@ const CesiumDashboard = () => {
     setShowAlertPanel(false);
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    setShowSidebar(isFullscreen); // Show sidebar when exiting fullscreen, hide when entering
+  };
+
 
 
   const breadcrumbItems = getBreadcrumb();
