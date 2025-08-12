@@ -204,6 +204,416 @@ CREATE TABLE safety_metrics (
 
 ---
 
+## 🔧 **COMPLETE FIXED DATABASE SCHEMA**
+
+### **1. COMPLETE Sites Table (All Defects Fixed)**
+```sql
+CREATE TABLE sites (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    address TEXT,
+    coordinates POINT,
+    status ENUM('active', 'inactive', 'maintenance') DEFAULT 'active',
+    type ENUM('commercial', 'residential', 'industrial', 'infrastructure'),
+    phase ENUM('planning', 'construction', 'finishing', 'completed'),
+    progress_percentage DECIMAL(5,2) DEFAULT 0.00,
+    budget DECIMAL(15,2),
+    completion_date DATE,
+    manager_id UUID,
+    
+    -- ✅ FIXED: Weather Integration Fields
+    weather_temp INT,
+    weather_condition VARCHAR(100),
+    weather_wind_speed VARCHAR(50),
+    weather_humidity DECIMAL(5,2),
+    weather_last_updated TIMESTAMP,
+    weather_api_source VARCHAR(100),
+    
+    -- ✅ FIXED: Activity Tracking
+    last_activity_timestamp TIMESTAMP,
+    last_activity_type VARCHAR(100),
+    activity_summary TEXT,
+    
+    -- ✅ FIXED: Performance Metrics
+    total_cameras INT DEFAULT 0,
+    active_cameras INT DEFAULT 0,
+    offline_cameras INT DEFAULT 0,
+    maintenance_cameras INT DEFAULT 0,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (manager_id) REFERENCES users(id),
+    
+    -- ✅ FIXED: Performance Indexes
+    INDEX idx_sites_status (status),
+    INDEX idx_sites_type_phase (type, phase),
+    INDEX idx_sites_coordinates (coordinates),
+    INDEX idx_sites_manager (manager_id),
+    INDEX idx_sites_weather_updated (weather_last_updated)
+);
+```
+
+### **2. COMPLETE Site_Personnel Table (All Defects Fixed)**
+```sql
+CREATE TABLE site_personnel (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    role VARCHAR(100),
+    status ENUM('active', 'inactive', 'break', 'offsite') DEFAULT 'active',
+    check_in_time TIMESTAMP,
+    check_out_time TIMESTAMP,
+    
+    -- ✅ FIXED: Real-time Location Tracking
+    current_zone_id UUID,
+    current_zone_name VARCHAR(100),
+    last_known_coordinates POINT,
+    location_updated_at TIMESTAMP,
+    
+    -- ✅ FIXED: PPE Compliance Tracking
+    ppe_compliance_score DECIMAL(5,2) DEFAULT 0.00,
+    ppe_status JSON, -- {"hardhat": true, "vest": true, "boots": false}
+    last_ppe_check_timestamp TIMESTAMP,
+    ppe_violations_count INT DEFAULT 0,
+    
+    -- ✅ FIXED: Activity Tracking
+    last_detection_timestamp TIMESTAMP,
+    last_detection_camera_id UUID,
+    activity_level ENUM('low', 'moderate', 'high') DEFAULT 'moderate',
+    break_start_time TIMESTAMP NULL,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (current_zone_id) REFERENCES zones(id),
+    FOREIGN KEY (last_detection_camera_id) REFERENCES cameras(id),
+    
+    -- ✅ FIXED: Optimized Indexes
+    UNIQUE KEY unique_site_user_active (site_id, user_id, status),
+    INDEX idx_personnel_site_status (site_id, status),
+    INDEX idx_personnel_zone (current_zone_id),
+    INDEX idx_personnel_compliance (ppe_compliance_score),
+    INDEX idx_personnel_activity (last_detection_timestamp)
+);
+```
+
+### **3. COMPLETE AI_Detections Table (All Defects Fixed)**
+```sql
+CREATE TABLE ai_detections (
+    id UUID PRIMARY KEY,
+    camera_id UUID NOT NULL,
+    site_id UUID NOT NULL, -- ✅ ADDED for better querying
+    zone_id UUID,
+    zone_name VARCHAR(100), -- ✅ FIXED: Added zone name for dashboard
+    
+    -- ✅ FIXED: Enhanced Detection Data
+    detection_type ENUM('person', 'vehicle', 'ppe', 'safety_violation', 'equipment', 'activity'),
+    person_count INT DEFAULT 0,
+    confidence_score DECIMAL(5,2),
+    overall_confidence DECIMAL(5,2), -- ✅ ADDED: Overall scene confidence
+    
+    -- ✅ FIXED: Rich Detection Results
+    bounding_boxes JSON, -- Store all detection coordinates
+    detection_results JSON, -- Complete AI model response
+    ppe_compliance_data JSON, -- Detailed PPE analysis
+    safety_violations JSON, -- List of detected violations
+    
+    -- ✅ FIXED: Activity Summary & Classification
+    activity_summary TEXT,
+    activity_level ENUM('low', 'moderate', 'high'),
+    risk_assessment ENUM('safe', 'caution', 'danger'),
+    safety_score DECIMAL(5,2),
+    
+    -- ✅ FIXED: Media & Evidence
+    snapshot_image_url VARCHAR(500),
+    video_clip_url VARCHAR(500),
+    annotated_image_url VARCHAR(500), -- Image with bounding boxes
+    
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed BOOLEAN DEFAULT FALSE,
+    alert_generated BOOLEAN DEFAULT FALSE,
+    alert_ids JSON, -- Array of generated alert IDs
+    
+    -- ✅ FIXED: Processing Metadata
+    model_version VARCHAR(50),
+    processing_time_ms INT,
+    ai_server_id VARCHAR(100),
+    
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id),
+    
+    -- ✅ FIXED: Performance Indexes
+    INDEX idx_detections_camera_time (camera_id, timestamp DESC),
+    INDEX idx_detections_site_time (site_id, timestamp DESC),
+    INDEX idx_detections_zone (zone_id),
+    INDEX idx_detections_type (detection_type),
+    INDEX idx_detections_alerts (alert_generated),
+    INDEX idx_detections_confidence (confidence_score),
+    INDEX idx_detections_processed (processed, timestamp)
+);
+```
+
+### **4. COMPLETE Alerts Table (All Defects Fixed)**
+```sql
+CREATE TABLE alerts (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    camera_id UUID,
+    zone_id UUID,
+    
+    -- ✅ FIXED: Enhanced Alert Information
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    priority ENUM('critical', 'high', 'medium', 'low', 'info') NOT NULL,
+    status ENUM('open', 'acknowledged', 'investigating', 'resolved', 'false_positive') DEFAULT 'open',
+    alert_type VARCHAR(100), -- 'ppe_violation', 'safety_breach', 'unauthorized_access', etc.
+    
+    -- ✅ FIXED: AI Integration
+    detection_id UUID, -- Link to AI detection that triggered this alert
+    confidence_score DECIMAL(5,2),
+    ai_model_used VARCHAR(100),
+    detection_data JSON, -- Complete AI detection results
+    
+    -- ✅ FIXED: Rich Media Evidence
+    primary_image_url VARCHAR(500),
+    secondary_images JSON, -- Array of additional images
+    video_clip_url VARCHAR(500),
+    annotated_evidence_url VARCHAR(500), -- Annotated image/video
+    
+    -- ✅ FIXED: Enhanced Workflow
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    acknowledged_at TIMESTAMP NULL,
+    acknowledged_by UUID NULL,
+    acknowledged_notes TEXT,
+    investigating_started_at TIMESTAMP NULL,
+    investigating_by UUID NULL,
+    resolved_at TIMESTAMP NULL,
+    resolved_by UUID NULL,
+    resolution_notes TEXT,
+    resolution_type ENUM('fixed', 'false_positive', 'training_needed', 'policy_update'),
+    
+    -- ✅ FIXED: Impact Assessment
+    severity_score DECIMAL(5,2), -- 0-10 impact rating
+    affected_personnel_count INT DEFAULT 0,
+    estimated_risk_level ENUM('low', 'medium', 'high', 'critical'),
+    
+    -- ✅ FIXED: Escalation & Notifications
+    escalated BOOLEAN DEFAULT FALSE,
+    escalated_at TIMESTAMP NULL,
+    escalated_to UUID NULL,
+    notification_sent BOOLEAN DEFAULT FALSE,
+    notification_channels JSON, -- ['email', 'sms', 'push', 'radio']
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id),
+    FOREIGN KEY (detection_id) REFERENCES ai_detections(id),
+    FOREIGN KEY (acknowledged_by) REFERENCES users(id),
+    FOREIGN KEY (investigating_by) REFERENCES users(id),
+    FOREIGN KEY (resolved_by) REFERENCES users(id),
+    FOREIGN KEY (escalated_to) REFERENCES users(id),
+    
+    -- ✅ FIXED: Performance Indexes
+    INDEX idx_alerts_site_priority (site_id, priority, status),
+    INDEX idx_alerts_status_time (status, timestamp DESC),
+    INDEX idx_alerts_camera (camera_id),
+    INDEX idx_alerts_assigned (acknowledged_by, investigating_by),
+    INDEX idx_alerts_detection (detection_id),
+    INDEX idx_alerts_escalated (escalated, escalated_at)
+);
+```
+
+### **5. COMPLETE Safety_Metrics Table (All Defects Fixed)**
+```sql
+CREATE TABLE safety_metrics (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    date DATE NOT NULL,
+    hour INT, -- ✅ ADDED: Hourly granularity for real-time dashboard
+    
+    -- ✅ FIXED: Core Safety Metrics
+    safety_score DECIMAL(3,1), -- 0.0 to 10.0
+    ppe_compliance_rate DECIMAL(5,2), -- Percentage
+    incident_count INT DEFAULT 0,
+    near_miss_count INT DEFAULT 0,
+    personnel_violations INT DEFAULT 0,
+    equipment_violations INT DEFAULT 0,
+    
+    -- ✅ FIXED: Detailed PPE Breakdown
+    hardhat_compliance_rate DECIMAL(5,2),
+    vest_compliance_rate DECIMAL(5,2),
+    boots_compliance_rate DECIMAL(5,2),
+    gloves_compliance_rate DECIMAL(5,2),
+    total_ppe_checks INT DEFAULT 0,
+    
+    -- ✅ FIXED: Personnel Metrics
+    total_personnel_detected INT DEFAULT 0,
+    peak_personnel_count INT DEFAULT 0,
+    average_personnel_count DECIMAL(5,2),
+    unauthorized_personnel_count INT DEFAULT 0,
+    
+    -- ✅ FIXED: Activity Metrics
+    total_detections INT DEFAULT 0,
+    high_risk_activities INT DEFAULT 0,
+    safe_activities INT DEFAULT 0,
+    
+    -- ✅ FIXED: Trend Analysis (Auto-calculated)
+    day_comparison DECIMAL(5,2), -- % change from previous day
+    week_comparison DECIMAL(5,2), -- % change from last week
+    month_comparison DECIMAL(5,2), -- % change from last month
+    
+    -- ✅ FIXED: Weather Correlation
+    weather_temp INT,
+    weather_condition VARCHAR(50),
+    weather_impact_score DECIMAL(3,1), -- How weather affected safety
+    
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    
+    -- ✅ FIXED: Optimized Indexes
+    UNIQUE KEY unique_site_date_hour (site_id, date, hour),
+    INDEX idx_safety_site_date (site_id, date DESC),
+    INDEX idx_safety_score (safety_score),
+    INDEX idx_safety_compliance (ppe_compliance_rate),
+    INDEX idx_safety_calculated (calculated_at)
+);
+```
+
+### **6. NEW: Site_Cameras Mapping Table (Missing)**
+```sql
+CREATE TABLE site_cameras (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    camera_id UUID NOT NULL,
+    zoneminder_monitor_id INT NOT NULL, -- ✅ ZoneMinder integration
+    
+    -- ✅ Camera positioning for 3D mapping
+    coordinates POINT,
+    elevation DECIMAL(8,2), -- Meters above sea level
+    orientation_angle DECIMAL(5,2), -- 0-360 degrees
+    tilt_angle DECIMAL(5,2), -- -90 to +90 degrees
+    field_of_view DECIMAL(5,2), -- Degrees
+    
+    -- ✅ Zone coverage
+    primary_zone_id UUID,
+    coverage_zones JSON, -- Array of zone IDs this camera covers
+    
+    -- ✅ Camera specifications
+    camera_type ENUM('fixed', 'ptz', 'fisheye', 'thermal', 'infrared'),
+    resolution VARCHAR(20), -- '1920x1080'
+    frame_rate INT DEFAULT 30,
+    night_vision BOOLEAN DEFAULT FALSE,
+    weather_resistant BOOLEAN DEFAULT FALSE,
+    
+    -- ✅ Status tracking
+    status ENUM('active', 'inactive', 'maintenance', 'offline') DEFAULT 'active',
+    last_online TIMESTAMP,
+    installation_date DATE,
+    maintenance_schedule VARCHAR(100),
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (primary_zone_id) REFERENCES zones(id),
+    
+    -- ✅ Indexes
+    UNIQUE KEY unique_site_camera (site_id, camera_id),
+    UNIQUE KEY unique_zm_monitor (zoneminder_monitor_id),
+    INDEX idx_site_cameras_site (site_id),
+    INDEX idx_site_cameras_status (status),
+    INDEX idx_site_cameras_zone (primary_zone_id)
+);
+```
+
+### **7. NEW: Weather_Data Table (Missing)**
+```sql
+CREATE TABLE weather_data (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- ✅ Complete weather metrics
+    temperature DECIMAL(5,2),
+    humidity DECIMAL(5,2),
+    wind_speed DECIMAL(5,2),
+    wind_direction VARCHAR(10), -- 'N', 'NE', 'E', etc.
+    pressure DECIMAL(7,2),
+    visibility DECIMAL(5,2), -- Kilometers
+    uv_index DECIMAL(3,1),
+    
+    -- ✅ Conditions
+    condition VARCHAR(100), -- 'Partly Cloudy', 'Rain', etc.
+    precipitation DECIMAL(5,2), -- mm/hour
+    cloud_cover DECIMAL(5,2), -- Percentage
+    
+    -- ✅ Safety impact
+    work_safety_score DECIMAL(3,1), -- 0-10 (weather suitability for construction)
+    safety_warnings JSON, -- ['high_wind', 'low_visibility', 'extreme_temp']
+    recommended_precautions JSON,
+    
+    -- ✅ Data source
+    weather_api_source VARCHAR(100),
+    api_response_raw JSON,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    
+    -- ✅ Indexes
+    INDEX idx_weather_site_time (site_id, timestamp DESC),
+    INDEX idx_weather_conditions (condition),
+    INDEX idx_weather_safety (work_safety_score)
+);
+```
+
+### **8. NEW: Activity_Feed Table (Missing)**
+```sql
+CREATE TABLE activity_feed (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    activity_type ENUM('detection', 'alert', 'personnel', 'camera', 'system') NOT NULL,
+    
+    -- ✅ Activity details
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    severity ENUM('info', 'low', 'medium', 'high', 'critical') DEFAULT 'info',
+    
+    -- ✅ Source references
+    detection_id UUID NULL,
+    alert_id UUID NULL,
+    camera_id UUID NULL,
+    user_id UUID NULL,
+    
+    -- ✅ Activity metadata
+    metadata JSON, -- Flexible data storage
+    thumbnail_url VARCHAR(500),
+    
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read_by JSON, -- Array of user IDs who have seen this activity
+    
+    -- ✅ Dashboard display
+    show_on_dashboard BOOLEAN DEFAULT TRUE,
+    priority_score DECIMAL(3,1) DEFAULT 5.0, -- For sorting
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (detection_id) REFERENCES ai_detections(id),
+    FOREIGN KEY (alert_id) REFERENCES alerts(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    
+    -- ✅ Indexes
+    INDEX idx_activity_site_time (site_id, timestamp DESC),
+    INDEX idx_activity_type (activity_type),
+    INDEX idx_activity_severity (severity),
+    INDEX idx_activity_dashboard (show_on_dashboard, priority_score DESC)
+);
+```
+
+---
+
 ## 📹 **ZoneMinder Integration**
 
 ### **Required ZoneMinder MySQL Tables**
