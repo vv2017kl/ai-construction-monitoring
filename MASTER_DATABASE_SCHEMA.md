@@ -63,8 +63,11 @@ This document serves as the **single source of truth** for all database table de
 - **Video & Evidence Management**: 4 tables
 - **Time-Lapse & Progress Tracking**: 5 tables
 - **Navigation & Street View**: 4 tables
+- **Historical Navigation & Analysis**: 4 tables
+- **Field Operations & Assessment**: 5 tables
+- **Temporal Analysis & Comparison**: 4 tables
 
-**Total Tables**: 48 tables
+**Total Tables**: 63 tables
 
 ---
 
