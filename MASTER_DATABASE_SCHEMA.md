@@ -313,6 +313,12 @@ CREATE TABLE site_cameras (
     last_online TIMESTAMP,
     health_score DECIMAL(3,1), -- 0-10 camera health rating
     
+    -- ✅ GEOSPATIAL VIEW ENHANCEMENTS
+    region VARCHAR(100), -- Geographic region grouping
+    zone_coverage JSON, -- Array of zone IDs this camera covers
+    field_of_view DECIMAL(5,2), -- Camera FOV in degrees for 3D visualization
+    detection_range DECIMAL(8,2), -- Detection range in meters
+    
     FOREIGN KEY (site_id) REFERENCES sites(id),
     FOREIGN KEY (camera_id) REFERENCES cameras(id),
     FOREIGN KEY (primary_zone_id) REFERENCES zones(id),
@@ -322,7 +328,11 @@ CREATE TABLE site_cameras (
     INDEX idx_site_cameras_site (site_id),
     INDEX idx_site_cameras_status (status),
     INDEX idx_site_cameras_zone (primary_zone_id),
-    INDEX idx_site_cameras_health (health_score)
+    INDEX idx_site_cameras_health (health_score),
+    -- ✅ GEOSPATIAL INDEXES
+    INDEX idx_site_cameras_region (region),
+    INDEX idx_site_cameras_coordinates (coordinates),
+    INDEX idx_site_cameras_elevation (elevation)
 );
 ```
 
