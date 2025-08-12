@@ -5,7 +5,7 @@ import {
   Shield, Settings, Bell, Eye, EyeOff, Edit, Save,
   Camera, Upload, Download, Trash2, Key, Lock,
   CheckCircle, AlertTriangle, Clock, Activity,
-  Smartphone, Monitor, Palette, Globe, Moon, Sun
+  Smartphone, Monitor, Palette, Globe, Moon, Sun, Home
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
