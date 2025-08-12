@@ -229,52 +229,61 @@ const CesiumContainer = ({
     };
   }, [viewer, onSiteClick, onCameraClick]);
 
-  // Camera movement based on view mode
+  // Camera movement based on view mode - Fixed with forced zoom
   useEffect(() => {
     if (!viewer) return;
     
-    console.log(`Camera movement effect triggered: viewMode=${viewMode}, selectedSite=${selectedSite?.name || 'none'}`);
+    console.log(`Camera movement effect: viewMode=${viewMode}, selectedSite=${selectedSite?.name || 'none'}`);
+
+    // Force camera movement with animation duration
+    const moveCamera = (destination, orientation) => {
+      viewer.camera.flyTo({
+        destination: destination,
+        orientation: orientation,
+        duration: 2.0 // 2 second animation
+      });
+    };
 
     switch (viewMode) {
       case 'global':
         console.log('Moving to global view');
-        viewer.camera.setView({
-          destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000),
-          orientation: {
+        moveCamera(
+          Cartesian3.fromDegrees(65.0000, 20.0000, 5000000),
+          {
             heading: 0.0,
             pitch: -CesiumMath.PI_OVER_TWO,
             roll: 0.0
           }
-        });
+        );
         break;
       
       case 'regional':
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
           console.log(`Moving to regional view for ${selectedSite.name} at [${longitude}, ${latitude}]`);
-          viewer.camera.setView({
-            destination: Cartesian3.fromDegrees(longitude, latitude, 50000),
-            orientation: {
+          moveCamera(
+            Cartesian3.fromDegrees(longitude, latitude, 50000),
+            {
               heading: 0.0,
               pitch: -CesiumMath.PI_OVER_FOUR,
               roll: 0.0
             }
-          });
+          );
         }
         break;
       
       case 'site':
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
-          console.log(`Moving to site view for ${selectedSite.name} at [${longitude}, ${latitude}] - 100m altitude`);
-          viewer.camera.setView({
-            destination: Cartesian3.fromDegrees(longitude, latitude, 100), // Very close - 100 meters
-            orientation: {
+          console.log(`Moving to CLOSE site view for ${selectedSite.name} at [${longitude}, ${latitude}] - 150m altitude`);
+          moveCamera(
+            Cartesian3.fromDegrees(longitude, latitude, 150), // 150 meters for better camera visibility
+            {
               heading: 0.0,
-              pitch: -CesiumMath.PI_OVER_SIX, // Less steep angle
+              pitch: -CesiumMath.PI_OVER_SIX,
               roll: 0.0
             }
-          });
+          );
         }
         break;
     }
