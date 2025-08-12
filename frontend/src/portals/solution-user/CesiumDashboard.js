@@ -211,7 +211,7 @@ const CesiumDashboard = () => {
         )}
 
         {/* Main Map Container */}
-        <div className={`${isFullscreen ? 'h-full' : 'h-full pt-16'}`}>
+        <div className={`${showSidebar ? 'h-full pt-16' : 'h-full'}`}>
           <CesiumContainer
             sites={accessibleSites}
             cameras={getCurrentCameras()}
