@@ -121,10 +121,11 @@ const CesiumContainer = ({
         id: `site-${site.id}`,
         position: Cartesian3.fromDegrees(longitude, latitude, height + 100),
         billboard: {
-          image: createSitePinImage(pinColor, site.project_type),
+          image: createFactoryIcon(pinColor),
           scale: 0.8,
           verticalOrigin: VerticalOrigin.BOTTOM,
-          heightReference: HeightReference.CLAMP_TO_GROUND
+          heightReference: HeightReference.CLAMP_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
         },
         label: {
           text: site.name,
