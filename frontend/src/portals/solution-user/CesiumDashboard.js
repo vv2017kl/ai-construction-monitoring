@@ -146,8 +146,8 @@ const CesiumDashboard = () => {
       className={isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}
     >
       <div className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-full w-full'}`}>
-        {/* Header Bar */}
-        {!isFullscreen && (
+        {/* Header Bar - Show only when sidebar is visible */}
+        {showSidebar && (
           <div className="absolute top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 px-6 py-3">
             <div className="flex items-center justify-between">
               {/* Breadcrumb Navigation */}
