@@ -29,11 +29,11 @@ This document serves as the **single source of truth** for all database table de
 - **Cameras & Monitoring**: 2 tables
 - **AI & Detection**: 7 tables
 - **Alerts & Safety**: 6 tables
-- **Analytics & Reporting**: 2 tables
+- **Analytics & Reporting**: 7 tables
 - **System & Configuration**: 3 tables
 - **Video & Evidence Management**: 4 tables
 
-**Total Tables**: 34 tables
+**Total Tables**: 39 tables
 
 ---
 
