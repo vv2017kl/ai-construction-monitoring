@@ -142,7 +142,7 @@ const CesiumDashboard = () => {
 
   return (
     <MainLayout 
-      showSidebar={showSidebar && !isFullscreen}
+      showSidebar={showSidebar}
       className={isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}
     >
       <div className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-full w-full'}`}>
