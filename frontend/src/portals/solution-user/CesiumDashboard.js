@@ -205,7 +205,7 @@ const CesiumDashboard = () => {
               className="flex items-center space-x-2 px-3 py-2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-md transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Exit Fullscreen</span>
+              <span>Show Sidebar</span>
             </button>
           </div>
         )}
