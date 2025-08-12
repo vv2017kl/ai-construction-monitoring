@@ -149,7 +149,10 @@ const CesiumContainer = ({
 
   // Create camera pins
   useEffect(() => {
+    console.log(`Camera effect triggered: viewer=${!!viewer}, cameras=${cameras.length}, viewMode=${viewMode}`);
     if (!viewer || !cameras.length || viewMode !== 'site') return;
+
+    console.log('Adding camera pins for site view:', cameras);
 
     // Clear existing camera pins
     cameraPinsRef.current.forEach(entity => {
