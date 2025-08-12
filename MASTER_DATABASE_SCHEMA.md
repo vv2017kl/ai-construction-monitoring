@@ -3196,20 +3196,328 @@ CREATE TABLE comparison_analysis_metrics (
 
 ---
 
-### **Version 1.9.0 (2025-01-12) - PHASE 2 CONTINUES**
-- **Updated from**: Screen Analysis #16 (Street View Comparison)
-- **Tables added**: 5 new tables (`street_view_comparisons`, `street_view_sessions`, `detected_changes`, `comparison_locations`, `comparison_analysis_metrics`)
-- **New section added**: Street View Comparison & Analysis (5 tables)
+## 🛣️ **PATH ADMINISTRATION & ROUTING**
+
+### **inspection_paths**
+```sql
+CREATE TABLE inspection_paths (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    
+    -- Path classification
+    path_type ENUM('inspection', 'maintenance', 'emergency', 'quality', 'tour', 'custom') NOT NULL,
+    status ENUM('active', 'inactive', 'draft', 'archived') DEFAULT 'draft',
+    priority ENUM('critical', 'high', 'medium', 'low') DEFAULT 'medium',
+    
+    -- Assignment and ownership
+    created_by UUID NOT NULL,
+    assigned_to VARCHAR(255), -- Team or individual assignment
+    assigned_user_ids JSON, -- Array of specific user IDs
+    
+    -- Path characteristics
+    estimated_duration_minutes INTEGER,
+    total_distance_meters DECIMAL(10,2),
+    waypoint_count INTEGER DEFAULT 0,
+    zone_coverage JSON, -- Array of zone IDs covered
+    
+    -- Performance metrics
+    usage_count INTEGER DEFAULT 0,
+    completion_rate DECIMAL(5,2) DEFAULT 0.00,
+    average_completion_time_minutes INTEGER,
+    success_rate DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Path configuration
+    path_coordinates JSON, -- Array of waypoint coordinates
+    zone_sequence JSON, -- Ordered zone visit sequence
+    required_equipment JSON, -- Required tools/equipment
+    safety_requirements JSON, -- Safety protocols
+    
+    -- Schedule and timing
+    is_scheduled BOOLEAN DEFAULT FALSE,
+    schedule_frequency ENUM('daily', 'weekly', 'monthly', 'on_demand'),
+    schedule_days JSON, -- Days of week if recurring
+    preferred_time_slots JSON, -- Time ranges for execution
+    
+    -- Metadata
+    weather_dependency ENUM('any', 'clear_only', 'daylight_only'),
+    skill_level_required ENUM('basic', 'intermediate', 'advanced', 'expert'),
+    certification_required JSON, -- Required certifications
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_used TIMESTAMP,
+    archived_at TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    
+    INDEX idx_inspection_paths_site_type (site_id, path_type, status),
+    INDEX idx_inspection_paths_priority (priority, status),
+    INDEX idx_inspection_paths_usage (usage_count DESC, completion_rate DESC),
+    INDEX idx_inspection_paths_schedule (is_scheduled, schedule_frequency),
+    FULLTEXT INDEX idx_inspection_paths_search (name, description)
+);
+```
+
+### **path_waypoints**
+```sql
+CREATE TABLE path_waypoints (
+    id UUID PRIMARY KEY,
+    path_id UUID NOT NULL,
+    waypoint_order INTEGER NOT NULL,
+    waypoint_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    
+    -- Location details
+    coordinates_x DECIMAL(10,6) NOT NULL,
+    coordinates_y DECIMAL(10,6) NOT NULL,
+    elevation DECIMAL(8,2),
+    zone_id UUID,
+    
+    -- Waypoint configuration
+    waypoint_type ENUM('checkpoint', 'inspection', 'maintenance', 'safety', 'assembly', 'exit', 'viewpoint', 'start', 'end', 'rest') NOT NULL,
+    is_mandatory BOOLEAN DEFAULT TRUE,
+    estimated_time_minutes INTEGER DEFAULT 5,
+    inspection_checklist JSON, -- Inspection items at this waypoint
+    
+    -- Camera and monitoring
+    camera_id UUID,
+    monitoring_required BOOLEAN DEFAULT FALSE,
+    photo_required BOOLEAN DEFAULT FALSE,
+    notes_required BOOLEAN DEFAULT FALSE,
+    
+    -- Safety and access
+    safety_level ENUM('safe', 'caution', 'restricted', 'danger') DEFAULT 'safe',
+    required_ppe JSON, -- PPE required at this waypoint
+    access_restrictions JSON, -- Access level requirements
+    weather_restrictions JSON, -- Weather limitations
+    
+    -- Performance tracking
+    visit_count INTEGER DEFAULT 0,
+    average_time_spent_minutes DECIMAL(5,2) DEFAULT 0.00,
+    issue_frequency DECIMAL(5,2) DEFAULT 0.00,
+    last_visited TIMESTAMP,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (path_id) REFERENCES inspection_paths(id) ON DELETE CASCADE,
+    FOREIGN KEY (zone_id) REFERENCES zones(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    
+    INDEX idx_path_waypoints_path_order (path_id, waypoint_order),
+    INDEX idx_path_waypoints_zone (zone_id, waypoint_type),
+    INDEX idx_path_waypoints_camera (camera_id, monitoring_required),
+    INDEX idx_path_waypoints_performance (visit_count DESC, issue_frequency),
+    UNIQUE KEY unique_path_waypoint_order (path_id, waypoint_order)
+);
+```
+
+### **path_executions**
+```sql
+CREATE TABLE path_executions (
+    id UUID PRIMARY KEY,
+    path_id UUID NOT NULL,
+    executor_id UUID NOT NULL,
+    session_id UUID UNIQUE, -- Unique session identifier
+    
+    -- Execution timing
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    planned_duration_minutes INTEGER,
+    actual_duration_minutes INTEGER,
+    is_completed BOOLEAN DEFAULT FALSE,
+    
+    -- Execution details
+    execution_type ENUM('scheduled', 'on_demand', 'emergency', 'training', 'audit') NOT NULL,
+    execution_reason TEXT,
+    weather_conditions TEXT,
+    equipment_used JSON, -- Equipment/tools used during execution
+    
+    -- Progress tracking
+    waypoints_visited INTEGER DEFAULT 0,
+    waypoints_total INTEGER,
+    completion_percentage DECIMAL(5,2) DEFAULT 0.00,
+    current_waypoint_id UUID,
+    
+    -- Quality metrics
+    quality_score DECIMAL(5,2) DEFAULT 0.00,
+    issues_found INTEGER DEFAULT 0,
+    photos_taken INTEGER DEFAULT 0,
+    notes_count INTEGER DEFAULT 0,
+    
+    -- Performance indicators
+    deviation_from_path DECIMAL(8,2) DEFAULT 0.00, -- Meters off path
+    pause_time_minutes INTEGER DEFAULT 0,
+    break_count INTEGER DEFAULT 0,
+    interruption_count INTEGER DEFAULT 0,
+    
+    -- Status and outcome
+    execution_status ENUM('in_progress', 'completed', 'paused', 'cancelled', 'failed') DEFAULT 'in_progress',
+    cancellation_reason TEXT,
+    supervisor_reviewed BOOLEAN DEFAULT FALSE,
+    reviewed_by UUID,
+    review_score DECIMAL(3,1), -- 1-10 supervisor rating
+    
+    -- Safety and compliance
+    safety_incidents INTEGER DEFAULT 0,
+    ppe_violations INTEGER DEFAULT 0,
+    compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    safety_notes TEXT,
+    
+    -- GPS and tracking
+    gps_tracking_enabled BOOLEAN DEFAULT TRUE,
+    gps_accuracy_avg DECIMAL(8,2), -- Average GPS accuracy in meters
+    distance_traveled DECIMAL(10,2), -- Actual distance traveled
+    route_deviation_score DECIMAL(5,2), -- How closely route was followed
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (path_id) REFERENCES inspection_paths(id),
+    FOREIGN KEY (executor_id) REFERENCES users(id),
+    FOREIGN KEY (current_waypoint_id) REFERENCES path_waypoints(id),
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    
+    INDEX idx_path_executions_path_time (path_id, started_at DESC),
+    INDEX idx_path_executions_executor (executor_id, execution_status, started_at DESC),
+    INDEX idx_path_executions_status (execution_status, started_at DESC),
+    INDEX idx_path_executions_quality (quality_score DESC, compliance_score DESC),
+    INDEX idx_path_executions_session (session_id, execution_status)
+);
+```
+
+### **path_execution_waypoints**
+```sql
+CREATE TABLE path_execution_waypoints (
+    id UUID PRIMARY KEY,
+    execution_id UUID NOT NULL,
+    waypoint_id UUID NOT NULL,
+    
+    -- Visit details
+    visited_at TIMESTAMP,
+    departure_at TIMESTAMP,
+    time_spent_minutes DECIMAL(5,2),
+    is_skipped BOOLEAN DEFAULT FALSE,
+    skip_reason TEXT,
+    
+    -- Location verification
+    actual_coordinates_x DECIMAL(10,6),
+    actual_coordinates_y DECIMAL(10,6),
+    gps_accuracy DECIMAL(8,2),
+    location_verified BOOLEAN DEFAULT FALSE,
+    distance_from_waypoint DECIMAL(8,2), -- Distance from intended waypoint
+    
+    -- Inspection results
+    inspection_completed BOOLEAN DEFAULT FALSE,
+    inspection_score DECIMAL(5,2),
+    issues_found INTEGER DEFAULT 0,
+    photos_taken INTEGER DEFAULT 0,
+    notes TEXT,
+    
+    -- Compliance and safety
+    ppe_compliance BOOLEAN DEFAULT TRUE,
+    safety_protocol_followed BOOLEAN DEFAULT TRUE,
+    environmental_conditions TEXT,
+    
+    -- Media evidence
+    photo_urls JSON, -- Array of photo URLs
+    video_urls JSON, -- Array of video URLs
+    document_urls JSON, -- Array of document URLs
+    
+    -- Quality metrics
+    inspector_confidence DECIMAL(5,2), -- Confidence in inspection quality
+    requires_follow_up BOOLEAN DEFAULT FALSE,
+    follow_up_notes TEXT,
+    priority_level ENUM('low', 'medium', 'high', 'urgent'),
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (execution_id) REFERENCES path_executions(id) ON DELETE CASCADE,
+    FOREIGN KEY (waypoint_id) REFERENCES path_waypoints(id),
+    
+    INDEX idx_execution_waypoints_execution (execution_id, visited_at DESC),
+    INDEX idx_execution_waypoints_waypoint (waypoint_id, visited_at DESC),
+    INDEX idx_execution_waypoints_issues (issues_found DESC, requires_follow_up),
+    INDEX idx_execution_waypoints_compliance (ppe_compliance, safety_protocol_followed),
+    UNIQUE KEY unique_execution_waypoint (execution_id, waypoint_id)
+);
+```
+
+### **path_templates**
+```sql
+CREATE TABLE path_templates (
+    id UUID PRIMARY KEY,
+    template_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    template_type ENUM('inspection', 'maintenance', 'emergency', 'quality', 'tour', 'custom') NOT NULL,
+    
+    -- Template configuration
+    base_waypoint_count INTEGER,
+    estimated_duration_minutes INTEGER,
+    recommended_zones JSON, -- Suggested zone types
+    required_equipment JSON, -- Standard equipment list
+    
+    -- Template characteristics
+    difficulty_level ENUM('basic', 'intermediate', 'advanced', 'expert') DEFAULT 'basic',
+    skill_requirements JSON, -- Required skills/certifications
+    safety_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    
+    -- Usage and popularity
+    usage_count INTEGER DEFAULT 0,
+    success_rate DECIMAL(5,2) DEFAULT 0.00,
+    user_rating DECIMAL(3,1) DEFAULT 0.0,
+    rating_count INTEGER DEFAULT 0,
+    
+    -- Template structure
+    waypoint_template JSON, -- Default waypoint configuration
+    inspection_checklist JSON, -- Standard checklist items
+    customizable_fields JSON, -- Fields that can be modified
+    
+    -- Access and permissions
+    is_public BOOLEAN DEFAULT TRUE,
+    created_by UUID NOT NULL,
+    organization_specific BOOLEAN DEFAULT FALSE,
+    industry_category VARCHAR(100),
+    
+    -- Versioning
+    version VARCHAR(20) DEFAULT '1.0',
+    parent_template_id UUID, -- Reference to parent template
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deprecated_at TIMESTAMP,
+    
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (parent_template_id) REFERENCES path_templates(id),
+    
+    INDEX idx_path_templates_type (template_type, is_active),
+    INDEX idx_path_templates_popularity (usage_count DESC, user_rating DESC),
+    INDEX idx_path_templates_difficulty (difficulty_level, safety_level),
+    FULLTEXT INDEX idx_path_templates_search (template_name, description)
+);
+```
+
+---
+
+### **Version 1.10.0 (2025-01-12) - PHASE 2 CONTINUES**
+- **Updated from**: Screen Analysis #17 (Path Administration)
+- **Tables added**: 5 new tables (`inspection_paths`, `path_waypoints`, `path_executions`, `path_execution_waypoints`, `path_templates`)
+- **New section added**: Path Administration & Routing (5 tables)
 - **New features added**:
-  - Comprehensive street view session management for temporal comparisons
-  - AI-powered change detection and analysis between timeframes
-  - Location-based comparison tracking with priority scoring
-  - Advanced metrics calculation for progress and efficiency analysis
-  - Review workflow for change validation and approval
-- **New indexes**: Street view comparison performance indexes for temporal analysis and change detection
-- **Focus**: Temporal analysis, construction progress tracking, change detection, before/after documentation
-- **Updated table count**: **63 → 68 tables**
-- **Next update**: Screen Analysis #17 (Phase 2 continues)
+  - Comprehensive inspection path management with multiple path types and scheduling
+  - Detailed waypoint system with GPS tracking and inspection checklists
+  - Real-time path execution monitoring with performance metrics and compliance tracking
+  - Template-based path creation with industry-specific configurations
+  - Advanced execution analytics with quality scoring and route optimization
+- **New indexes**: Path administration performance indexes for execution tracking and route management
+- **Focus**: Inspection workflow optimization, GPS-guided navigation, execution monitoring, template standardization
+- **Updated table count**: **68 → 73 tables**
+- **Next update**: Screen Analysis #18 (Phase 2 continues)
 
 ---
 
