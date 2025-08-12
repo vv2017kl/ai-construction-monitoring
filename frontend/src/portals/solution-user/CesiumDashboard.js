@@ -5,7 +5,7 @@ import CesiumContainer from '../../components/CesiumMap/CesiumContainer';
 import MapControls from '../../components/CesiumMap/MapControls';
 import AlertSummaryPanel from '../../components/CesiumMap/AlertSummaryPanel';
 import { useTheme } from '../../context/ThemeContext';
-import { mockSites, mockCameras, regions } from '../../data/cesiumMockData';
+import { constructionSites, constructionCameras, regions } from '../../data/cesiumMockData';
 import { ArrowLeft, Home, Navigation2, Maximize } from 'lucide-react';
 
 const CesiumDashboard = () => {
