@@ -1067,6 +1067,217 @@ CREATE TABLE notifications (
 );
 ```
 
+### **user_certifications**
+```sql
+CREATE TABLE user_certifications (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    
+    -- Certification details
+    certification_name VARCHAR(255) NOT NULL,
+    certification_type ENUM('safety', 'technical', 'license', 'training', 'medical') NOT NULL,
+    certification_number VARCHAR(100),
+    issuing_authority VARCHAR(255),
+    
+    -- Validity and compliance
+    issue_date DATE NOT NULL,
+    expiry_date DATE,
+    renewal_required BOOLEAN DEFAULT TRUE,
+    renewal_period_months INT,
+    
+    -- Status tracking
+    status ENUM('active', 'expired', 'suspended', 'pending_renewal') DEFAULT 'active',
+    verification_status ENUM('verified', 'pending', 'rejected') DEFAULT 'pending',
+    
+    -- Compliance requirements
+    required_for_roles JSON, -- Array of roles requiring this certification
+    required_for_zones JSON, -- Array of zone IDs requiring this certification
+    
+    -- Files and documentation
+    certificate_file_path VARCHAR(500),
+    verification_documents JSON, -- Array of document paths
+    
+    -- Audit trail
+    created_by UUID,
+    verified_by UUID,
+    last_verification_check DATE,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (verified_by) REFERENCES users(id),
+    
+    INDEX idx_user_certifications_user (user_id),
+    INDEX idx_user_certifications_type (certification_type),
+    INDEX idx_user_certifications_status (status),
+    INDEX idx_user_certifications_expiry (expiry_date),
+    INDEX idx_user_certifications_required_roles (required_for_roles),
+    UNIQUE KEY unique_user_certification (user_id, certification_name, certification_number)
+);
+```
+
+### **personnel_attendance**
+```sql
+CREATE TABLE personnel_attendance (
+    id UUID PRIMARY KEY,
+    personnel_id UUID NOT NULL,
+    attendance_date DATE NOT NULL,
+    
+    -- Check-in/Check-out
+    check_in_time TIMESTAMP,
+    check_out_time TIMESTAMP,
+    scheduled_start_time TIME,
+    scheduled_end_time TIME,
+    
+    -- Break management
+    break_start_time TIMESTAMP,
+    break_end_time TIMESTAMP,
+    total_break_minutes INT DEFAULT 0,
+    authorized_break_minutes INT DEFAULT 30,
+    
+    -- Time calculations
+    total_work_minutes INT DEFAULT 0,
+    overtime_hours DECIMAL(4,2) DEFAULT 0.00,
+    overtime_approved BOOLEAN DEFAULT FALSE,
+    
+    -- Location verification
+    location_check_in POINT,
+    location_check_out POINT,
+    gps_accuracy_check_in DECIMAL(8,2), -- meters
+    gps_accuracy_check_out DECIMAL(8,2),
+    
+    -- Device and method tracking
+    device_used_check_in VARCHAR(255), -- mobile, tablet, terminal, etc.
+    device_used_check_out VARCHAR(255),
+    check_in_method ENUM('gps', 'qr_code', 'nfc', 'manual', 'facial_recognition') DEFAULT 'gps',
+    check_out_method ENUM('gps', 'qr_code', 'nfc', 'manual', 'facial_recognition') DEFAULT 'gps',
+    
+    -- Status and compliance
+    attendance_status ENUM('present', 'late', 'absent', 'partial', 'overtime') DEFAULT 'present',
+    tardiness_minutes INT DEFAULT 0,
+    early_departure_minutes INT DEFAULT 0,
+    
+    -- Approval and notes
+    approved_by UUID,
+    supervisor_notes TEXT,
+    employee_notes TEXT,
+    
+    FOREIGN KEY (personnel_id) REFERENCES site_personnel(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    
+    UNIQUE KEY unique_personnel_date (personnel_id, attendance_date),
+    INDEX idx_attendance_personnel_date (personnel_id, attendance_date DESC),
+    INDEX idx_attendance_status (attendance_status),
+    INDEX idx_attendance_overtime (overtime_hours DESC),
+    SPATIAL INDEX idx_attendance_checkin_location (location_check_in),
+    SPATIAL INDEX idx_attendance_checkout_location (location_check_out)
+);
+```
+
+### **personnel_safety_scores**
+```sql
+CREATE TABLE personnel_safety_scores (
+    id UUID PRIMARY KEY,
+    personnel_id UUID NOT NULL,
+    recorded_date DATE NOT NULL,
+    recorded_time TIME DEFAULT CURRENT_TIME,
+    
+    -- Safety metrics
+    safety_score DECIMAL(5,2) NOT NULL, -- 0.00 to 100.00
+    ppe_compliance_score DECIMAL(5,2) NOT NULL,
+    behavior_score DECIMAL(5,2) DEFAULT 100.00,
+    zone_compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Assessment details
+    assessment_type ENUM('ai_automated', 'supervisor_review', 'incident_based', 'periodic_review') NOT NULL,
+    assessed_by UUID,
+    assessment_camera_id UUID,
+    assessment_zone_id UUID,
+    
+    -- Detailed breakdown
+    ppe_items_status JSON, -- Detailed PPE compliance by item
+    safety_violations JSON, -- Array of violations detected
+    positive_behaviors JSON, -- Array of positive safety behaviors
+    
+    -- Context and evidence
+    assessment_context TEXT,
+    evidence_files JSON, -- Array of evidence file paths
+    ai_confidence_score DECIMAL(5,2),
+    
+    -- Improvement tracking
+    previous_score DECIMAL(5,2),
+    score_change DECIMAL(6,2), -- Can be negative
+    improvement_notes TEXT,
+    corrective_actions JSON,
+    
+    FOREIGN KEY (personnel_id) REFERENCES site_personnel(id),
+    FOREIGN KEY (assessed_by) REFERENCES users(id),
+    FOREIGN KEY (assessment_camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (assessment_zone_id) REFERENCES zones(id),
+    
+    INDEX idx_safety_scores_personnel_date (personnel_id, recorded_date DESC),
+    INDEX idx_safety_scores_type (assessment_type),
+    INDEX idx_safety_scores_score (safety_score DESC),
+    INDEX idx_safety_scores_assessor (assessed_by),
+    INDEX idx_safety_scores_zone (assessment_zone_id)
+);
+```
+
+### **department_assignments**
+```sql
+CREATE TABLE department_assignments (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    site_id UUID NOT NULL,
+    
+    -- Department and position
+    department_name VARCHAR(255) NOT NULL,
+    position_title VARCHAR(255) NOT NULL,
+    position_level ENUM('entry', 'junior', 'mid', 'senior', 'lead', 'supervisor', 'manager') DEFAULT 'entry',
+    
+    -- Reporting structure
+    reporting_manager_id UUID,
+    department_head_id UUID,
+    
+    -- Assignment details
+    start_date DATE NOT NULL,
+    end_date DATE,
+    is_active BOOLEAN DEFAULT TRUE,
+    assignment_type ENUM('permanent', 'temporary', 'contract', 'intern') DEFAULT 'permanent',
+    
+    -- Responsibilities and permissions
+    job_responsibilities JSON, -- Array of responsibility descriptions
+    zone_access_permissions JSON, -- Array of zone IDs user can access
+    equipment_permissions JSON, -- Array of equipment IDs user can operate
+    
+    -- Work schedule
+    default_shift_start TIME,
+    default_shift_end TIME,
+    work_days JSON, -- Array of weekdays (0=Sunday, 1=Monday, etc.)
+    
+    -- Compensation (optional)
+    hourly_rate DECIMAL(8,2),
+    overtime_rate DECIMAL(8,2),
+    
+    -- Assignment history
+    assigned_by UUID,
+    assignment_reason TEXT,
+    previous_assignment_id UUID, -- Reference to previous assignment
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (reporting_manager_id) REFERENCES users(id),
+    FOREIGN KEY (department_head_id) REFERENCES users(id),
+    FOREIGN KEY (assigned_by) REFERENCES users(id),
+    FOREIGN KEY (previous_assignment_id) REFERENCES department_assignments(id),
+    
+    INDEX idx_department_assignments_user (user_id),
+    INDEX idx_department_assignments_site (site_id),
+    INDEX idx_department_assignments_department (department_name),
+    INDEX idx_department_assignments_manager (reporting_manager_id),
+    INDEX idx_department_assignments_active (is_active, start_date DESC)
+);
+```
+
 ---
 
 ## 📈 **Database Statistics**
