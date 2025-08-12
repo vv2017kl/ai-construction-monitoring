@@ -44,7 +44,8 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, portal = 'solution-user' }) =>
         title: 'DASHBOARD',
         icon: Home,
         items: [
-          { name: 'Dashboard Home', path: '/dashboard', icon: Home }
+          { name: 'My Dashboard', path: '/dashboard', icon: Home },
+          { name: 'GeoSpatial View', path: '/cesium-dashboard', icon: Globe, badge: 'NEW' }
         ]
       },
       {
