@@ -173,8 +173,8 @@ Profile and settings screens:
 
 ---
 
-**Next Screen**: **Street View Comparison** (`/street-comparison`)  
-**Rationale**: Visual comparison tools for before/after analysis and progress documentation - continuing Phase 2 enhanced functionality screens.
+**Next Screen**: **User Directory** (`/admin/users`)  
+**Rationale**: Administrative user management system with role-based permissions and access control - launching Phase 3 admin portal screens.
 
 **Document Created**: 2025-01-12  
-**Last Updated**: 2025-01-12 (After Historical Street View completion - Phase 2 Milestone)
+**Last Updated**: 2025-01-12 (After Admin Dashboard completion - Phase 2 Near Complete at 80%)
