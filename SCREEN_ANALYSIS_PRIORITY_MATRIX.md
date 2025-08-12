@@ -155,8 +155,8 @@ Profile and settings screens:
 
 ---
 
-**Next Screen**: **Time Lapse** (`/time-lapse`)  
-**Rationale**: Important for progress documentation, project management, and time-series analysis - completing Phase 1 core operational screens.
+**Next Screen**: **Street View Comparison** (`/street-comparison`)  
+**Rationale**: Visual comparison tools for before/after analysis and progress documentation - continuing Phase 2 enhanced functionality screens.
 
 **Document Created**: 2025-01-12  
 **Last Updated**: 2025-01-12 (After Reports Center completion)
