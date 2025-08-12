@@ -107,7 +107,7 @@ const CesiumDashboard = () => {
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
-    setShowSidebar(!isFullscreen); // Hide sidebar in fullscreen
+    setShowSidebar(isFullscreen); // Show sidebar when exiting fullscreen, hide when entering
   };
 
   // Keyboard shortcuts
