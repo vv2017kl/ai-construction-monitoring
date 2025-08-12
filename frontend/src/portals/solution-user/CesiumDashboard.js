@@ -29,13 +29,10 @@ const CesiumDashboard = () => {
     accessible_groups: ['33333333-3333-3333-3333-333333333333']
   });
 
-  // Filter sites and cameras based on user permissions
+  // Filter sites and cameras based on user permissions  
   const accessibleSites = constructionSites.filter(site => {
-    if (userRole.level === 1) return true; // SysAdmin
-    if (userRole.level === 2) return site.company_id === userRole.company_id;
-    if (userRole.level === 3) return userRole.accessible_groups.includes(site.group_id);
-    if (userRole.level >= 4) return userRole.accessible_sites.includes(site.id);
-    return false;
+    // For now, show all sites - in production this would be based on real user permissions
+    return true;
   });
 
   const getCurrentCameras = () => {
