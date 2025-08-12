@@ -138,7 +138,7 @@ const MapLiveView = () => {
                   className="p-2 bg-black/50 hover:bg-black/70 rounded-lg transition-all"
                   title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                 >
-                  {isFullscreen ? <ExitFullscreen className="w-5 h-5" /> : <Fullscreen className="w-5 h-5" />}
+                  {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
                 </button>
               </div>
             </div>
