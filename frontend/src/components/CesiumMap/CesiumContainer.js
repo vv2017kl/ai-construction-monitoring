@@ -38,35 +38,43 @@ const CesiumContainer = ({
   // Initialize Cesium viewer
   useEffect(() => {
     if (cesiumContainerRef.current && !viewer) {
-      const cesiumViewer = new Viewer(cesiumContainerRef.current, {
-        baseLayerPicker: false,
-        geocoder: false,
-        homeButton: false,
-        sceneModePicker: false,
-        navigationHelpButton: false,
-        animation: false,
-        timeline: false,
-        fullscreenButton: false,
-        vrButton: false
-      });
+      try {
+        const cesiumViewer = new Viewer(cesiumContainerRef.current, {
+          baseLayerPicker: false,
+          geocoder: false,
+          homeButton: false,
+          sceneModePicker: false,
+          navigationHelpButton: false,
+          animation: false,
+          timeline: false,
+          fullscreenButton: false,
+          vrButton: false
+        });
 
-      // Set initial camera position (global view)
-      cesiumViewer.camera.setView({
-        destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000), // Between Dubai and India
-        orientation: {
-          heading: 0.0,
-          pitch: -CesiumMath.PI_OVER_TWO,
-          roll: 0.0
-        }
-      });
+        // Set initial camera position (global view)
+        cesiumViewer.camera.setView({
+          destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000), // Between Dubai and India
+          orientation: {
+            heading: 0.0,
+            pitch: -CesiumMath.PI_OVER_TWO,
+            roll: 0.0
+          }
+        });
 
-      setViewer(cesiumViewer);
-      viewerRef.current = cesiumViewer;
+        setViewer(cesiumViewer);
+        viewerRef.current = cesiumViewer;
+      } catch (error) {
+        console.error('Failed to initialize Cesium viewer:', error);
+      }
     }
 
     return () => {
       if (viewerRef.current) {
-        viewerRef.current.destroy();
+        try {
+          viewerRef.current.destroy();
+        } catch (error) {
+          console.error('Error destroying Cesium viewer:', error);
+        }
         viewerRef.current = null;
         setViewer(null);
       }
