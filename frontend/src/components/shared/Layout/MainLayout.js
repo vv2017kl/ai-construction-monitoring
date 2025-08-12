@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
-const MainLayout = ({ children, portal = 'solution-user' }) => {
+const MainLayout = ({ children, portal = 'solution-user', showSidebar = true, className = '' }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
@@ -33,16 +33,18 @@ const MainLayout = ({ children, portal = 'solution-user' }) => {
   };
 
   return (
-    <div className="h-screen flex bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar
-        isCollapsed={sidebarCollapsed}
-        onToggleCollapse={toggleSidebar}
-        portal={portal}
-      />
+    <div className={`h-screen flex bg-gray-50 ${className}`}>
+      {/* Conditionally render sidebar based on showSidebar prop */}
+      {showSidebar && (
+        <Sidebar
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+          portal={portal}
+        />
+      )}
 
       {/* Mobile Overlay */}
-      {isMobile && !sidebarCollapsed && (
+      {isMobile && !sidebarCollapsed && showSidebar && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-20"
           onClick={toggleSidebar}
@@ -51,13 +53,15 @@ const MainLayout = ({ children, portal = 'solution-user' }) => {
 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-16' : 'ml-64'
+        !showSidebar ? 'ml-0' : (sidebarCollapsed ? 'ml-16' : 'ml-64')
       }`}>
-        {/* Header */}
-        <Header 
-          onToggleSidebar={toggleSidebar}
-          portal={portal}
-        />
+        {/* Conditionally render header based on showSidebar prop */}
+        {showSidebar && (
+          <Header 
+            onToggleSidebar={toggleSidebar}
+            portal={portal}
+          />
+        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto">
