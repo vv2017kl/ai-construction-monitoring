@@ -276,21 +276,21 @@ const CesiumContainer = ({
           const [longitude, latitude] = selectedSite.coordinates;
           console.log(`SITE VIEW: Moving close to ${selectedSite.name} at [${longitude}, ${latitude}]`);
           
-          // Force immediate close zoom for site view
+          // Force very close zoom for individual site with cameras
           setTimeout(() => {
             if (viewer && viewer.camera) {
               viewer.camera.flyTo({
-                destination: Cartesian3.fromDegrees(longitude, latitude, 200), // 200 meters altitude
+                destination: Cartesian3.fromDegrees(longitude, latitude, 300), // 300 meters - closer for camera visibility
                 orientation: {
                   heading: 0.0,
-                  pitch: -CesiumMath.PI_OVER_SIX,
+                  pitch: -CesiumMath.PI_OVER_FOUR, // 45 degree angle for better view
                   roll: 0.0
                 },
-                duration: 3.0 // 3 second animation to site level
+                duration: 4.0 // 4 second animation for dramatic zoom
               });
-              console.log('Site zoom animation started');
+              console.log(`Site zoom animation started to ${selectedSite.name}`);
             }
-          }, 100); // Small delay to ensure state is updated
+          }, 100);
         }
         break;
     }
