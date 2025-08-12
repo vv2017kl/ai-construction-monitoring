@@ -25,14 +25,14 @@ This document serves as the **single source of truth** for all database table de
 
 ### **Core Entity Count:**
 - **Sites & Locations**: 3 tables
-- **Personnel & Users**: 2 tables  
+- **Personnel & Users**: 3 tables  
 - **Cameras & Monitoring**: 2 tables
 - **AI & Detection**: 3 tables
 - **Alerts & Safety**: 3 tables
 - **Analytics & Reporting**: 2 tables
 - **System & Configuration**: 3 tables
 
-**Total Tables**: 18 tables
+**Total Tables**: 19 tables
 
 ---
 
