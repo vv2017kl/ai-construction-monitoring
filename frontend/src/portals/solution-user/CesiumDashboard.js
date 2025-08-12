@@ -35,6 +35,8 @@ const CesiumDashboard = () => {
     return true;
   });
 
+  console.log('CesiumDashboard loaded', constructionSites.length, 'sites, accessible:', accessibleSites.length);
+
   const getCurrentCameras = () => {
     if (!selectedSite) return [];
     const cameras = constructionCameras.filter(camera => camera.siteId === selectedSite.id);
