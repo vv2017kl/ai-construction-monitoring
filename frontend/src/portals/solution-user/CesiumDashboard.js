@@ -37,7 +37,9 @@ const CesiumDashboard = () => {
 
   const getCurrentCameras = () => {
     if (!selectedSite) return [];
-    return constructionCameras.filter(camera => camera.siteId === selectedSite.id);
+    const cameras = constructionCameras.filter(camera => camera.siteId === selectedSite.id);
+    console.log(`Found ${cameras.length} cameras for site ${selectedSite.id}:`, cameras);
+    return cameras;
   };
 
   // Navigation breadcrumb
