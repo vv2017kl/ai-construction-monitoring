@@ -232,9 +232,12 @@ const CesiumContainer = ({
   // Camera movement based on view mode
   useEffect(() => {
     if (!viewer) return;
+    
+    console.log(`Camera movement effect triggered: viewMode=${viewMode}, selectedSite=${selectedSite?.name || 'none'}`);
 
     switch (viewMode) {
       case 'global':
+        console.log('Moving to global view');
         viewer.camera.setView({
           destination: Cartesian3.fromDegrees(65.0000, 20.0000, 5000000),
           orientation: {
@@ -248,6 +251,7 @@ const CesiumContainer = ({
       case 'regional':
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
+          console.log(`Moving to regional view for ${selectedSite.name} at [${longitude}, ${latitude}]`);
           viewer.camera.setView({
             destination: Cartesian3.fromDegrees(longitude, latitude, 50000),
             orientation: {
@@ -262,8 +266,9 @@ const CesiumContainer = ({
       case 'site':
         if (selectedSite) {
           const [longitude, latitude] = selectedSite.coordinates;
+          console.log(`Moving to site view for ${selectedSite.name} at [${longitude}, ${latitude}] - 100m altitude`);
           viewer.camera.setView({
-            destination: Cartesian3.fromDegrees(longitude, latitude, 100), // Much closer - 100 meters
+            destination: Cartesian3.fromDegrees(longitude, latitude, 100), // Very close - 100 meters
             orientation: {
               heading: 0.0,
               pitch: -CesiumMath.PI_OVER_SIX, // Less steep angle
