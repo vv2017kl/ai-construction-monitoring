@@ -24,17 +24,11 @@ These screens are essential for daily operations and safety management:
 ### **🔥 TIER 1: Critical Operations (High Priority)**
 These screens are essential for daily operations and safety management:
 
-**09. Reports Center** (`/reports`) - **NEXT**
-- **Priority**: CRITICAL 
-- **Rationale**: Compliance reporting, business intelligence, audit trails - essential for regulatory compliance
-- **Dependencies**: All system data aggregation, export systems, scheduled reporting
-- **Integration**: Data analytics, automated reporting, compliance documentation
-
-**10. Time Lapse** (`/time-lapse`)
-- **Priority**: MEDIUM-HIGH
-- **Rationale**: Progress documentation, project management, time-series analysis
-- **Dependencies**: Camera feeds, time-series data, progress tracking
-- **Integration**: ZoneMinder time-series, construction progress tracking
+**10. Time Lapse** (`/time-lapse`) - **NEXT**
+- **Priority**: MEDIUM-HIGH 
+- **Rationale**: Progress documentation, project management, time-series analysis - important for project tracking
+- **Dependencies**: Camera feeds, time-series data, progress tracking, construction timeline analysis
+- **Integration**: ZoneMinder time-series, construction progress tracking, automated documentation
 
 ### **🎯 TIER 2: Operational Excellence (Medium-High Priority)**
 Important for comprehensive site management and compliance:
