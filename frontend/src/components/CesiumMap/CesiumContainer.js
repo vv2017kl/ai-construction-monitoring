@@ -185,9 +185,9 @@ const CesiumContainer = ({
 
   // Handle click events
   useEffect(() => {
-    if (!viewer) return;
+    if (!viewer || !viewer.cesiumWidget || !viewer.cesiumWidget.cesiumContainer) return;
 
-    const handler = viewer.cesiumWidget.cesiumContainer.addEventListener('click', (event) => {
+    const clickHandler = (event) => {
       const picked = viewer.scene.pick(viewer.camera.getPickRay(event));
       
       if (picked && picked.id) {
@@ -202,11 +202,13 @@ const CesiumContainer = ({
           }
         }
       }
-    });
+    };
+
+    viewer.cesiumWidget.cesiumContainer.addEventListener('click', clickHandler);
 
     return () => {
-      if (handler) {
-        viewer.cesiumWidget.cesiumContainer.removeEventListener('click', handler);
+      if (viewer && viewer.cesiumWidget && viewer.cesiumWidget.cesiumContainer) {
+        viewer.cesiumWidget.cesiumContainer.removeEventListener('click', clickHandler);
       }
     };
   }, [viewer, onSiteClick, onCameraClick]);
