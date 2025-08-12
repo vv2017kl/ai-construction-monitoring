@@ -18,9 +18,6 @@ const MapControls = ({
   const [siteDropdownOpen, setSiteDropdownOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
 
-  // Import regions data
-  const { regions } = require('../../data/cesiumMockData');
-
   // Filter sites based on user role
   const accessibleSites = sites.filter(site => {
     // Basic access control - in real app this would be more sophisticated
