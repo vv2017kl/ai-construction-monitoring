@@ -3818,20 +3818,1232 @@ CREATE TABLE executive_reports (
 
 ---
 
-### **Version 1.11.0 (2025-01-12) - PHASE 2 CONTINUES - ADMIN PORTAL START**
-- **Updated from**: Screen Analysis #18 (Admin Dashboard)
-- **Tables added**: 5 new tables (`admin_dashboard_metrics`, `site_performance_summary`, `system_health_logs`, `admin_activity_log`, `executive_reports`)
-- **New section added**: Admin Dashboard & System Management (5 tables)
+## 👥 **USER MANAGEMENT & ADMINISTRATION**
+
+### **user_management_profiles**
+```sql
+CREATE TABLE user_management_profiles (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE,
+    
+    -- Extended profile information
+    employee_number VARCHAR(50) UNIQUE,
+    badge_number VARCHAR(50) UNIQUE,
+    social_security_number VARCHAR(20), -- Encrypted
+    date_of_birth DATE,
+    gender ENUM('male', 'female', 'other', 'prefer_not_to_say'),
+    nationality VARCHAR(100),
+    
+    -- Address and contact
+    home_address TEXT,
+    home_city VARCHAR(100),
+    home_state VARCHAR(100),
+    home_zip_code VARCHAR(20),
+    home_country VARCHAR(100),
+    emergency_contact_name VARCHAR(255),
+    emergency_contact_phone VARCHAR(20),
+    emergency_contact_relationship VARCHAR(100),
+    
+    -- Professional details
+    position_title VARCHAR(255),
+    position_level ENUM('entry', 'junior', 'mid', 'senior', 'lead', 'supervisor', 'manager', 'director', 'executive'),
+    pay_grade VARCHAR(50),
+    reports_to_user_id UUID,
+    direct_reports_count INTEGER DEFAULT 0,
+    
+    -- Employment information
+    employment_type ENUM('full_time', 'part_time', 'contract', 'temporary', 'consultant', 'intern'),
+    employment_status ENUM('active', 'on_leave', 'terminated', 'retired', 'suspended'),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    probation_end_date DATE,
+    performance_review_due DATE,
+    
+    -- Skills and qualifications
+    skills JSON,
+    qualifications JSON,
+    languages JSON,
+    special_certifications JSON,
+    
+    -- Preferences and settings
+    notification_preferences JSON,
+    ui_theme VARCHAR(50) DEFAULT 'default',
+    timezone VARCHAR(100),
+    language_preference VARCHAR(10) DEFAULT 'en',
+    
+    -- Privacy and compliance
+    privacy_settings JSON,
+    gdpr_consent BOOLEAN DEFAULT FALSE,
+    marketing_consent BOOLEAN DEFAULT FALSE,
+    data_retention_consent BOOLEAN DEFAULT TRUE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (reports_to_user_id) REFERENCES users(id),
+    
+    INDEX idx_user_profiles_employee (employee_number, badge_number),
+    INDEX idx_user_profiles_position (position_level, employment_status),
+    INDEX idx_user_profiles_dates (start_date, end_date)
+);
+```
+
+### **user_role_assignments**
+```sql
+CREATE TABLE user_role_assignments (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    role_type ENUM('system_role', 'site_role', 'department_role', 'project_role', 'temporary_role'),
+    role_name VARCHAR(255) NOT NULL,
+    role_description TEXT,
+    
+    -- Assignment scope
+    site_id UUID,
+    department_id UUID,
+    project_id UUID,
+    
+    -- Permission details
+    permissions JSON,
+    access_level ENUM('read', 'write', 'admin', 'super_admin') DEFAULT 'read',
+    resource_restrictions JSON,
+    time_restrictions JSON,
+    
+    -- Assignment metadata
+    assigned_by UUID NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    effective_from DATE NOT NULL,
+    effective_until DATE,
+    is_primary_role BOOLEAN DEFAULT FALSE,
+    
+    -- Approval workflow
+    requires_approval BOOLEAN DEFAULT FALSE,
+    approved_by UUID,
+    approved_at TIMESTAMP,
+    approval_notes TEXT,
+    
+    -- Status and monitoring
+    assignment_status ENUM('pending', 'active', 'suspended', 'expired', 'revoked') DEFAULT 'pending',
+    last_used TIMESTAMP,
+    usage_count INTEGER DEFAULT 0,
+    
+    -- Audit trail
+    revoked_by UUID,
+    revoked_at TIMESTAMP,
+    revocation_reason TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (assigned_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    FOREIGN KEY (revoked_by) REFERENCES users(id),
+    
+    INDEX idx_role_assignments_user (user_id, assignment_status),
+    INDEX idx_role_assignments_role (role_type, role_name),
+    INDEX idx_role_assignments_scope (site_id, department_id),
+    INDEX idx_role_assignments_effective (effective_from, effective_until)
+);
+```
+
+### **user_session_management**
+```sql
+CREATE TABLE user_session_management (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    session_id VARCHAR(255) UNIQUE NOT NULL,
+    session_token VARCHAR(512) UNIQUE NOT NULL,
+    
+    -- Session details
+    login_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    logout_timestamp TIMESTAMP,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    session_duration_seconds INTEGER,
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    -- Client information
+    ip_address INET NOT NULL,
+    user_agent TEXT,
+    browser_info JSON,
+    device_info JSON,
+    operating_system VARCHAR(100),
+    
+    -- Location and access
+    login_location POINT,
+    access_method ENUM('web', 'mobile_app', 'api', 'sso', 'ldap') DEFAULT 'web',
+    authentication_method ENUM('password', 'sso', 'mfa', 'biometric', 'certificate') DEFAULT 'password',
+    
+    -- Security context
+    mfa_verified BOOLEAN DEFAULT FALSE,
+    risk_score DECIMAL(3,1),
+    suspicious_activity BOOLEAN DEFAULT FALSE,
+    concurrent_sessions INTEGER DEFAULT 1,
+    
+    -- Session management
+    force_logout BOOLEAN DEFAULT FALSE,
+    session_timeout_minutes INTEGER DEFAULT 480,
+    remember_me BOOLEAN DEFAULT FALSE,
+    auto_logout_at TIMESTAMP,
+    
+    -- Activity tracking
+    page_views INTEGER DEFAULT 0,
+    api_calls INTEGER DEFAULT 0,
+    downloads INTEGER DEFAULT 0,
+    uploads INTEGER DEFAULT 0,
+    
+    -- Compliance and audit
+    compliance_acknowledgment BOOLEAN DEFAULT FALSE,
+    terms_accepted_version VARCHAR(20),
+    privacy_policy_accepted BOOLEAN DEFAULT FALSE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    
+    INDEX idx_sessions_user_active (user_id, is_active, last_activity),
+    INDEX idx_sessions_token (session_token, is_active),
+    INDEX idx_sessions_security (risk_score, suspicious_activity),
+    INDEX idx_sessions_cleanup (is_active, auto_logout_at)
+);
+```
+
+### **user_activity_tracking**
+```sql
+CREATE TABLE user_activity_tracking (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    session_id UUID NOT NULL,
+    
+    -- Activity details
+    activity_type ENUM('login', 'logout', 'page_view', 'api_call', 'data_access', 'configuration_change', 'user_management', 'report_generation', 'alert_action') NOT NULL,
+    activity_description TEXT NOT NULL,
+    activity_category VARCHAR(100),
+    
+    -- Context information
+    resource_type VARCHAR(100),
+    resource_id UUID,
+    resource_name VARCHAR(255),
+    site_id UUID,
+    
+    -- Request details
+    request_method VARCHAR(10),
+    request_url TEXT,
+    request_payload JSON,
+    response_status INTEGER,
+    response_time_ms INTEGER,
+    
+    -- Geolocation and timing
+    activity_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    location_coordinates POINT,
+    location_accuracy DECIMAL(8,2),
+    timezone_offset INTEGER,
+    
+    -- Security and compliance
+    security_level ENUM('public', 'internal', 'confidential', 'restricted') DEFAULT 'internal',
+    data_classification VARCHAR(100),
+    requires_audit BOOLEAN DEFAULT TRUE,
+    compliance_tags JSON,
+    
+    -- Performance metrics
+    processing_time_ms INTEGER,
+    database_queries INTEGER DEFAULT 0,
+    cache_hits INTEGER DEFAULT 0,
+    errors_count INTEGER DEFAULT 0,
+    
+    -- User behavior analysis
+    is_automated BOOLEAN DEFAULT FALSE,
+    pattern_anomaly BOOLEAN DEFAULT FALSE,
+    risk_indicator DECIMAL(3,1),
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (session_id) REFERENCES user_session_management(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    
+    INDEX idx_activity_user_time (user_id, activity_timestamp DESC),
+    INDEX idx_activity_type (activity_type, activity_category),
+    INDEX idx_activity_security (security_level, requires_audit),
+    INDEX idx_activity_performance (response_time_ms, processing_time_ms)
+);
+```
+
+### **user_permissions_matrix**
+```sql
+CREATE TABLE user_permissions_matrix (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    permission_category VARCHAR(100) NOT NULL,
+    permission_name VARCHAR(255) NOT NULL,
+    
+    -- Permission scope
+    scope_type ENUM('global', 'site', 'department', 'project', 'resource') NOT NULL,
+    scope_id UUID,
+    scope_name VARCHAR(255),
+    
+    -- Access details
+    access_level ENUM('none', 'read', 'write', 'admin', 'owner') NOT NULL,
+    can_delegate BOOLEAN DEFAULT FALSE,
+    can_revoke BOOLEAN DEFAULT FALSE,
+    
+    -- Conditions and restrictions
+    conditions JSON,
+    time_restrictions JSON,
+    location_restrictions JSON,
+    device_restrictions JSON,
+    
+    -- Grant information
+    granted_by UUID NOT NULL,
+    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    granted_reason TEXT,
+    approval_required BOOLEAN DEFAULT FALSE,
+    approved_by UUID,
+    
+    -- Status and lifecycle
+    status ENUM('pending', 'active', 'suspended', 'expired', 'revoked') DEFAULT 'pending',
+    effective_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    effective_until TIMESTAMP,
+    auto_renewal BOOLEAN DEFAULT FALSE,
+    renewal_period_days INTEGER,
+    
+    -- Usage tracking
+    first_used TIMESTAMP,
+    last_used TIMESTAMP,
+    usage_count INTEGER DEFAULT 0,
+    abuse_reports INTEGER DEFAULT 0,
+    
+    -- Audit and compliance
+    audit_required BOOLEAN DEFAULT TRUE,
+    compliance_notes TEXT,
+    last_reviewed DATE,
+    next_review_due DATE,
+    reviewer_user_id UUID,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (granted_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    FOREIGN KEY (reviewer_user_id) REFERENCES users(id),
+    
+    INDEX idx_permissions_user_category (user_id, permission_category),
+    INDEX idx_permissions_scope (scope_type, scope_id),
+    INDEX idx_permissions_status (status, effective_until),
+    INDEX idx_permissions_review (next_review_due, audit_required),
+    UNIQUE KEY unique_user_permission_scope (user_id, permission_category, permission_name, scope_type, scope_id)
+);
+```
+
+---
+
+## 🏗️ **SITE CONFIGURATION & INFRASTRUCTURE**
+
+### **site_configurations**
+```sql
+CREATE TABLE site_configurations (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL UNIQUE,
+    
+    -- Basic configuration
+    timezone VARCHAR(100) DEFAULT 'America/New_York',
+    working_hours_start TIME DEFAULT '06:00',
+    working_hours_end TIME DEFAULT '18:00',
+    max_occupancy INTEGER DEFAULT 100,
+    safety_level ENUM('standard', 'high', 'critical') DEFAULT 'standard',
+    
+    -- AI and detection settings
+    ai_detection_enabled BOOLEAN DEFAULT TRUE,
+    ai_sensitivity_level ENUM('low', 'medium', 'high') DEFAULT 'medium',
+    detection_zones JSON,
+    detection_models JSON,
+    real_time_analysis BOOLEAN DEFAULT TRUE,
+    
+    -- Recording and storage
+    recording_retention_days INTEGER DEFAULT 30,
+    recording_quality ENUM('low', 'medium', 'high', 'ultra') DEFAULT 'high',
+    recording_schedule JSON,
+    storage_location VARCHAR(255),
+    backup_retention_days INTEGER DEFAULT 90,
+    
+    -- Alert and notification settings
+    alert_notifications_enabled BOOLEAN DEFAULT TRUE,
+    notification_methods JSON,
+    alert_escalation_rules JSON,
+    notification_recipients JSON,
+    
+    -- Emergency contacts and procedures
+    emergency_contacts JSON,
+    emergency_procedures JSON,
+    evacuation_plan_url VARCHAR(500),
+    safety_protocols JSON,
+    
+    -- Access control settings
+    access_control_type ENUM('manual', 'keycard', 'biometric', 'mobile') DEFAULT 'keycard',
+    visitor_management BOOLEAN DEFAULT TRUE,
+    contractor_access_rules JSON,
+    multi_factor_auth_required BOOLEAN DEFAULT FALSE,
+    
+    -- Integration settings
+    weather_monitoring BOOLEAN DEFAULT FALSE,
+    environmental_sensors JSON,
+    third_party_integrations JSON,
+    api_access_tokens JSON,
+    
+    -- Performance and maintenance
+    system_health_threshold INTEGER DEFAULT 85,
+    maintenance_schedule JSON,
+    performance_monitoring BOOLEAN DEFAULT TRUE,
+    automated_diagnostics BOOLEAN DEFAULT TRUE,
+    
+    -- Compliance and regulations
+    compliance_frameworks JSON,
+    audit_frequency ENUM('weekly', 'monthly', 'quarterly', 'annually') DEFAULT 'monthly',
+    documentation_requirements JSON,
+    regulatory_contacts JSON,
+    
+    -- Custom configurations
+    custom_fields JSON,
+    feature_flags JSON,
+    integration_endpoints JSON,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    configured_by UUID NOT NULL,
+    last_modified_by UUID NOT NULL,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (configured_by) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by) REFERENCES users(id),
+    
+    INDEX idx_site_configs_safety (safety_level, ai_detection_enabled),
+    INDEX idx_site_configs_compliance (compliance_frameworks, audit_frequency),
+    INDEX idx_site_configs_performance (system_health_threshold, performance_monitoring)
+);
+```
+
+### **site_infrastructure**
+```sql
+CREATE TABLE site_infrastructure (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL UNIQUE,
+    
+    -- Network infrastructure
+    network_status ENUM('excellent', 'good', 'fair', 'poor', 'offline') DEFAULT 'fair',
+    internet_speed_mbps INTEGER,
+    network_provider VARCHAR(255),
+    ip_range VARCHAR(50),
+    wifi_networks JSON,
+    network_monitoring BOOLEAN DEFAULT TRUE,
+    
+    -- Power infrastructure
+    power_status ENUM('stable', 'unstable', 'backup_active', 'critical', 'offline') DEFAULT 'stable',
+    main_power_source VARCHAR(255),
+    backup_power_available BOOLEAN DEFAULT FALSE,
+    backup_power_capacity_hours INTEGER,
+    ups_systems JSON,
+    power_consumption_kw DECIMAL(8,2),
+    
+    -- Environmental systems
+    weather_station_installed BOOLEAN DEFAULT FALSE,
+    environmental_sensors JSON,
+    hvac_systems JSON,
+    lighting_systems JSON,
+    security_systems JSON,
+    
+    -- Communication systems
+    radio_communication BOOLEAN DEFAULT FALSE,
+    intercom_systems JSON,
+    emergency_communication JSON,
+    cellular_coverage ENUM('excellent', 'good', 'fair', 'poor', 'none') DEFAULT 'good',
+    
+    -- Storage and computing
+    local_servers JSON,
+    storage_capacity_tb DECIMAL(8,2),
+    cloud_storage_enabled BOOLEAN DEFAULT TRUE,
+    computing_resources JSON,
+    data_backup_systems JSON,
+    
+    -- Maintenance tracking
+    last_infrastructure_audit DATE,
+    next_infrastructure_audit DATE,
+    maintenance_contracts JSON,
+    equipment_warranties JSON,
+    upgrade_schedule JSON,
+    
+    -- Performance metrics
+    uptime_percentage DECIMAL(5,2) DEFAULT 100.00,
+    average_response_time_ms INTEGER,
+    network_utilization_percentage DECIMAL(5,2),
+    storage_utilization_percentage DECIMAL(5,2),
+    system_temperature_celsius DECIMAL(4,1),
+    
+    -- Compliance and certifications
+    infrastructure_certifications JSON,
+    inspection_records JSON,
+    regulatory_compliance JSON,
+    insurance_information JSON,
+    
+    -- Integration points
+    camera_network_config JSON,
+    sensor_network_config JSON,
+    third_party_connections JSON,
+    api_endpoints JSON,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_audit_by UUID,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (last_audit_by) REFERENCES users(id),
+    
+    INDEX idx_site_infrastructure_status (network_status, power_status),
+    INDEX idx_site_infrastructure_performance (uptime_percentage, average_response_time_ms),
+    INDEX idx_site_infrastructure_audit (next_infrastructure_audit, last_audit_by)
+);
+```
+
+### **site_zone_configurations**
+```sql
+CREATE TABLE site_zone_configurations (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    zone_id UUID NOT NULL,
+    
+    -- Zone-specific settings
+    zone_configuration JSON,
+    access_restrictions JSON,
+    safety_requirements JSON,
+    monitoring_level ENUM('basic', 'standard', 'enhanced', 'maximum') DEFAULT 'standard',
+    
+    -- Camera assignments
+    assigned_cameras JSON,
+    camera_coverage_percentage DECIMAL(5,2) DEFAULT 0.00,
+    blind_spots JSON,
+    camera_positioning_optimal BOOLEAN DEFAULT FALSE,
+    
+    -- Personnel settings
+    max_personnel INTEGER,
+    authorized_roles JSON,
+    restricted_hours JSON,
+    ppe_requirements JSON,
+    
+    -- Environmental settings
+    environmental_hazards JSON,
+    weather_restrictions JSON,
+    emergency_procedures JSON,
+    evacuation_routes JSON,
+    
+    -- AI and detection settings
+    ai_detection_rules JSON,
+    alert_thresholds JSON,
+    detection_sensitivity ENUM('low', 'medium', 'high') DEFAULT 'medium',
+    notification_overrides JSON,
+    
+    -- Performance tracking
+    zone_utilization_percentage DECIMAL(5,2) DEFAULT 0.00,
+    incident_frequency DECIMAL(8,2) DEFAULT 0.00,
+    safety_score DECIMAL(5,2) DEFAULT 100.00,
+    compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Status and maintenance
+    zone_status ENUM('active', 'maintenance', 'restricted', 'inactive') DEFAULT 'active',
+    last_inspection DATE,
+    next_inspection DATE,
+    maintenance_notes TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    configured_by UUID NOT NULL,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id),
+    FOREIGN KEY (configured_by) REFERENCES users(id),
+    
+    INDEX idx_zone_configs_site (site_id, zone_status),
+    INDEX idx_zone_configs_performance (safety_score, compliance_score),
+    INDEX idx_zone_configs_monitoring (monitoring_level, camera_coverage_percentage),
+    UNIQUE KEY unique_site_zone_config (site_id, zone_id)
+);
+```
+
+### **site_performance_tracking**
+```sql
+CREATE TABLE site_performance_tracking (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    tracking_date DATE NOT NULL,
+    tracking_period ENUM('hourly', 'daily', 'weekly', 'monthly') NOT NULL,
+    
+    -- System performance metrics
+    system_health_score DECIMAL(5,2) DEFAULT 100.00,
+    uptime_percentage DECIMAL(5,2) DEFAULT 100.00,
+    response_time_avg_ms INTEGER DEFAULT 0,
+    error_rate_percentage DECIMAL(5,2) DEFAULT 0.00,
+    throughput_operations_per_hour INTEGER DEFAULT 0,
+    
+    -- Infrastructure performance
+    network_performance_score DECIMAL(5,2) DEFAULT 100.00,
+    power_stability_score DECIMAL(5,2) DEFAULT 100.00,
+    storage_performance_score DECIMAL(5,2) DEFAULT 100.00,
+    camera_system_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Operational metrics
+    personnel_capacity_utilization DECIMAL(5,2) DEFAULT 0.00,
+    zone_utilization_average DECIMAL(5,2) DEFAULT 0.00,
+    safety_incident_count INTEGER DEFAULT 0,
+    compliance_violation_count INTEGER DEFAULT 0,
+    
+    -- Alert and response metrics
+    alerts_generated INTEGER DEFAULT 0,
+    alerts_resolved INTEGER DEFAULT 0,
+    average_response_time_minutes INTEGER DEFAULT 0,
+    escalated_incidents INTEGER DEFAULT 0,
+    
+    -- AI and detection performance
+    detection_accuracy_rate DECIMAL(5,2) DEFAULT 0.00,
+    false_positive_rate DECIMAL(5,2) DEFAULT 0.00,
+    ai_processing_time_avg_ms INTEGER DEFAULT 0,
+    detection_coverage_percentage DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Resource utilization
+    cpu_utilization_avg DECIMAL(5,2) DEFAULT 0.00,
+    memory_utilization_avg DECIMAL(5,2) DEFAULT 0.00,
+    storage_utilization_percentage DECIMAL(5,2) DEFAULT 0.00,
+    bandwidth_utilization_percentage DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Compliance and quality metrics
+    compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    audit_findings INTEGER DEFAULT 0,
+    documentation_completeness DECIMAL(5,2) DEFAULT 100.00,
+    training_compliance_rate DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Trend indicators
+    performance_trend ENUM('improving', 'stable', 'declining', 'volatile') DEFAULT 'stable',
+    health_trend ENUM('improving', 'stable', 'declining') DEFAULT 'stable',
+    efficiency_trend ENUM('improving', 'stable', 'declining') DEFAULT 'stable',
+    
+    -- Comparison metrics
+    site_ranking INTEGER,
+    industry_benchmark_comparison DECIMAL(6,2),
+    historical_performance_change DECIMAL(6,2),
+    
+    -- Notes and analysis
+    performance_notes TEXT,
+    improvement_recommendations JSON,
+    issues_identified JSON,
+    action_items JSON,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    analyst_id UUID,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (analyst_id) REFERENCES users(id),
+    
+    INDEX idx_site_performance_date (site_id, tracking_date DESC, tracking_period),
+    INDEX idx_site_performance_scores (system_health_score DESC, compliance_score DESC),
+    INDEX idx_site_performance_trends (performance_trend, health_trend),
+    UNIQUE KEY unique_site_tracking_period (site_id, tracking_date, tracking_period)
+);
+```
+
+### **site_compliance_tracking**
+```sql
+CREATE TABLE site_compliance_tracking (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    compliance_framework VARCHAR(255) NOT NULL,
+    compliance_date DATE NOT NULL,
+    
+    -- Compliance status
+    overall_compliance_score DECIMAL(5,2) NOT NULL,
+    compliance_status ENUM('compliant', 'minor_issues', 'major_issues', 'non_compliant') DEFAULT 'compliant',
+    certification_valid BOOLEAN DEFAULT TRUE,
+    certification_expiry_date DATE,
+    
+    -- Audit information
+    audit_type ENUM('internal', 'external', 'regulatory', 'third_party') NOT NULL,
+    auditor_name VARCHAR(255),
+    auditor_organization VARCHAR(255),
+    audit_date DATE NOT NULL,
+    next_audit_date DATE,
+    
+    -- Findings and issues
+    total_findings INTEGER DEFAULT 0,
+    critical_findings INTEGER DEFAULT 0,
+    major_findings INTEGER DEFAULT 0,
+    minor_findings INTEGER DEFAULT 0,
+    observations INTEGER DEFAULT 0,
+    
+    -- Compliance areas
+    safety_compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    environmental_compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    quality_compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    security_compliance_score DECIMAL(5,2) DEFAULT 100.00,
+    
+    -- Documentation compliance
+    documentation_completeness DECIMAL(5,2) DEFAULT 100.00,
+    training_records_current BOOLEAN DEFAULT TRUE,
+    procedure_documentation_current BOOLEAN DEFAULT TRUE,
+    incident_reporting_compliant BOOLEAN DEFAULT TRUE,
+    
+    -- Corrective actions
+    corrective_actions_required INTEGER DEFAULT 0,
+    corrective_actions_completed INTEGER DEFAULT 0,
+    corrective_actions_overdue INTEGER DEFAULT 0,
+    preventive_actions_implemented INTEGER DEFAULT 0,
+    
+    -- Timeline tracking
+    findings_resolved_days INTEGER,
+    compliance_maintenance_effort_hours INTEGER,
+    cost_of_compliance_usd DECIMAL(12,2),
+    
+    -- Regulatory requirements
+    regulatory_updates_applied INTEGER DEFAULT 0,
+    regulatory_notifications_pending INTEGER DEFAULT 0,
+    license_renewals_due JSON,
+    permit_status JSON,
+    
+    -- Risk assessment
+    compliance_risk_score DECIMAL(5,2) DEFAULT 0.00,
+    risk_mitigation_plans JSON,
+    insurance_compliance BOOLEAN DEFAULT TRUE,
+    legal_exposure_assessment TEXT,
+    
+    -- Performance tracking
+    compliance_trend ENUM('improving', 'stable', 'declining') DEFAULT 'stable',
+    benchmark_comparison DECIMAL(6,2),
+    historical_compliance_change DECIMAL(6,2),
+    
+    -- Stakeholder information
+    compliance_officer_id UUID,
+    regulatory_contact_info JSON,
+    consultant_information JSON,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    reported_by UUID NOT NULL,
+    approved_by UUID,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (compliance_officer_id) REFERENCES users(id),
+    FOREIGN KEY (reported_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    
+    INDEX idx_compliance_site_framework (site_id, compliance_framework, compliance_date DESC),
+    INDEX idx_compliance_status (compliance_status, certification_valid),
+    INDEX idx_compliance_audit (audit_type, next_audit_date),
+    INDEX idx_compliance_scores (overall_compliance_score DESC, safety_compliance_score DESC)
+);
+```
+
+---
+
+## 🧠 **AI MODEL MANAGEMENT & DEPLOYMENT**
+
+### **ai_models**
+```sql
+CREATE TABLE ai_models (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    model_type ENUM('object_detection', 'object_tracking', 'person_detection', 'behavior_analysis', 'defect_detection', 'classification', 'segmentation', 'custom') NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    
+    -- Version and metadata
+    version VARCHAR(50) NOT NULL,
+    description TEXT,
+    framework VARCHAR(100),
+    architecture VARCHAR(255),
+    author VARCHAR(255),
+    organization VARCHAR(255),
+    
+    -- Model files and storage
+    model_file_path VARCHAR(500) NOT NULL,
+    model_file_size_mb DECIMAL(10,2),
+    config_file_path VARCHAR(500),
+    weights_file_path VARCHAR(500),
+    labels_file_path VARCHAR(500),
+    documentation_url VARCHAR(500),
+    
+    -- Training information
+    training_dataset_info JSON,
+    training_images_count INTEGER,
+    validation_images_count INTEGER,
+    test_images_count INTEGER,
+    training_duration_hours DECIMAL(8,2),
+    training_completed_date TIMESTAMP,
+    training_compute_cost DECIMAL(10,2),
+    
+    -- Model specifications
+    input_resolution_width INTEGER,
+    input_resolution_height INTEGER,
+    input_channels INTEGER DEFAULT 3,
+    output_classes JSON,
+    batch_size_optimal INTEGER,
+    batch_size_max INTEGER,
+    memory_requirement_gb DECIMAL(8,2),
+    
+    -- Performance characteristics
+    baseline_accuracy DECIMAL(5,2),
+    baseline_precision DECIMAL(5,2),
+    baseline_recall DECIMAL(5,2),
+    baseline_f1_score DECIMAL(5,2),
+    inference_time_ms DECIMAL(8,3),
+    throughput_fps DECIMAL(8,2),
+    confidence_threshold_default DECIMAL(3,2) DEFAULT 0.50,
+    
+    -- Deployment requirements
+    min_gpu_memory_gb DECIMAL(6,2),
+    recommended_gpu_models JSON,
+    cpu_cores_required INTEGER,
+    ram_requirement_gb DECIMAL(6,2),
+    storage_requirement_gb DECIMAL(8,2),
+    network_bandwidth_mbps INTEGER,
+    
+    -- Status and lifecycle
+    status ENUM('development', 'training', 'testing', 'validation', 'approved', 'deprecated', 'archived') DEFAULT 'development',
+    lifecycle_stage ENUM('experimental', 'beta', 'stable', 'mature', 'legacy') DEFAULT 'experimental',
+    approval_status ENUM('pending', 'approved', 'rejected', 'requires_review') DEFAULT 'pending',
+    approved_by UUID,
+    approved_at TIMESTAMP,
+    
+    -- Licensing and compliance
+    license_type VARCHAR(100),
+    license_restrictions TEXT,
+    compliance_certifications JSON,
+    regulatory_approvals JSON,
+    export_restrictions TEXT,
+    intellectual_property_notes TEXT,
+    
+    -- Dependencies and compatibility
+    dependency_requirements JSON,
+    framework_version VARCHAR(50),
+    python_version_min VARCHAR(20),
+    cuda_version_required VARCHAR(20),
+    compatibility_notes TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by UUID NOT NULL,
+    last_modified_by UUID NOT NULL,
+    
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by) REFERENCES users(id),
+    
+    INDEX idx_ai_models_type (model_type, category),
+    INDEX idx_ai_models_status (status, lifecycle_stage),
+    INDEX idx_ai_models_performance (baseline_accuracy DESC, inference_time_ms),
+    INDEX idx_ai_models_approval (approval_status, approved_at),
+    FULLTEXT INDEX idx_ai_models_search (name, description, category)
+);
+```
+
+### **model_deployments**
+```sql
+CREATE TABLE model_deployments (
+    id UUID PRIMARY KEY,
+    model_id UUID NOT NULL,
+    site_id UUID NOT NULL,
+    deployment_name VARCHAR(255) NOT NULL,
+    
+    -- Deployment configuration
+    deployment_status ENUM('pending', 'deploying', 'active', 'paused', 'failed', 'terminated') DEFAULT 'pending',
+    deployment_type ENUM('production', 'staging', 'testing', 'canary', 'blue_green') DEFAULT 'production',
+    deployment_strategy ENUM('immediate', 'gradual', 'scheduled', 'on_demand') DEFAULT 'immediate',
+    
+    -- Configuration parameters
+    confidence_threshold DECIMAL(3,2) NOT NULL,
+    batch_size INTEGER NOT NULL,
+    processing_interval_seconds INTEGER DEFAULT 1,
+    max_concurrent_requests INTEGER DEFAULT 10,
+    timeout_seconds INTEGER DEFAULT 30,
+    
+    -- Resource allocation
+    allocated_gpu_memory_gb DECIMAL(6,2),
+    allocated_cpu_cores INTEGER,
+    allocated_ram_gb DECIMAL(6,2),
+    priority_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    resource_limits JSON,
+    
+    -- Deployment timing
+    scheduled_start_time TIMESTAMP,
+    scheduled_end_time TIMESTAMP,
+    deployed_at TIMESTAMP,
+    last_health_check TIMESTAMP,
+    next_maintenance_window TIMESTAMP,
+    
+    -- Performance settings
+    auto_scaling_enabled BOOLEAN DEFAULT FALSE,
+    min_instances INTEGER DEFAULT 1,
+    max_instances INTEGER DEFAULT 3,
+    scale_up_threshold DECIMAL(5,2) DEFAULT 80.00,
+    scale_down_threshold DECIMAL(5,2) DEFAULT 30.00,
+    
+    -- Monitoring and alerting
+    monitoring_enabled BOOLEAN DEFAULT TRUE,
+    alert_on_errors BOOLEAN DEFAULT TRUE,
+    alert_on_performance_degradation BOOLEAN DEFAULT TRUE,
+    performance_alert_threshold DECIMAL(5,2) DEFAULT 10.00,
+    error_rate_alert_threshold DECIMAL(5,2) DEFAULT 5.00,
+    
+    -- Integration settings
+    input_sources JSON,
+    output_destinations JSON,
+    preprocessing_pipeline JSON,
+    postprocessing_pipeline JSON,
+    
+    -- Rollback and versioning
+    rollback_model_id UUID,
+    rollback_enabled BOOLEAN DEFAULT TRUE,
+    previous_deployment_id UUID,
+    deployment_notes TEXT,
+    rollback_trigger_conditions JSON,
+    
+    -- Access control
+    authorized_users JSON,
+    api_access_enabled BOOLEAN DEFAULT FALSE,
+    api_key VARCHAR(255),
+    rate_limit_requests_per_minute INTEGER DEFAULT 100,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deployed_by UUID NOT NULL,
+    
+    FOREIGN KEY (model_id) REFERENCES ai_models(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (rollback_model_id) REFERENCES ai_models(id),
+    FOREIGN KEY (previous_deployment_id) REFERENCES model_deployments(id),
+    FOREIGN KEY (deployed_by) REFERENCES users(id),
+    
+    INDEX idx_deployments_model_site (model_id, site_id, deployment_status),
+    INDEX idx_deployments_status (deployment_status, deployed_at DESC),
+    INDEX idx_deployments_type (deployment_type, deployment_strategy),
+    INDEX idx_deployments_performance (performance_alert_threshold, error_rate_alert_threshold)
+);
+```
+
+### **model_performance_metrics**
+```sql
+CREATE TABLE model_performance_metrics (
+    id UUID PRIMARY KEY,
+    deployment_id UUID NOT NULL,
+    metric_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    collection_period_minutes INTEGER DEFAULT 5,
+    
+    -- Performance metrics
+    accuracy_percentage DECIMAL(5,2),
+    precision_percentage DECIMAL(5,2),
+    recall_percentage DECIMAL(5,2),
+    f1_score DECIMAL(5,2),
+    confidence_score_avg DECIMAL(3,2),
+    inference_time_avg_ms DECIMAL(8,3),
+    inference_time_p95_ms DECIMAL(8,3),
+    throughput_fps DECIMAL(8,2),
+    
+    -- Detection statistics
+    total_detections INTEGER DEFAULT 0,
+    true_positives INTEGER DEFAULT 0,
+    false_positives INTEGER DEFAULT 0,
+    true_negatives INTEGER DEFAULT 0,
+    false_negatives INTEGER DEFAULT 0,
+    detection_rate_per_hour DECIMAL(8,2),
+    
+    -- Resource utilization
+    cpu_utilization_avg DECIMAL(5,2),
+    cpu_utilization_max DECIMAL(5,2),
+    gpu_utilization_avg DECIMAL(5,2),
+    gpu_utilization_max DECIMAL(5,2),
+    memory_usage_avg_gb DECIMAL(8,2),
+    memory_usage_max_gb DECIMAL(8,2),
+    gpu_memory_usage_avg_gb DECIMAL(6,2),
+    gpu_memory_usage_max_gb DECIMAL(6,2),
+    
+    -- Network and I/O metrics
+    network_bandwidth_usage_mbps DECIMAL(8,2),
+    disk_io_read_mb DECIMAL(10,2),
+    disk_io_write_mb DECIMAL(10,2),
+    api_requests_per_minute INTEGER DEFAULT 0,
+    api_response_time_avg_ms DECIMAL(8,2),
+    
+    -- Error tracking
+    total_errors INTEGER DEFAULT 0,
+    preprocessing_errors INTEGER DEFAULT 0,
+    inference_errors INTEGER DEFAULT 0,
+    postprocessing_errors INTEGER DEFAULT 0,
+    timeout_errors INTEGER DEFAULT 0,
+    memory_errors INTEGER DEFAULT 0,
+    error_rate_percentage DECIMAL(5,2),
+    
+    -- Quality metrics
+    data_quality_score DECIMAL(5,2),
+    prediction_consistency_score DECIMAL(5,2),
+    drift_detection_score DECIMAL(5,2),
+    anomaly_detection_count INTEGER DEFAULT 0,
+    
+    -- Business impact metrics
+    cost_per_inference DECIMAL(10,6),
+    cost_per_detection DECIMAL(10,4),
+    roi_impact_score DECIMAL(8,2),
+    user_satisfaction_score DECIMAL(3,1),
+    business_value_generated DECIMAL(12,2),
+    
+    -- Comparative analysis
+    baseline_performance_diff DECIMAL(6,2),
+    previous_period_performance_diff DECIMAL(6,2),
+    industry_benchmark_comparison DECIMAL(6,2),
+    peer_model_performance_rank INTEGER,
+    
+    -- Environmental factors
+    temperature_celsius DECIMAL(4,1),
+    humidity_percentage DECIMAL(5,2),
+    ambient_light_conditions VARCHAR(100),
+    network_latency_ms INTEGER,
+    data_center_load_percentage DECIMAL(5,2),
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (deployment_id) REFERENCES model_deployments(id) ON DELETE CASCADE,
+    
+    INDEX idx_performance_deployment_time (deployment_id, metric_timestamp DESC),
+    INDEX idx_performance_metrics (accuracy_percentage DESC, f1_score DESC),
+    INDEX idx_performance_resource (cpu_utilization_avg, gpu_utilization_avg),
+    INDEX idx_performance_errors (error_rate_percentage, total_errors)
+);
+```
+
+### **model_training_jobs**
+```sql
+CREATE TABLE model_training_jobs (
+    id UUID PRIMARY KEY,
+    model_id UUID NOT NULL,
+    job_name VARCHAR(255) NOT NULL,
+    job_description TEXT,
+    
+    -- Job configuration
+    training_type ENUM('initial_training', 'fine_tuning', 'transfer_learning', 'incremental_learning', 'reinforcement_learning') NOT NULL,
+    base_model_id UUID,
+    dataset_id UUID,
+    hyperparameters JSON,
+    
+    -- Resource allocation
+    compute_instance_type VARCHAR(100),
+    gpu_count INTEGER DEFAULT 1,
+    gpu_type VARCHAR(100),
+    cpu_cores INTEGER DEFAULT 8,
+    memory_gb INTEGER DEFAULT 32,
+    storage_gb INTEGER DEFAULT 100,
+    
+    -- Training parameters
+    epochs INTEGER DEFAULT 100,
+    batch_size INTEGER DEFAULT 32,
+    learning_rate DECIMAL(10,8) DEFAULT 0.001,
+    optimizer VARCHAR(50) DEFAULT 'Adam',
+    loss_function VARCHAR(100),
+    validation_split DECIMAL(3,2) DEFAULT 0.20,
+    early_stopping_patience INTEGER DEFAULT 10,
+    
+    -- Status tracking
+    job_status ENUM('queued', 'initializing', 'running', 'paused', 'completed', 'failed', 'cancelled') DEFAULT 'queued',
+    progress_percentage DECIMAL(5,2) DEFAULT 0.00,
+    current_epoch INTEGER DEFAULT 0,
+    estimated_completion_time TIMESTAMP,
+    actual_completion_time TIMESTAMP,
+    
+    -- Performance tracking
+    current_loss DECIMAL(12,8),
+    current_accuracy DECIMAL(5,2),
+    best_loss DECIMAL(12,8),
+    best_accuracy DECIMAL(5,2),
+    best_epoch INTEGER,
+    validation_loss DECIMAL(12,8),
+    validation_accuracy DECIMAL(5,2),
+    
+    -- Cost tracking
+    compute_cost_per_hour DECIMAL(8,4),
+    estimated_total_cost DECIMAL(10,2),
+    actual_cost DECIMAL(10,2),
+    cost_budget_limit DECIMAL(10,2),
+    cost_alert_threshold DECIMAL(10,2),
+    
+    -- Results and artifacts
+    output_model_path VARCHAR(500),
+    checkpoint_paths JSON,
+    log_file_path VARCHAR(500),
+    tensorboard_log_path VARCHAR(500),
+    metrics_file_path VARCHAR(500),
+    confusion_matrix_path VARCHAR(500),
+    
+    -- Error handling
+    error_message TEXT,
+    error_stack_trace TEXT,
+    retry_count INTEGER DEFAULT 0,
+    max_retries INTEGER DEFAULT 3,
+    auto_restart_on_failure BOOLEAN DEFAULT TRUE,
+    
+    -- Notifications
+    notification_recipients JSON,
+    notification_on_completion BOOLEAN DEFAULT TRUE,
+    notification_on_failure BOOLEAN DEFAULT TRUE,
+    notification_on_milestone BOOLEAN DEFAULT FALSE,
+    slack_webhook_url VARCHAR(500),
+    
+    -- Experiment tracking
+    experiment_name VARCHAR(255),
+    experiment_tags JSON,
+    parent_experiment_id UUID,
+    experiment_notes TEXT,
+    reproducibility_seed INTEGER,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    created_by UUID NOT NULL,
+    
+    FOREIGN KEY (model_id) REFERENCES ai_models(id),
+    FOREIGN KEY (base_model_id) REFERENCES ai_models(id),
+    FOREIGN KEY (parent_experiment_id) REFERENCES model_training_jobs(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    
+    INDEX idx_training_jobs_model (model_id, job_status),
+    INDEX idx_training_jobs_status (job_status, created_at DESC),
+    INDEX idx_training_jobs_performance (best_accuracy DESC, current_accuracy DESC),
+    INDEX idx_training_jobs_cost (actual_cost, cost_budget_limit)
+);
+```
+
+### **model_evaluation_results**
+```sql
+CREATE TABLE model_evaluation_results (
+    id UUID PRIMARY KEY,
+    model_id UUID NOT NULL,
+    evaluation_name VARCHAR(255) NOT NULL,
+    evaluation_type ENUM('validation', 'test', 'benchmark', 'production_sample', 'a_b_test', 'stress_test') NOT NULL,
+    
+    -- Evaluation dataset information
+    dataset_id UUID,
+    dataset_size INTEGER,
+    dataset_description TEXT,
+    evaluation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    evaluation_duration_minutes INTEGER,
+    
+    -- Overall performance metrics
+    overall_accuracy DECIMAL(5,2),
+    overall_precision DECIMAL(5,2),
+    overall_recall DECIMAL(5,2),
+    overall_f1_score DECIMAL(5,2),
+    micro_f1_score DECIMAL(5,2),
+    macro_f1_score DECIMAL(5,2),
+    weighted_f1_score DECIMAL(5,2),
+    
+    -- Per-class performance metrics
+    class_wise_metrics JSON,
+    confusion_matrix JSON,
+    classification_report JSON,
+    
+    -- Detection-specific metrics
+    mean_average_precision_50 DECIMAL(5,2),
+    mean_average_precision_75 DECIMAL(5,2),
+    mean_average_precision_50_95 DECIMAL(5,2),
+    average_recall_100 DECIMAL(5,2),
+    average_recall_300 DECIMAL(5,2),
+    average_recall_1000 DECIMAL(5,2),
+    
+    -- Performance distribution
+    confidence_score_distribution JSON,
+    inference_time_distribution JSON,
+    accuracy_by_confidence_threshold JSON,
+    roc_curve_data JSON,
+    precision_recall_curve_data JSON,
+    
+    -- Resource performance
+    evaluation_cpu_time_seconds DECIMAL(10,3),
+    evaluation_gpu_time_seconds DECIMAL(10,3),
+    peak_memory_usage_gb DECIMAL(8,2),
+    average_inference_time_ms DECIMAL(8,3),
+    throughput_images_per_second DECIMAL(8,2),
+    
+    -- Robustness testing
+    adversarial_accuracy DECIMAL(5,2),
+    noise_robustness_score DECIMAL(5,2),
+    lighting_robustness_score DECIMAL(5,2),
+    occlusion_robustness_score DECIMAL(5,2),
+    scale_robustness_score DECIMAL(5,2),
+    
+    -- Bias and fairness metrics
+    demographic_parity_score DECIMAL(5,2),
+    equalized_odds_score DECIMAL(5,2),
+    calibration_score DECIMAL(5,2),
+    bias_detection_results JSON,
+    fairness_constraints_met BOOLEAN DEFAULT FALSE,
+    
+    -- Business impact assessment
+    cost_per_evaluation DECIMAL(8,4),
+    business_accuracy_score DECIMAL(5,2),
+    false_positive_cost_impact DECIMAL(10,2),
+    false_negative_cost_impact DECIMAL(10,2),
+    roi_projection DECIMAL(10,2),
+    
+    -- Comparison metrics
+    baseline_model_comparison JSON,
+    previous_version_comparison JSON,
+    competitor_model_comparison JSON,
+    human_performance_comparison DECIMAL(6,2),
+    
+    -- Quality assurance
+    data_quality_issues JSON,
+    model_quality_score DECIMAL(5,2),
+    deployment_readiness_score DECIMAL(5,2),
+    risk_assessment_score DECIMAL(5,2),
+    
+    -- Files and artifacts
+    evaluation_report_path VARCHAR(500),
+    detailed_results_path VARCHAR(500),
+    visualization_files JSON,
+    raw_predictions_path VARCHAR(500),
+    error_analysis_path VARCHAR(500),
+    
+    -- Review and approval
+    reviewed_by UUID,
+    review_status ENUM('pending', 'approved', 'requires_revision', 'rejected') DEFAULT 'pending',
+    review_date TIMESTAMP,
+    review_comments TEXT,
+    approval_for_production BOOLEAN DEFAULT FALSE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    evaluated_by UUID NOT NULL,
+    
+    FOREIGN KEY (model_id) REFERENCES ai_models(id),
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    FOREIGN KEY (evaluated_by) REFERENCES users(id),
+    
+    INDEX idx_evaluation_model_type (model_id, evaluation_type, evaluation_date DESC),
+    INDEX idx_evaluation_performance (overall_accuracy DESC, overall_f1_score DESC),
+    INDEX idx_evaluation_review (review_status, approval_for_production),
+    INDEX idx_evaluation_business (business_accuracy_score DESC, roi_projection DESC)
+);
+```
+
+---
+
+### **Version 1.12.0 (2025-01-12) - PHASE 3 STARTS - ADMIN PORTAL EXPANSION**
+- **Updated from**: Screen Analysis #19 (User Directory), #20 (Site Configuration), #21 (AI Model Management)
+- **Tables added**: 15 new tables across user management, site configuration, and AI model management
+- **New sections added**: User Management & Administration (5 tables), Site Configuration & Infrastructure (5 tables), AI Model Management & Deployment (5 tables)
 - **New features added**:
-  - Comprehensive system-wide metrics aggregation with multi-site performance tracking
-  - Executive-level dashboard with KPI monitoring and trend analysis
-  - System health monitoring with resource utilization and service status tracking  
-  - Administrative activity logging with audit trail and compliance tracking
-  - Executive report generation with automated scheduling and distribution
-- **New indexes**: Admin dashboard performance indexes for real-time metrics and executive reporting
-- **Focus**: System administration, executive insights, performance monitoring, compliance tracking
-- **Updated table count**: **73 → 78 tables**
-- **Next update**: Screen Analysis #19 (Admin Portal continues)
+  - Comprehensive user management with role assignments, session tracking, and permission matrices
+  - Advanced site configuration with infrastructure monitoring and compliance tracking
+  - Complete AI model lifecycle management with deployment, performance monitoring, and evaluation
+- **New indexes**: Advanced indexing for user activity tracking, site performance monitoring, and AI model performance
+- **Focus**: Administrative control, infrastructure management, AI model governance, compliance tracking
+- **Updated table count**: **78 → 93 tables**
+- **Next update**: Screen Analysis #22 (Admin Portal continues)
 
 ---
 
