@@ -17,18 +17,19 @@ const MapControls = ({
   const [siteDropdownOpen, setSiteDropdownOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
 
-  // Filter sites based on user permissions
+  // Import regions data
+  const { regions } = require('../../data/cesiumMockData');
+
+  // Filter sites based on user role
   const accessibleSites = sites.filter(site => {
-    if (userRole.level === 1) return true; // SysAdmin sees all
-    if (userRole.level === 2) return site.company_id === userRole.company_id;
-    if (userRole.level === 3) return userRole.accessible_groups?.includes(site.group_id);
+    // Basic access control - in real app this would be more sophisticated
     if (userRole.level >= 4) return userRole.accessible_sites?.includes(site.id);
-    return false;
+    return true; // For now, show all sites
   });
 
-  // Group sites by region/country for dropdown
+  // Group sites by region for dropdown
   const sitesByRegion = accessibleSites.reduce((acc, site) => {
-    const region = `${site.city}, ${site.country}`;
+    const region = site.region === 'MIDDLE_EAST' ? 'Middle East' : 'South Asia';
     if (!acc[region]) acc[region] = [];
     acc[region].push(site);
     return acc;
