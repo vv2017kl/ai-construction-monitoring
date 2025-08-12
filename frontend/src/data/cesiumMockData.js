@@ -1,281 +1,221 @@
 // Cesium Map Mock Data
-// Construction Site Management - Geospatial Data
+// Construction Sites with Realistic Data and Hierarchical Navigation
 
-export const mockSites = [
-  // Dubai Sites
+// Alert Types and Colors
+export const alertTypes = {
+  CRITICAL: { color: '#DC2626', name: 'Critical', priority: 1 },
+  HIGH: { color: '#EA580C', name: 'High', priority: 2 },
+  MEDIUM: { color: '#D97706', name: 'Medium', priority: 3 },
+  LOW: { color: '#65A30D', name: 'Low', priority: 4 },
+  INFO: { color: '#2563EB', name: 'Info', priority: 5 }
+};
+
+// Regional Data
+export const regions = {
+  MIDDLE_EAST: {
+    id: 'middle_east',
+    name: 'Middle East',
+    center: [55.2708, 25.2048], // Dubai coordinates
+    zoom: 7,
+    sites: ['site_1', 'site_2', 'site_3', 'site_4']
+  },
+  SOUTH_ASIA: {
+    id: 'south_asia', 
+    name: 'South Asia',
+    center: [72.8777, 19.0760], // Mumbai coordinates
+    zoom: 7,
+    sites: ['site_5', 'site_6', 'site_7', 'site_8']
+  }
+};
+
+// Construction Sites with Real Coordinates and Data
+export const constructionSites = [
+  // Middle East Region - Dubai Projects
   {
-    id: 'dubai-001',
-    name: 'Downtown Dubai Tower',
-    code: 'DXB-DT-001',
-    coordinates: [55.2744, 25.1972, 0], // Near Burj Khalifa [longitude, latitude, height]
-    project_type: 'commercial',
-    project_phase: 'construction',
-    status: 'active',
-    country: 'UAE',
+    id: 'site_1',
+    name: 'Downtown Dubai Tower Complex',
+    code: 'DD-TC-2024',
+    region: 'MIDDLE_EAST',
+    coordinates: [55.2744, 25.1972], // Downtown Dubai
     city: 'Dubai',
-    region: 'Middle East',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '33333333-3333-3333-3333-333333333333',
-    alert_summary: {
+    country: 'UAE',
+    projectType: 'High-Rise Mixed Use',
+    constructionStage: 'Foundation & Structure',
+    alerts: {
       critical: 2,
       high: 5,
-      medium: 12,
-      low: 8
-    },
-    site_stats: {
-      total_cameras: 4,
-      active_cameras: 4,
-      offline_cameras: 0,
-      personnel_count: 45,
-      equipment_count: 8
-    },
-    boundary_coordinates: [
-      [55.2740, 25.1975],
-      [55.2748, 25.1975],
-      [55.2748, 25.1969],
-      [55.2740, 25.1969],
-      [55.2740, 25.1975]
-    ]
-  },
-  {
-    id: 'dubai-002',
-    name: 'Dubai Marina Residential Complex',
-    code: 'DXB-MR-002',
-    coordinates: [55.1384, 25.0777, 0], // Dubai Marina
-    project_type: 'residential',
-    project_phase: 'construction',
-    status: 'active',
-    country: 'UAE',
-    city: 'Dubai',
-    region: 'Middle East',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '33333333-3333-3333-3333-333333333333',
-    alert_summary: {
-      critical: 0,
-      high: 3,
       medium: 8,
-      low: 15
+      low: 12,
+      info: 3
     },
-    site_stats: {
-      total_cameras: 3,
-      active_cameras: 3,
-      offline_cameras: 0,
-      personnel_count: 32,
-      equipment_count: 5
-    },
-    boundary_coordinates: [
-      [55.1380, 25.0780],
-      [55.1388, 25.0780],
-      [55.1388, 25.0774],
-      [55.1380, 25.0774],
-      [55.1380, 25.0780]
-    ]
+    totalCameras: 8,
+    activeWorkers: 145,
+    safetyScore: 72,
+    projectManager: 'Ahmed Hassan',
+    completionPercent: 35
   },
   {
-    id: 'dubai-003',
-    name: 'Palm Jumeirah Villa Project',
-    code: 'DXB-PJ-003',
-    coordinates: [55.1167, 25.1124, 0], // Palm Jumeirah
-    project_type: 'residential',
-    project_phase: 'finishing',
-    status: 'active',
-    country: 'UAE',
+    id: 'site_2',
+    name: 'Dubai Marina Residential Tower',
+    code: 'DM-RT-2024',
+    region: 'MIDDLE_EAST',
+    coordinates: [55.1416, 25.0823], // Dubai Marina
     city: 'Dubai',
-    region: 'Middle East',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '33333333-3333-3333-3333-333333333333',
-    alert_summary: {
-      critical: 1,
+    country: 'UAE',
+    projectType: 'Residential Tower',
+    constructionStage: 'Exterior Finishing',
+    alerts: {
+      critical: 0,
       high: 2,
-      medium: 6,
-      low: 4
+      medium: 4,
+      low: 8,
+      info: 6
     },
-    site_stats: {
-      total_cameras: 4,
-      active_cameras: 3,
-      offline_cameras: 1,
-      personnel_count: 28,
-      equipment_count: 4
-    },
-    boundary_coordinates: [
-      [55.1163, 25.1127],
-      [55.1171, 25.1127],
-      [55.1171, 25.1121],
-      [55.1163, 25.1121],
-      [55.1163, 25.1127]
-    ]
+    totalCameras: 6,
+    activeWorkers: 89,
+    safetyScore: 91,
+    projectManager: 'Sarah Al-Mansouri',
+    completionPercent: 78
   },
   {
-    id: 'dubai-004',
-    name: 'DIFC Office Complex',
-    code: 'DXB-OF-004',
-    coordinates: [55.2089, 25.2135, 0], // Dubai International Financial Centre
-    project_type: 'commercial',
-    project_phase: 'preparation',
-    status: 'active',
-    country: 'UAE',
+    id: 'site_3',
+    name: 'Business Bay Commercial Complex',
+    code: 'BB-CC-2024',
+    region: 'MIDDLE_EAST',
+    coordinates: [55.2634, 25.1848], // Business Bay
     city: 'Dubai',
-    region: 'Middle East',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '33333333-3333-3333-3333-333333333333',
-    alert_summary: {
+    country: 'UAE',
+    projectType: 'Commercial Complex',
+    constructionStage: 'Interior Fit-out',
+    alerts: {
+      critical: 1,
+      high: 3,
+      medium: 6,
+      low: 15,
+      info: 4
+    },
+    totalCameras: 10,
+    activeWorkers: 203,
+    safetyScore: 85,
+    projectManager: 'Mohammad Rahman',
+    completionPercent: 62
+  },
+  {
+    id: 'site_4',
+    name: 'Dubai Silicon Oasis Data Center',
+    code: 'DSO-DC-2024',
+    region: 'MIDDLE_EAST',
+    coordinates: [55.3781, 25.1207], // Dubai Silicon Oasis
+    city: 'Dubai',
+    country: 'UAE',
+    projectType: 'Data Center',
+    constructionStage: 'MEP Installation',
+    alerts: {
       critical: 0,
       high: 1,
-      medium: 4,
-      low: 2
+      medium: 2,
+      low: 5,
+      info: 8
     },
-    site_stats: {
-      total_cameras: 3,
-      active_cameras: 3,
-      offline_cameras: 0,
-      personnel_count: 15,
-      equipment_count: 3
-    },
-    boundary_coordinates: [
-      [55.2085, 25.2138],
-      [55.2093, 25.2138],
-      [55.2093, 25.2132],
-      [55.2085, 25.2132],
-      [55.2085, 25.2138]
-    ]
+    totalCameras: 12,
+    activeWorkers: 67,
+    safetyScore: 96,
+    projectManager: 'James Wilson',
+    completionPercent: 89
   },
-
-  // India Sites
+  
+  // South Asia Region - Mumbai Projects
   {
-    id: 'mumbai-001',
+    id: 'site_5',
     name: 'Bandra-Kurla Complex Office Tower',
-    code: 'MUM-BK-001',
-    coordinates: [72.8697, 19.0625, 0], // BKC Mumbai
-    project_type: 'commercial',
-    project_phase: 'construction',
-    status: 'active',
-    country: 'India',
+    code: 'BKC-OT-2024',
+    region: 'SOUTH_ASIA',
+    coordinates: [72.8697, 19.0606], // BKC Mumbai
     city: 'Mumbai',
-    region: 'South Asia',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '44444444-4444-4444-4444-444444444444',
-    alert_summary: {
+    country: 'India',
+    projectType: 'Office Tower',
+    constructionStage: 'Structure Completion',
+    alerts: {
       critical: 3,
       high: 7,
-      medium: 15,
-      low: 12
+      medium: 11,
+      low: 18,
+      info: 5
     },
-    site_stats: {
-      total_cameras: 4,
-      active_cameras: 4,
-      offline_cameras: 0,
-      personnel_count: 65,
-      equipment_count: 12
-    },
-    boundary_coordinates: [
-      [72.8693, 19.0628],
-      [72.8701, 19.0628],
-      [72.8701, 19.0622],
-      [72.8693, 19.0622],
-      [72.8693, 19.0628]
-    ]
+    totalCameras: 9,
+    activeWorkers: 178,
+    safetyScore: 68,
+    projectManager: 'Rajesh Sharma',
+    completionPercent: 43
   },
   {
-    id: 'bangalore-001',
-    name: 'Electronic City IT Campus',
-    code: 'BLR-EC-001',
-    coordinates: [77.6648, 12.8456, 0], // Electronic City Bangalore
-    project_type: 'commercial',
-    project_phase: 'construction',
-    status: 'active',
+    id: 'site_6',
+    name: 'Powai Tech Park Expansion',
+    code: 'PTP-EX-2024',
+    region: 'SOUTH_ASIA',
+    coordinates: [72.9081, 19.1136], // Powai
+    city: 'Mumbai',
     country: 'India',
-    city: 'Bangalore',
-    region: 'South Asia',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '44444444-4444-4444-4444-444444444444',
-    alert_summary: {
+    projectType: 'Tech Campus',
+    constructionStage: 'Foundation',
+    alerts: {
       critical: 1,
       high: 4,
       medium: 9,
-      low: 18
+      low: 14,
+      info: 7
     },
-    site_stats: {
-      total_cameras: 3,
-      active_cameras: 3,
-      offline_cameras: 0,
-      personnel_count: 42,
-      equipment_count: 7
-    },
-    boundary_coordinates: [
-      [77.6644, 12.8459],
-      [77.6652, 12.8459],
-      [77.6652, 12.8453],
-      [77.6644, 12.8453],
-      [77.6644, 12.8459]
-    ]
+    totalCameras: 7,
+    activeWorkers: 156,
+    safetyScore: 79,
+    projectManager: 'Priya Patel',
+    completionPercent: 25
   },
   {
-    id: 'delhi-001',
-    name: 'Gurgaon Cyber Hub Extension',
-    code: 'DEL-GH-001',
-    coordinates: [77.0688, 28.4595, 0], // Gurgaon
-    project_type: 'commercial',
-    project_phase: 'construction',
-    status: 'active',
+    id: 'site_7',
+    name: 'Andheri Metro Station Hub',
+    code: 'AMS-HUB-2024',
+    region: 'SOUTH_ASIA',
+    coordinates: [72.8467, 19.1197], // Andheri
+    city: 'Mumbai',
     country: 'India',
-    city: 'Gurgaon',
-    region: 'South Asia',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '44444444-4444-4444-4444-444444444444',
-    alert_summary: {
-      critical: 2,
-      high: 6,
-      medium: 11,
-      low: 9
-    },
-    site_stats: {
-      total_cameras: 4,
-      active_cameras: 3,
-      offline_cameras: 1,
-      personnel_count: 38,
-      equipment_count: 9
-    },
-    boundary_coordinates: [
-      [77.0684, 28.4598],
-      [77.0692, 28.4598],
-      [77.0692, 28.4592],
-      [77.0684, 28.4592],
-      [77.0684, 28.4598]
-    ]
-  },
-  {
-    id: 'pune-001',
-    name: 'Hinjewadi Tech Park Phase 4',
-    code: 'PUN-HP-001',
-    coordinates: [73.7274, 18.5912, 0], // Hinjewadi Pune
-    project_type: 'commercial',
-    project_phase: 'preparation',
-    status: 'active',
-    country: 'India',
-    city: 'Pune',
-    region: 'South Asia',
-    company_id: '11111111-1111-1111-1111-111111111111',
-    group_id: '44444444-4444-4444-4444-444444444444',
-    alert_summary: {
+    projectType: 'Transport Infrastructure',
+    constructionStage: 'Excavation & Foundation',
+    alerts: {
       critical: 0,
       high: 2,
-      medium: 7,
-      low: 11
+      medium: 5,
+      low: 11,
+      info: 9
     },
-    site_stats: {
-      total_cameras: 3,
-      active_cameras: 3,
-      offline_cameras: 0,
-      personnel_count: 25,
-      equipment_count: 4
+    totalCameras: 11,
+    activeWorkers: 234,
+    safetyScore: 87,
+    projectManager: 'Vikram Singh',
+    completionPercent: 31
+  },
+  {
+    id: 'site_8',
+    name: 'Navi Mumbai Smart City Phase 2',
+    code: 'NMSC-P2-2024',
+    region: 'SOUTH_ASIA',
+    coordinates: [73.0297, 19.0330], // Navi Mumbai
+    city: 'Navi Mumbai',
+    country: 'India',
+    projectType: 'Smart City Development',
+    constructionStage: 'Infrastructure Development',
+    alerts: {
+      critical: 0,
+      high: 1,
+      medium: 3,
+      low: 7,
+      info: 12
     },
-    boundary_coordinates: [
-      [73.7270, 18.5915],
-      [73.7278, 18.5915],
-      [73.7278, 18.5909],
-      [73.7270, 18.5909],
-      [73.7270, 18.5915]
-    ]
+    totalCameras: 15,
+    activeWorkers: 312,
+    safetyScore: 93,
+    projectManager: 'Ananya Desai',
+    completionPercent: 56
   }
 ];
 
