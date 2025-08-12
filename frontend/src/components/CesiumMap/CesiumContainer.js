@@ -419,32 +419,77 @@ const CesiumContainer = ({
 
   const createSiteDescription = (site) => {
     return `
-      <div style="font-family: Arial, sans-serif; max-width: 350px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-        <h3 style="margin: 0 0 12px 0; color: #1a202c; font-size: 18px; font-weight: bold;">${site.name}</h3>
-        <div style="margin-bottom: 12px;">
-          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Code:</strong> ${site.code}</p>
-          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Type:</strong> ${site.projectType}</p>
-          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Stage:</strong> ${site.constructionStage}</p>
-          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Location:</strong> ${site.city}, ${site.country}</p>
-          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Manager:</strong> ${site.projectManager}</p>
-          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Progress:</strong> ${site.completionPercent}%</p>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 320px; padding: 0; margin: 0;">
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 16px; margin: -10px -10px 12px -10px; border-radius: 6px 6px 0 0;">
+          <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; line-height: 1.2;">${site.name}</h3>
+          <div style="font-size: 13px; opacity: 0.9;">${site.code} • ${site.city}, ${site.country}</div>
         </div>
         
-        <div style="margin-bottom: 12px; padding: 10px; background: #f8fafc; border-radius: 6px;">
-          <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">Site Status</h4>
-          <p style="margin: 0 0 4px 0; font-size: 13px;">👷 Workers: ${site.activeWorkers}</p>
-          <p style="margin: 0 0 4px 0; font-size: 13px;">📹 Cameras: ${site.totalCameras}</p>
-          <p style="margin: 0 0 4px 0; font-size: 13px;">🛡️ Safety Score: ${site.safetyScore}%</p>
-        </div>
-        
-        <div style="padding: 10px; background: #fef2f2; border-radius: 6px; border-left: 4px solid #dc2626;">
-          <h4 style="margin: 0 0 8px 0; color: #dc2626; font-size: 14px;">Active Alerts</h4>
-          <div style="display: flex; gap: 12px; font-size: 12px;">
-            ${site.alerts.critical > 0 ? `<span style="color: #dc2626;">🔴 ${site.alerts.critical} Critical</span>` : ''}
-            ${site.alerts.high > 0 ? `<span style="color: #ea580c;">🟠 ${site.alerts.high} High</span>` : ''}
-            ${site.alerts.medium > 0 ? `<span style="color: #d97706;">🟡 ${site.alerts.medium} Medium</span>` : ''}
-            ${site.alerts.low > 0 ? `<span style="color: #65a30d;">🟢 ${site.alerts.low} Low</span>` : ''}
-            ${site.alerts.info > 0 ? `<span style="color: #2563eb;">ℹ️ ${site.alerts.info} Info</span>` : ''}
+        <div style="padding: 0 4px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Project Type</div>
+              <div style="font-size: 14px; font-weight: 500; color: #1f2937;">${site.projectType}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Stage</div>
+              <div style="font-size: 14px; font-weight: 500; color: #1f2937;">${site.constructionStage}</div>
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Progress</div>
+              <div style="font-size: 16px; font-weight: 600; color: #059669;">${site.completionPercent}%</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Safety Score</div>
+              <div style="font-size: 16px; font-weight: 600; color: ${site.safetyScore >= 90 ? '#059669' : site.safetyScore >= 75 ? '#d97706' : '#dc2626'};">${site.safetyScore}%</div>
+            </div>
+          </div>
+
+          <div style="background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+            <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Site Status</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+              <div>
+                <div style="font-size: 18px; font-weight: 600; color: #1f2937;">${site.activeWorkers}</div>
+                <div style="font-size: 11px; color: #6b7280;">Workers</div>
+              </div>
+              <div>
+                <div style="font-size: 18px; font-weight: 600; color: #1f2937;">${site.totalCameras}</div>
+                <div style="font-size: 11px; color: #6b7280;">Cameras</div>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 500; color: #1f2937;">${site.projectManager.split(' ')[0]}</div>
+                <div style="font-size: 11px; color: #6b7280;">Manager</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: #fef2f2; padding: 12px; border-radius: 6px; border-left: 4px solid #dc2626;">
+            <div style="font-size: 11px; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 600;">Active Alerts</div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center;">
+              <div style="background: ${site.alerts.critical > 0 ? '#fee2e2' : '#f9fafb'}; padding: 6px 4px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 600; color: #dc2626;">${site.alerts.critical}</div>
+                <div style="font-size: 10px; color: #6b7280;">Critical</div>
+              </div>
+              <div style="background: ${site.alerts.high > 0 ? '#fed7aa' : '#f9fafb'}; padding: 6px 4px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 600; color: #ea580c;">${site.alerts.high}</div>
+                <div style="font-size: 10px; color: #6b7280;">High</div>
+              </div>
+              <div style="background: ${site.alerts.medium > 0 ? '#fef3c7' : '#f9fafb'}; padding: 6px 4px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 600; color: #d97706;">${site.alerts.medium}</div>
+                <div style="font-size: 10px; color: #6b7280;">Medium</div>
+              </div>
+              <div style="background: ${site.alerts.low > 0 ? '#dcfce7' : '#f9fafb'}; padding: 6px 4px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 600; color: #65a30d;">${site.alerts.low}</div>
+                <div style="font-size: 10px; color: #6b7280;">Low</div>
+              </div>
+              <div style="background: ${site.alerts.info > 0 ? '#dbeafe' : '#f9fafb'}; padding: 6px 4px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 600; color: #2563eb;">${site.alerts.info}</div>
+                <div style="font-size: 10px; color: #6b7280;">Info</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
