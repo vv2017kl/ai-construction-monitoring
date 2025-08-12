@@ -141,57 +141,134 @@ const CesiumDashboard = () => {
   const breadcrumbItems = getBreadcrumb();
 
   return (
-    <MainLayout 
-      showSidebar={showSidebar}
-      className={isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}
-    >
-      <div className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-full w-full'}`}>
-        {/* Header Bar - Show only when sidebar is visible */}
-        {showSidebar && (
-          <div className="absolute top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 px-6 py-3">
-            <div className="flex items-center justify-between">
-              {/* Breadcrumb Navigation */}
-              <nav className="flex items-center space-x-2 text-sm">
-                {breadcrumbItems.map((item, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && <span className="text-gray-400">/</span>}
-                    {item.active ? (
-                      <span className="text-gray-900 font-medium">{item.label}</span>
-                    ) : (
-                      <button
-                        onClick={item.action}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        {item.label}
-                      </button>
-                    )}
-                  </React.Fragment>
-                ))}
-              </nav>
+    <>
+      {showSidebar ? (
+        // Use MainLayout when sidebar should be shown
+        <MainLayout 
+          showSidebar={true}
+          className=""
+        >
+          <div className="relative h-full w-full">
+            {/* Header Bar - Show only when sidebar is visible */}
+            <div className="absolute top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 px-6 py-3">
+              <div className="flex items-center justify-between">
+                {/* Breadcrumb Navigation */}
+                <nav className="flex items-center space-x-2 text-sm">
+                  {breadcrumbItems.map((item, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && <span className="text-gray-400">/</span>}
+                      {item.active ? (
+                        <span className="text-gray-900 font-medium">{item.label}</span>
+                      ) : (
+                        <button
+                          onClick={item.action}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          {item.label}
+                        </button>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </nav>
 
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-                >
-                  <Home className="w-4 h-4" />
-                  <span>Dashboard</span>
-                </button>
-                <button
-                  onClick={toggleFullscreen}
-                  className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors"
-                >
-                  <Maximize className="w-4 h-4" />
-                  <span>Exit Immersive</span>
-                </button>
+                {/* Action Buttons */}
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  >
+                    <Home className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </button>
+                  <button
+                    onClick={toggleFullscreen}
+                    className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors"
+                  >
+                    <Maximize className="w-4 h-4" />
+                    <span>Exit Immersive</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Fullscreen Controls - Show when sidebar is hidden */}
-        {!showSidebar && (
+            {/* Main Map Container */}
+            <div className="h-full pt-16">
+              <CesiumContainer
+                sites={accessibleSites}
+                cameras={getCurrentCameras()}
+                selectedSite={selectedSite}
+                selectedCamera={selectedCamera}
+                viewMode={viewMode}
+                onSiteClick={handleSiteClick}
+                onCameraClick={handleCameraClick}
+                className="h-full w-full"
+              />
+
+              {/* Map Controls */}
+              <MapControls
+                sites={accessibleSites}
+                selectedSite={selectedSite}
+                selectedRegion={selectedRegion}
+                viewMode={viewMode}
+                onSiteSelect={handleSiteSelect}
+                onRegionSelect={setSelectedRegion}
+                onViewModeChange={handleViewModeChange}
+                onZoomToGlobal={handleZoomToGlobal}
+                userRole={userRole}
+              />
+
+              {/* Alert Summary Panel */}
+              <AlertSummaryPanel
+                site={selectedSite}
+                cameras={getCurrentCameras()}
+                visible={showAlertPanel}
+                onClose={() => setShowAlertPanel(false)}
+                onViewSite={(site) => {
+                  navigate(`/site-overview/${site.id}`);
+                }}
+                onViewCamera={handleCameraClick}
+              />
+
+              {/* Status Bar - Show when sidebar is visible */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm">
+                  <div className="flex items-center space-x-4">
+                    <span className="flex items-center space-x-1">
+                      <Navigation2 className="w-4 h-4" />
+                      <span>
+                        {viewMode === 'global' && 'Global View'}
+                        {viewMode === 'regional' && `Regional: ${selectedRegion || 'All Regions'}`}
+                        {viewMode === 'site' && `Site: ${selectedSite?.name || 'None Selected'}`}
+                      </span>
+                    </span>
+                    <span>•</span>
+                    <span>{accessibleSites.length} accessible sites</span>
+                    {selectedSite && (
+                      <>
+                        <span>•</span>
+                        <span>{getCurrentCameras().length} cameras</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Help Text */}
+              {viewMode === 'global' && !selectedSite && (
+                <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+                  <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm text-center max-w-md">
+                    <p className="font-medium">🗺️ Welcome to Cesium Site Manager</p>
+                    <p className="mt-1">Click on site pins to drill down, or use the site selector to navigate directly.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </MainLayout>
+      ) : (
+        // Direct immersive mode without MainLayout
+        <div className="fixed inset-0 z-50 bg-black h-screen w-screen">
+          {/* Fullscreen Controls - Show when sidebar is hidden */}
           <div className="absolute top-4 right-4 z-30 flex items-center space-x-2">
             <button
               onClick={() => navigate('/dashboard')}
@@ -208,84 +285,48 @@ const CesiumDashboard = () => {
               <span>Show Sidebar</span>
             </button>
           </div>
-        )}
 
-        {/* Main Map Container */}
-        <div className={`${showSidebar ? 'h-full pt-16' : 'h-full'}`}>
-          <CesiumContainer
-            sites={accessibleSites}
-            cameras={getCurrentCameras()}
-            selectedSite={selectedSite}
-            selectedCamera={selectedCamera}
-            viewMode={viewMode}
-            onSiteClick={handleSiteClick}
-            onCameraClick={handleCameraClick}
-            className="h-full w-full"
-          />
+          {/* Main Map Container */}
+          <div className="h-full">
+            <CesiumContainer
+              sites={accessibleSites}
+              cameras={getCurrentCameras()}
+              selectedSite={selectedSite}
+              selectedCamera={selectedCamera}
+              viewMode={viewMode}
+              onSiteClick={handleSiteClick}
+              onCameraClick={handleCameraClick}
+              className="h-full w-full"
+            />
 
-          {/* Map Controls */}
-          <MapControls
-            sites={accessibleSites}
-            selectedSite={selectedSite}
-            selectedRegion={selectedRegion}
-            viewMode={viewMode}
-            onSiteSelect={handleSiteSelect}
-            onRegionSelect={setSelectedRegion}
-            onViewModeChange={handleViewModeChange}
-            onZoomToGlobal={handleZoomToGlobal}
-            userRole={userRole}
-          />
+            {/* Map Controls */}
+            <MapControls
+              sites={accessibleSites}
+              selectedSite={selectedSite}
+              selectedRegion={selectedRegion}
+              viewMode={viewMode}
+              onSiteSelect={handleSiteSelect}
+              onRegionSelect={setSelectedRegion}
+              onViewModeChange={handleViewModeChange}
+              onZoomToGlobal={handleZoomToGlobal}
+              userRole={userRole}
+            />
 
-          {/* Alert Summary Panel */}
-          <AlertSummaryPanel
-            site={selectedSite}
-            cameras={getCurrentCameras()}
-            visible={showAlertPanel}
-            onClose={() => setShowAlertPanel(false)}
-            onViewSite={(site) => {
-              navigate(`/site-overview/${site.id}`);
-            }}
-            onViewCamera={handleCameraClick}
-          />
-
-          {/* Status Bar - Show when sidebar is visible */}
-          {showSidebar && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
-              <div className="bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm">
-                <div className="flex items-center space-x-4">
-                  <span className="flex items-center space-x-1">
-                    <Navigation2 className="w-4 h-4" />
-                    <span>
-                      {viewMode === 'global' && 'Global View'}
-                      {viewMode === 'regional' && `Regional: ${selectedRegion || 'All Regions'}`}
-                      {viewMode === 'site' && `Site: ${selectedSite?.name || 'None Selected'}`}
-                    </span>
-                  </span>
-                  <span>•</span>
-                  <span>{accessibleSites.length} accessible sites</span>
-                  {selectedSite && (
-                    <>
-                      <span>•</span>
-                      <span>{getCurrentCameras().length} cameras</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Help Text */}
-          {viewMode === 'global' && !selectedSite && (
-            <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
-              <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm text-center max-w-md">
-                <p className="font-medium">🗺️ Welcome to Cesium Site Manager</p>
-                <p className="mt-1">Click on site pins to drill down, or use the site selector to navigate directly.</p>
-              </div>
-            </div>
-          )}
+            {/* Alert Summary Panel */}
+            <AlertSummaryPanel
+              site={selectedSite}
+              cameras={getCurrentCameras()}
+              visible={showAlertPanel}
+              onClose={() => setShowAlertPanel(false)}
+              onViewSite={(site) => {
+                navigate(`/site-overview/${site.id}`);
+              }}
+              onViewCamera={handleCameraClick}
+            />
+          </div>
         </div>
-      </div>
-    </MainLayout>
+      )}
+    </>
   );
 };
 
