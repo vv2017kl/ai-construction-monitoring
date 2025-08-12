@@ -72,8 +72,11 @@ This document serves as the **single source of truth** for all database table de
 - **User Management & Administration**: 5 tables
 - **Site Configuration & Infrastructure**: 5 tables
 - **AI Model Management & Deployment**: 5 tables
+- **System Monitoring & Infrastructure Health**: 5 tables
+- **Access Control & Security Management**: 5 tables
+- **Integration & User Experience**: 7 tables
 
-**Total Tables**: 93 tables
+**Total Tables**: 110 tables
 
 ---
 
