@@ -91,15 +91,14 @@ const CesiumContainer = ({
     return '#6B7280';                   // Gray - No alerts
   };
 
-  // Camera pin color determination
+  // Camera pin color determination  
   const getCameraPinColor = (camera) => {
-    switch (camera.status) {
-      case 'critical': return '#FF0000';    // Red
-      case 'warning': return '#FFA500';     // Orange
-      case 'maintenance': return '#FFFF00'; // Yellow
-      case 'normal': return '#00FF00';      // Green
-      default: return '#808080';            // Gray
-    }
+    // Color based on camera alerts and status
+    if (camera.alerts && camera.alerts.includes('critical')) return '#DC2626'; // Red
+    if (camera.alerts && camera.alerts.includes('high')) return '#EA580C';     // Orange
+    if (camera.status === 'maintenance') return '#D97706';                     // Amber
+    if (camera.status === 'active') return '#65A30D';                          // Green
+    return '#6B7280';                                                           // Gray - offline/unknown
   };
 
   // Create site pins
