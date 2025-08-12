@@ -167,10 +167,11 @@ const CesiumContainer = ({
         id: `camera-${camera.id}`,
         position: Cartesian3.fromDegrees(longitude, latitude, height),
         billboard: {
-          image: createCameraPinImage(pinColor, camera.type),
-          scale: 0.6,
+          image: createCameraIcon(pinColor, camera.type),
+          scale: 0.8,
           verticalOrigin: VerticalOrigin.BOTTOM,
-          heightReference: HeightReference.CLAMP_TO_GROUND
+          heightReference: HeightReference.CLAMP_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
         },
         label: {
           text: camera.name,
