@@ -2200,6 +2200,381 @@ CREATE TABLE report_data_sources (
 
 ---
 
+## ⏱️ **TIME-LAPSE & PROGRESS TRACKING**
+
+### **timelapse_sequences**
+```sql
+CREATE TABLE timelapse_sequences (
+    id UUID PRIMARY KEY,
+    
+    -- Basic sequence information
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    site_id UUID NOT NULL,
+    created_by UUID NOT NULL,
+    
+    -- Source configuration
+    primary_camera_id UUID NOT NULL,
+    additional_camera_ids JSON, -- Array of additional camera IDs for multi-camera sequences
+    
+    -- Time range
+    start_datetime TIMESTAMP NOT NULL,
+    end_datetime TIMESTAMP NOT NULL,
+    duration_seconds INT NOT NULL,
+    
+    -- Generation settings
+    compression_level ENUM('low', 'medium', 'high') DEFAULT 'medium',
+    frame_rate_fps INT DEFAULT 30,
+    playback_speed DECIMAL(5,2) DEFAULT 1.0, -- Default playback speed multiplier
+    resolution_width INT DEFAULT 1920,
+    resolution_height INT DEFAULT 1080,
+    
+    -- Processing information
+    generation_status ENUM('queued', 'processing', 'completed', 'failed', 'cancelled') DEFAULT 'queued',
+    processing_started_at TIMESTAMP,
+    processing_completed_at TIMESTAMP,
+    processing_duration_seconds INT,
+    
+    -- File information
+    output_file_path VARCHAR(500),
+    output_file_format VARCHAR(10), -- mp4, gif, webm, avi
+    file_size_bytes BIGINT,
+    thumbnail_path VARCHAR(500),
+    preview_gif_path VARCHAR(500),
+    
+    -- Quality metrics
+    total_frames_processed INT,
+    frames_with_activity INT,
+    activity_score DECIMAL(5,2), -- 0-10 overall activity level
+    quality_score DECIMAL(5,2), -- 0-10 visual quality assessment
+    
+    -- Metadata
+    weather_conditions JSON, -- Weather during the time period
+    project_phase VARCHAR(100), -- Construction phase during sequence
+    milestone_events JSON, -- Major milestones captured in sequence
+    
+    -- Usage and sharing
+    view_count INT DEFAULT 0,
+    download_count INT DEFAULT 0,
+    share_count INT DEFAULT 0,
+    bookmark_count INT DEFAULT 0,
+    
+    -- Status and lifecycle
+    status ENUM('active', 'archived', 'deleted') DEFAULT 'active',
+    archived_at TIMESTAMP,
+    retention_date DATE, -- When sequence can be deleted
+    
+    -- Error handling
+    error_message TEXT,
+    retry_count INT DEFAULT 0,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (primary_camera_id) REFERENCES cameras(id),
+    
+    INDEX idx_timelapse_sequences_site (site_id, created_at DESC),
+    INDEX idx_timelapse_sequences_creator (created_by, created_at DESC),
+    INDEX idx_timelapse_sequences_camera (primary_camera_id, start_datetime DESC),
+    INDEX idx_timelapse_sequences_status (generation_status, processing_started_at),
+    INDEX idx_timelapse_sequences_timerange (start_datetime, end_datetime),
+    INDEX idx_timelapse_sequences_quality (quality_score DESC, activity_score DESC)
+);
+```
+
+### **timelapse_bookmarks**
+```sql
+CREATE TABLE timelapse_bookmarks (
+    id UUID PRIMARY KEY,
+    timelapse_sequence_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    
+    -- Bookmark details
+    bookmark_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    
+    -- Temporal information
+    timestamp_seconds DECIMAL(10,3) NOT NULL, -- Precise timestamp within sequence
+    frame_number INT, -- Exact frame number for precise positioning
+    
+    -- Context information
+    bookmark_type ENUM('manual', 'milestone', 'activity', 'safety', 'progress', 'custom') DEFAULT 'manual',
+    activity_detected VARCHAR(100), -- Type of activity at bookmark
+    personnel_count INT, -- Number of personnel visible at bookmark
+    equipment_present JSON, -- Array of equipment visible
+    
+    -- Visual markers
+    thumbnail_path VARCHAR(500), -- Thumbnail image at bookmark time
+    marker_color VARCHAR(7) DEFAULT '#FFA500', -- Hex color for timeline display
+    marker_icon VARCHAR(50), -- Icon identifier for bookmark type
+    
+    -- Annotations
+    annotations JSON, -- Array of annotation objects with coordinates and text
+    highlight_areas JSON, -- Array of highlight regions in the frame
+    
+    -- Collaboration
+    is_shared BOOLEAN DEFAULT FALSE,
+    shared_with JSON, -- Array of user IDs with access
+    comments_enabled BOOLEAN DEFAULT TRUE,
+    
+    -- Workflow status
+    status ENUM('active', 'archived', 'deleted') DEFAULT 'active',
+    reviewed BOOLEAN DEFAULT FALSE,
+    reviewed_by UUID,
+    reviewed_at TIMESTAMP,
+    
+    -- Usage tracking
+    access_count INT DEFAULT 0,
+    last_accessed TIMESTAMP,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (timelapse_sequence_id) REFERENCES timelapse_sequences(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    
+    INDEX idx_timelapse_bookmarks_sequence (timelapse_sequence_id, timestamp_seconds),
+    INDEX idx_timelapse_bookmarks_user (user_id, created_at DESC),
+    INDEX idx_timelapse_bookmarks_type (bookmark_type, status),
+    INDEX idx_timelapse_bookmarks_shared (is_shared, shared_with),
+    UNIQUE KEY unique_user_sequence_timestamp (user_id, timelapse_sequence_id, timestamp_seconds)
+);
+```
+
+### **timelapse_events**
+```sql
+CREATE TABLE timelapse_events (
+    id UUID PRIMARY KEY,
+    timelapse_sequence_id UUID NOT NULL,
+    
+    -- Event timing
+    event_timestamp TIMESTAMP NOT NULL,
+    sequence_timestamp_seconds DECIMAL(10,3) NOT NULL, -- Time within the sequence
+    duration_seconds INT, -- Event duration if applicable
+    
+    -- Event classification
+    event_type ENUM('personnel_activity', 'equipment_movement', 'safety_incident', 'milestone_completion', 'weather_change', 'construction_phase', 'inspection', 'delivery') NOT NULL,
+    event_category VARCHAR(100), -- More specific categorization
+    
+    -- Event details
+    event_title VARCHAR(255) NOT NULL,
+    event_description TEXT,
+    confidence_score DECIMAL(5,2), -- AI confidence in event detection
+    
+    -- Detected elements
+    personnel_count INT DEFAULT 0,
+    equipment_detected JSON, -- Array of detected equipment
+    vehicle_count INT DEFAULT 0,
+    activity_level ENUM('low', 'moderate', 'high', 'peak') DEFAULT 'moderate',
+    
+    -- Spatial information
+    detection_zones JSON, -- Array of zone IDs where event occurred
+    bounding_boxes JSON, -- Coordinate data for detected objects
+    camera_angle_info JSON, -- Camera positioning data
+    
+    -- Correlation data
+    related_alert_id UUID, -- Link to safety alerts if applicable
+    related_detection_ids JSON, -- Array of AI detection IDs
+    milestone_reference VARCHAR(255), -- Project milestone reference
+    
+    -- Visual evidence
+    thumbnail_path VARCHAR(500),
+    evidence_images JSON, -- Array of evidence image paths
+    annotation_data JSON, -- Visual annotations and highlights
+    
+    -- Impact assessment
+    impact_level ENUM('minimal', 'low', 'moderate', 'significant', 'critical') DEFAULT 'minimal',
+    safety_implications ENUM('none', 'minor', 'moderate', 'serious', 'critical') DEFAULT 'none',
+    
+    -- Verification and validation
+    auto_detected BOOLEAN DEFAULT TRUE,
+    manually_verified BOOLEAN DEFAULT FALSE,
+    verified_by UUID,
+    verified_at TIMESTAMP,
+    
+    -- Status
+    status ENUM('detected', 'verified', 'false_positive', 'archived') DEFAULT 'detected',
+    
+    FOREIGN KEY (timelapse_sequence_id) REFERENCES timelapse_sequences(id) ON DELETE CASCADE,
+    FOREIGN KEY (related_alert_id) REFERENCES alerts(id),
+    FOREIGN KEY (verified_by) REFERENCES users(id),
+    
+    INDEX idx_timelapse_events_sequence_time (timelapse_sequence_id, sequence_timestamp_seconds),
+    INDEX idx_timelapse_events_type (event_type, event_category),
+    INDEX idx_timelapse_events_timestamp (event_timestamp DESC),
+    INDEX idx_timelapse_events_impact (impact_level, safety_implications),
+    INDEX idx_timelapse_events_verification (auto_detected, manually_verified),
+    INDEX idx_timelapse_events_confidence (confidence_score DESC)
+);
+```
+
+### **timelapse_shares**
+```sql
+CREATE TABLE timelapse_shares (
+    id UUID PRIMARY KEY,
+    timelapse_sequence_id UUID NOT NULL,
+    
+    -- Sharing details
+    shared_by UUID NOT NULL,
+    share_type ENUM('link', 'email', 'embed', 'download') NOT NULL,
+    
+    -- Recipients and access
+    shared_with_users JSON, -- Array of user IDs
+    shared_with_emails JSON, -- Array of email addresses for external sharing
+    access_level ENUM('view', 'comment', 'bookmark', 'download') DEFAULT 'view',
+    
+    -- Share configuration
+    share_token VARCHAR(255) UNIQUE,
+    password_protected BOOLEAN DEFAULT FALSE,
+    password_hash VARCHAR(255),
+    
+    -- Playback context
+    start_time_seconds DECIMAL(10,3) DEFAULT 0, -- Starting playback position
+    playback_speed DECIMAL(5,2) DEFAULT 1.0,
+    include_bookmarks BOOLEAN DEFAULT TRUE,
+    include_annotations BOOLEAN DEFAULT TRUE,
+    
+    -- Restrictions and limits
+    expires_at TIMESTAMP,
+    max_views INT,
+    max_downloads INT,
+    allowed_ip_ranges JSON,
+    
+    -- Usage tracking
+    view_count INT DEFAULT 0,
+    download_count INT DEFAULT 0,
+    unique_viewers INT DEFAULT 0,
+    last_accessed_at TIMESTAMP,
+    
+    -- Access logs summary
+    total_watch_time_seconds INT DEFAULT 0,
+    average_session_duration_seconds INT,
+    bookmarks_created_by_viewers INT DEFAULT 0,
+    
+    -- Feedback collection
+    allow_feedback BOOLEAN DEFAULT FALSE,
+    feedback_collected JSON, -- Array of feedback objects
+    
+    -- Share metadata
+    share_title VARCHAR(255),
+    share_description TEXT,
+    custom_thumbnail_path VARCHAR(500),
+    
+    -- Status and lifecycle
+    status ENUM('active', 'expired', 'disabled', 'revoked') DEFAULT 'active',
+    revoked_at TIMESTAMP,
+    revoked_by UUID,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (timelapse_sequence_id) REFERENCES timelapse_sequences(id),
+    FOREIGN KEY (shared_by) REFERENCES users(id),
+    FOREIGN KEY (revoked_by) REFERENCES users(id),
+    
+    INDEX idx_timelapse_shares_sequence (timelapse_sequence_id, created_at DESC),
+    INDEX idx_timelapse_shares_token (share_token, status),
+    INDEX idx_timelapse_shares_sharer (shared_by, created_at DESC),
+    INDEX idx_timelapse_shares_expires (expires_at, status),
+    INDEX idx_timelapse_shares_usage (view_count DESC, download_count DESC)
+);
+```
+
+### **construction_milestones**
+```sql
+CREATE TABLE construction_milestones (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    
+    -- Milestone identification
+    milestone_name VARCHAR(255) NOT NULL,
+    milestone_code VARCHAR(50), -- Project-specific milestone identifier
+    description TEXT,
+    
+    -- Project context
+    project_phase VARCHAR(100),
+    work_package VARCHAR(100),
+    contractor VARCHAR(255),
+    
+    -- Scheduling information
+    planned_start_date DATE,
+    planned_completion_date DATE,
+    actual_start_date DATE,
+    actual_completion_date DATE,
+    
+    -- Progress tracking
+    completion_percentage DECIMAL(5,2) DEFAULT 0.00,
+    status ENUM('not_started', 'in_progress', 'completed', 'delayed', 'cancelled', 'on_hold') DEFAULT 'not_started',
+    
+    -- Dependencies
+    prerequisite_milestones JSON, -- Array of milestone IDs that must be completed first
+    dependent_milestones JSON, -- Array of milestone IDs that depend on this one
+    
+    -- Quality and compliance
+    quality_checkpoints JSON, -- Array of quality check requirements
+    compliance_requirements JSON, -- Regulatory compliance requirements
+    safety_requirements JSON, -- Safety-specific requirements
+    
+    -- Documentation
+    specification_documents JSON, -- Array of specification document references
+    approval_documents JSON, -- Array of approval document references
+    inspection_records JSON, -- Array of inspection record references
+    
+    -- Visual documentation
+    reference_images JSON, -- Array of reference/plan images
+    progress_images JSON, -- Array of progress photos
+    timelapse_sequences JSON, -- Array of related time-lapse sequence IDs
+    
+    -- Budget and resources
+    budgeted_amount DECIMAL(12,2),
+    actual_cost DECIMAL(12,2),
+    allocated_resources JSON, -- Personnel and equipment allocations
+    
+    -- Timeline analysis
+    planned_duration_days INT,
+    actual_duration_days INT,
+    delay_days INT DEFAULT 0,
+    delay_reasons JSON, -- Array of delay reason descriptions
+    
+    -- Automated detection
+    auto_detection_enabled BOOLEAN DEFAULT FALSE,
+    detection_criteria JSON, -- Criteria for automated milestone detection
+    last_detection_check TIMESTAMP,
+    
+    -- Approval workflow
+    requires_approval BOOLEAN DEFAULT FALSE,
+    approved_by UUID,
+    approved_at TIMESTAMP,
+    approval_notes TEXT,
+    
+    -- Change management
+    change_requests JSON, -- Array of change request references
+    revision_number INT DEFAULT 1,
+    previous_version_id UUID,
+    
+    created_by UUID NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id),
+    FOREIGN KEY (previous_version_id) REFERENCES construction_milestones(id),
+    
+    INDEX idx_construction_milestones_site (site_id, planned_completion_date),
+    INDEX idx_construction_milestones_status (status, completion_percentage DESC),
+    INDEX idx_construction_milestones_phase (project_phase, status),
+    INDEX idx_construction_milestones_schedule (planned_start_date, planned_completion_date),
+    INDEX idx_construction_milestones_delays (delay_days DESC, status),
+    INDEX idx_construction_milestones_creator (created_by, created_at DESC),
+    UNIQUE KEY unique_site_milestone_code (site_id, milestone_code)
+);
+```
+
+---
+
 **Document Maintained By**: AI Construction Management System Team
 **Last Review**: 2025-01-12  
 **Next Review**: After each screen analysis completion
