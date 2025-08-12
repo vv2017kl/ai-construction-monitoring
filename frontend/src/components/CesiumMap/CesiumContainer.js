@@ -406,41 +406,34 @@ const CesiumContainer = ({
     return canvas.toDataURL();
   };
 
-  const getProjectTypeIcon = (projectType) => {
-    switch (projectType) {
-      case 'commercial': return '🏢';
-      case 'residential': return '🏠';
-      case 'industrial': return '🏭';
-      case 'infrastructure': return '🌉';
-      default: return '🏗️';
-    }
-  };
-
   const createSiteDescription = (site) => {
-    const { alert_summary, site_stats } = site;
     return `
-      <div style="font-family: Arial, sans-serif; max-width: 300px;">
-        <h3 style="margin: 0 0 10px 0; color: #2c3e50;">${site.name}</h3>
-        <p style="margin: 0 0 5px 0;"><strong>Code:</strong> ${site.code}</p>
-        <p style="margin: 0 0 5px 0;"><strong>Type:</strong> ${site.project_type}</p>
-        <p style="margin: 0 0 5px 0;"><strong>Phase:</strong> ${site.project_phase}</p>
-        <p style="margin: 0 0 10px 0;"><strong>Location:</strong> ${site.city}, ${site.country}</p>
-        
-        <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin: 10px 0;">
-          <h4 style="margin: 0 0 5px 0; color: #e74c3c;">🚨 Active Alerts</h4>
-          <div style="display: flex; gap: 10px; font-size: 12px;">
-            <span style="color: #e74c3c;">Critical: ${alert_summary.critical}</span>
-            <span style="color: #f39c12;">High: ${alert_summary.high}</span>
-            <span style="color: #f1c40f;">Medium: ${alert_summary.medium}</span>
-          </div>
+      <div style="font-family: Arial, sans-serif; max-width: 350px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin: 0 0 12px 0; color: #1a202c; font-size: 18px; font-weight: bold;">${site.name}</h3>
+        <div style="margin-bottom: 12px;">
+          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Code:</strong> ${site.code}</p>
+          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Type:</strong> ${site.projectType}</p>
+          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Stage:</strong> ${site.constructionStage}</p>
+          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Location:</strong> ${site.city}, ${site.country}</p>
+          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Manager:</strong> ${site.projectManager}</p>
+          <p style="margin: 0 0 6px 0; font-size: 14px;"><strong>Progress:</strong> ${site.completionPercent}%</p>
         </div>
         
-        <div style="background: #e8f5e8; padding: 8px; border-radius: 4px;">
-          <h4 style="margin: 0 0 5px 0; color: #27ae60;">📊 Site Stats</h4>
-          <div style="font-size: 12px;">
-            <p style="margin: 2px 0;">📹 Cameras: ${site_stats.active_cameras}/${site_stats.total_cameras}</p>
-            <p style="margin: 2px 0;">👷 Personnel: ${site_stats.personnel_count}</p>
-            <p style="margin: 2px 0;">🏗️ Equipment: ${site_stats.equipment_count}</p>
+        <div style="margin-bottom: 12px; padding: 10px; background: #f8fafc; border-radius: 6px;">
+          <h4 style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">Site Status</h4>
+          <p style="margin: 0 0 4px 0; font-size: 13px;">👷 Workers: ${site.activeWorkers}</p>
+          <p style="margin: 0 0 4px 0; font-size: 13px;">📹 Cameras: ${site.totalCameras}</p>
+          <p style="margin: 0 0 4px 0; font-size: 13px;">🛡️ Safety Score: ${site.safetyScore}%</p>
+        </div>
+        
+        <div style="padding: 10px; background: #fef2f2; border-radius: 6px; border-left: 4px solid #dc2626;">
+          <h4 style="margin: 0 0 8px 0; color: #dc2626; font-size: 14px;">Active Alerts</h4>
+          <div style="display: flex; gap: 12px; font-size: 12px;">
+            ${site.alerts.critical > 0 ? `<span style="color: #dc2626;">🔴 ${site.alerts.critical} Critical</span>` : ''}
+            ${site.alerts.high > 0 ? `<span style="color: #ea580c;">🟠 ${site.alerts.high} High</span>` : ''}
+            ${site.alerts.medium > 0 ? `<span style="color: #d97706;">🟡 ${site.alerts.medium} Medium</span>` : ''}
+            ${site.alerts.low > 0 ? `<span style="color: #65a30d;">🟢 ${site.alerts.low} Low</span>` : ''}
+            ${site.alerts.info > 0 ? `<span style="color: #2563eb;">ℹ️ ${site.alerts.info} Info</span>` : ''}
           </div>
         </div>
       </div>
