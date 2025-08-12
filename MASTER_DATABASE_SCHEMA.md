@@ -66,8 +66,9 @@ This document serves as the **single source of truth** for all database table de
 - **Historical Navigation & Analysis**: 4 tables
 - **Field Operations & Assessment**: 5 tables
 - **Temporal Analysis & Comparison**: 4 tables
+- **Street View Comparison & Analysis**: 5 tables
 
-**Total Tables**: 63 tables
+**Total Tables**: 68 tables
 
 ---
 
