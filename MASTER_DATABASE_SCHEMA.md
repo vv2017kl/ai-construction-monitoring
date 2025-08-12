@@ -69,8 +69,11 @@ This document serves as the **single source of truth** for all database table de
 - **Street View Comparison & Analysis**: 5 tables
 - **Path Administration & Routing**: 5 tables
 - **Admin Dashboard & System Management**: 5 tables
+- **User Management & Administration**: 5 tables
+- **Site Configuration & Infrastructure**: 5 tables
+- **AI Model Management & Deployment**: 5 tables
 
-**Total Tables**: 78 tables
+**Total Tables**: 93 tables
 
 ---
 
