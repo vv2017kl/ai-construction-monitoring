@@ -24,7 +24,7 @@ This document serves as the **single source of truth** for all database table de
 ## 📊 **Database Overview**
 
 ### **Core Entity Count:**
-- **Sites & Locations**: 3 tables
+- **Sites & Locations**: 4 tables
 - **Personnel & Users**: 7 tables  
 - **Cameras & Monitoring**: 2 tables
 - **AI & Detection**: 7 tables
@@ -32,8 +32,9 @@ This document serves as the **single source of truth** for all database table de
 - **Analytics & Reporting**: 7 tables
 - **System & Configuration**: 3 tables
 - **Video & Evidence Management**: 4 tables
+- **Time-Lapse & Progress Tracking**: 5 tables
 
-**Total Tables**: 39 tables
+**Total Tables**: 44 tables
 
 ---
 
