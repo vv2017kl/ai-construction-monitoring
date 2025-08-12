@@ -120,7 +120,7 @@ const MapControls = ({
                           {getSiteStatusIcon(site)}
                           <div>
                             <div className="text-sm font-medium text-gray-900">{site.name}</div>
-                            <div className="text-xs text-gray-500">{site.code} • {site.project_type}</div>
+                            <div className="text-xs text-gray-500">{site.code} • {site.projectType}</div>
                           </div>
                         </div>
                         <div className="text-right">
