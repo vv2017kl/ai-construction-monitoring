@@ -166,7 +166,6 @@ const CesiumDashboard = () => {
       </div>
     </div>
   );
-  );
 };
 
 export default CesiumDashboard;
