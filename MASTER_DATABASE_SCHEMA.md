@@ -952,7 +952,18 @@ CREATE TABLE notifications (
   - `site_cameras`: region, zone_coverage, field_of_view, detection_range
 - **New indexes**: Geospatial performance indexes for coordinates and regions
 - **Focus**: 3D visualization and user permission requirements
-- **Next update**: Screen Analysis #03 (Next screen analysis)
+- **Next update**: Screen Analysis #03 (Live View)
+
+### **Version 1.2.0 (2025-01-12)**
+- **Updated from**: Screen Analysis #03 (Live View)
+- **Tables added**: 1 new table (`recording_sessions`)
+- **Tables enhanced**: `cameras`, `site_cameras` with live view capabilities
+- **New fields added**:
+  - `cameras`: audio_enabled, ptz_capabilities, recording_capabilities
+  - `site_cameras`: current_zoom_level, recording_active, stream_quality
+- **New indexes**: Live view performance indexes for recording and PTZ state
+- **Focus**: Real-time video streaming, recording management, PTZ control
+- **Next update**: Screen Analysis #04 (Next screen analysis)
 
 ---
 
