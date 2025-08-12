@@ -366,6 +366,11 @@ CREATE TABLE site_cameras (
     field_of_view DECIMAL(5,2), -- Camera FOV in degrees for 3D visualization
     detection_range DECIMAL(8,2), -- Detection range in meters
     
+    -- ✅ LIVE VIEW ENHANCEMENTS
+    current_zoom_level DECIMAL(5,2) DEFAULT 1.0, -- Current PTZ zoom level
+    recording_active BOOLEAN DEFAULT FALSE, -- Current recording status
+    stream_quality ENUM('low', 'medium', 'high') DEFAULT 'high', -- Current stream quality
+    
     FOREIGN KEY (site_id) REFERENCES sites(id),
     FOREIGN KEY (camera_id) REFERENCES cameras(id),
     FOREIGN KEY (primary_zone_id) REFERENCES zones(id),
@@ -379,7 +384,10 @@ CREATE TABLE site_cameras (
     -- ✅ GEOSPATIAL INDEXES
     INDEX idx_site_cameras_region (region),
     INDEX idx_site_cameras_coordinates (coordinates),
-    INDEX idx_site_cameras_elevation (elevation)
+    INDEX idx_site_cameras_elevation (elevation),
+    -- ✅ LIVE VIEW INDEXES
+    INDEX idx_site_cameras_recording (recording_active),
+    INDEX idx_site_cameras_zoom (current_zoom_level)
 );
 ```
 
