@@ -209,6 +209,40 @@ CREATE TABLE users (
 );
 ```
 
+### **user_site_access**
+```sql
+CREATE TABLE user_site_access (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    site_id UUID NOT NULL,
+    access_level ENUM('view', 'manage', 'admin') DEFAULT 'view',
+    granted_by UUID NOT NULL,
+    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NULL,
+    status ENUM('active', 'suspended', 'expired') DEFAULT 'active',
+    
+    -- Permission details
+    permissions JSON, -- Specific permissions array
+    zone_restrictions JSON, -- Array of restricted zone IDs
+    time_restrictions JSON, -- Time-based access rules
+    
+    -- Audit fields
+    last_accessed TIMESTAMP,
+    access_count INT DEFAULT 0,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id), 
+    FOREIGN KEY (granted_by) REFERENCES users(id),
+    
+    UNIQUE KEY unique_user_site (user_id, site_id),
+    INDEX idx_user_access_user (user_id),
+    INDEX idx_user_access_site (site_id),
+    INDEX idx_user_access_level (access_level),
+    INDEX idx_user_access_status (status),
+    INDEX idx_user_access_expires (expires_at)
+);
+```
+
 ### **site_personnel**
 ```sql
 CREATE TABLE site_personnel (
