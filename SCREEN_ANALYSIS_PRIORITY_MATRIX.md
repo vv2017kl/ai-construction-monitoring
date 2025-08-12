@@ -16,23 +16,20 @@
 ### **🔥 TIER 1: Critical Operations (High Priority)**
 These screens are essential for daily operations and safety management:
 
-**05. Site Overview** (`/site-overview`) - **NEXT**
+### **🔥 TIER 1: Critical Operations (High Priority)**
+These screens are essential for daily operations and safety management:
+
+**08. Video Review** (`/video-review`) - **NEXT**
 - **Priority**: CRITICAL 
-- **Rationale**: Central site management hub, integrates with all other systems
-- **Dependencies**: Sites, cameras, personnel, alerts, zones
-- **Integration**: ZoneMinder, AI detections, real-time status
+- **Rationale**: Historical analysis, compliance, incident investigation - essential for forensic analysis
+- **Dependencies**: Recording sessions, evidence management, ZoneMinder integration
+- **Integration**: ZoneMinder event history, AI detection correlation, video analysis
 
-**06. Personnel Management** (`/personnel`) 
-- **Priority**: CRITICAL
-- **Rationale**: Workforce safety tracking, known runtime bug needs fixing
-- **Dependencies**: Site personnel, zones, safety compliance
-- **Integration**: AI person detection, access control, safety metrics
-
-**07. AI Analytics** (`/ai-analytics`)
+**09. Reports Center** (`/reports`)
 - **Priority**: HIGH
-- **Rationale**: AI performance monitoring and trend analysis
-- **Dependencies**: AI detections, model performance, confidence tracking
-- **Integration**: Roboflow models, detection history, performance optimization
+- **Rationale**: Compliance reporting, business intelligence, audit trails
+- **Dependencies**: All system data aggregation
+- **Integration**: Export systems, scheduled reporting, data analytics
 
 ### **🎯 TIER 2: Operational Excellence (Medium-High Priority)**
 Important for comprehensive site management and compliance:
