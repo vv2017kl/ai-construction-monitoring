@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useTheme } from '../../context/ThemeContext';
-import { mockCameras, mockSites } from '../../data/cesiumMockData';
+import { constructionCameras, constructionSites } from '../../data/cesiumMockData';
 import { 
   ArrowLeft, MapPin, Camera, AlertTriangle, 
   Volume2, VolumeX, RotateCcw, Settings,
