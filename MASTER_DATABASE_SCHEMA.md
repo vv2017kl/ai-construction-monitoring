@@ -3004,6 +3004,214 @@ CREATE TABLE navigation_sessions (
 
 ---
 
+## 🔍 **STREET VIEW COMPARISON & ANALYSIS**
+
+### **street_view_comparisons**
+```sql
+CREATE TABLE street_view_comparisons (
+    id UUID PRIMARY KEY,
+    session_before_id UUID NOT NULL, -- Reference to earlier session
+    session_after_id UUID NOT NULL, -- Reference to later session 
+    site_id UUID NOT NULL,
+    location_zone VARCHAR(255),
+    
+    -- Comparison configuration
+    comparison_type ENUM('construction_progress', 'equipment_changes', 'safety_compliance', 'personnel_activity') NOT NULL,
+    timespan_days INTEGER NOT NULL,
+    
+    -- Analysis results
+    overall_progress_percentage DECIMAL(5,2),
+    construction_growth DECIMAL(5,2),
+    equipment_changes_count INTEGER DEFAULT 0,
+    safety_improvements_count INTEGER DEFAULT 0,
+    personnel_variation_percentage DECIMAL(5,2),
+    
+    -- Processing status
+    analysis_status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
+    processing_started_at TIMESTAMP,
+    processing_completed_at TIMESTAMP,
+    processing_time_seconds INT,
+    error_message TEXT,
+    
+    -- Metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by UUID NOT NULL,
+    
+    FOREIGN KEY (session_before_id) REFERENCES street_view_sessions(id),
+    FOREIGN KEY (session_after_id) REFERENCES street_view_sessions(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    
+    INDEX idx_sv_comparisons_site (site_id, created_at DESC),
+    INDEX idx_sv_comparisons_type (comparison_type, analysis_status),
+    INDEX idx_sv_comparisons_timespan (timespan_days, overall_progress_percentage),
+    INDEX idx_sv_comparisons_status (analysis_status, processing_completed_at),
+    UNIQUE KEY unique_comparison_sessions (session_before_id, session_after_id, comparison_type)
+);
+```
+
+### **street_view_sessions**
+```sql
+CREATE TABLE street_view_sessions (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    camera_id UUID NOT NULL,
+    
+    -- Session metadata
+    session_label VARCHAR(255) NOT NULL,
+    session_date DATE NOT NULL,
+    session_time TIME NOT NULL,
+    
+    -- Location and positioning
+    location_coordinates_x DECIMAL(10,6),
+    location_coordinates_y DECIMAL(10,6),
+    heading_degrees DECIMAL(5,2), -- 0-360 degrees
+    
+    -- Recording details
+    weather_conditions TEXT,
+    recording_quality ENUM('low', 'medium', 'high', 'ultra') DEFAULT 'high',
+    file_path TEXT,
+    file_size_mb DECIMAL(10,2),
+    duration_seconds INTEGER,
+    
+    -- Status and metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID NOT NULL,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    
+    INDEX idx_sv_sessions_site_date (site_id, session_date DESC),
+    INDEX idx_sv_sessions_camera (camera_id, session_date DESC),
+    INDEX idx_sv_sessions_location (location_coordinates_x, location_coordinates_y),
+    INDEX idx_sv_sessions_quality (recording_quality, file_size_mb)
+);
+```
+
+### **detected_changes**
+```sql
+CREATE TABLE detected_changes (
+    id UUID PRIMARY KEY,
+    comparison_id UUID NOT NULL,
+    
+    -- Change details
+    change_type ENUM('construction_progress', 'equipment_addition', 'safety_improvement', 'personnel_increase', 'material_change', 'structural_change') NOT NULL,
+    severity ENUM('low', 'medium', 'high', 'critical') NOT NULL,
+    description TEXT NOT NULL,
+    
+    -- Location information
+    location_name VARCHAR(255),
+    location_coordinates_x DECIMAL(10,6),
+    location_coordinates_y DECIMAL(10,6),
+    
+    -- AI analysis results
+    confidence_percentage DECIMAL(5,2) NOT NULL,
+    impact_description TEXT,
+    ai_model_version VARCHAR(50),
+    detection_algorithm VARCHAR(100),
+    
+    -- Review workflow
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reviewed_by UUID,
+    review_status ENUM('pending', 'confirmed', 'rejected', 'needs_review') DEFAULT 'pending',
+    review_notes TEXT,
+    
+    FOREIGN KEY (comparison_id) REFERENCES street_view_comparisons(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    
+    INDEX idx_detected_changes_comparison (comparison_id, change_type),
+    INDEX idx_detected_changes_severity (severity, confidence_percentage DESC),
+    INDEX idx_detected_changes_location (location_name, change_type),
+    INDEX idx_detected_changes_review (review_status, created_at DESC)
+);
+```
+
+### **comparison_locations**
+```sql
+CREATE TABLE comparison_locations (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    
+    -- Location details
+    location_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    coordinates_x DECIMAL(10,6),
+    coordinates_y DECIMAL(10,6),
+    
+    -- Classification
+    zone_type ENUM('foundation', 'structural', 'entrance', 'equipment_yard', 'storage', 'office', 'safety') NOT NULL,
+    monitoring_priority ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    
+    -- Status and activity
+    is_active BOOLEAN DEFAULT TRUE,
+    last_comparison_date TIMESTAMP,
+    change_frequency_score DECIMAL(5,2), -- Historical change frequency
+    
+    -- Metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    
+    INDEX idx_comparison_locations_site (site_id, is_active),
+    INDEX idx_comparison_locations_zone (zone_type, monitoring_priority),
+    INDEX idx_comparison_locations_activity (change_frequency_score DESC, last_comparison_date),
+    INDEX idx_comparison_locations_coordinates (coordinates_x, coordinates_y)
+);
+```
+
+### **comparison_analysis_metrics**
+```sql
+CREATE TABLE comparison_analysis_metrics (
+    id UUID PRIMARY KEY,
+    comparison_id UUID NOT NULL,
+    
+    -- Metric details
+    metric_type ENUM('overall_progress', 'construction_growth', 'equipment_changes', 'safety_improvements', 'personnel_variation', 'cost_impact', 'timeline_impact') NOT NULL,
+    metric_value DECIMAL(10,4) NOT NULL,
+    metric_unit VARCHAR(50),
+    
+    -- Analysis metadata
+    calculation_method TEXT,
+    baseline_value DECIMAL(10,4),
+    improvement_percentage DECIMAL(5,2),
+    trend_direction ENUM('increasing', 'decreasing', 'stable', 'volatile'),
+    confidence_level DECIMAL(5,2),
+    
+    -- Processing information
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calculated_by VARCHAR(100), -- AI model or user ID
+    
+    FOREIGN KEY (comparison_id) REFERENCES street_view_comparisons(id) ON DELETE CASCADE,
+    
+    INDEX idx_analysis_metrics_comparison (comparison_id, metric_type),
+    INDEX idx_analysis_metrics_value (metric_value DESC, improvement_percentage),
+    INDEX idx_analysis_metrics_trend (trend_direction, confidence_level DESC),
+    UNIQUE KEY unique_comparison_metric (comparison_id, metric_type)
+);
+```
+
+---
+
+### **Version 1.9.0 (2025-01-12) - PHASE 2 CONTINUES**
+- **Updated from**: Screen Analysis #16 (Street View Comparison)
+- **Tables added**: 5 new tables (`street_view_comparisons`, `street_view_sessions`, `detected_changes`, `comparison_locations`, `comparison_analysis_metrics`)
+- **New section added**: Street View Comparison & Analysis (5 tables)
+- **New features added**:
+  - Comprehensive street view session management for temporal comparisons
+  - AI-powered change detection and analysis between timeframes
+  - Location-based comparison tracking with priority scoring
+  - Advanced metrics calculation for progress and efficiency analysis
+  - Review workflow for change validation and approval
+- **New indexes**: Street view comparison performance indexes for temporal analysis and change detection
+- **Focus**: Temporal analysis, construction progress tracking, change detection, before/after documentation
+- **Updated table count**: **63 → 68 tables**
+- **Next update**: Screen Analysis #17 (Phase 2 continues)
+
+---
+
 **Document Maintained By**: AI Construction Management System Team
 **Last Review**: 2025-01-12  
 **Next Review**: After each screen analysis completion
