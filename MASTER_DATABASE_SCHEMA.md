@@ -31,8 +31,9 @@ This document serves as the **single source of truth** for all database table de
 - **Alerts & Safety**: 6 tables
 - **Analytics & Reporting**: 2 tables
 - **System & Configuration**: 3 tables
+- **Video & Evidence Management**: 4 tables
 
-**Total Tables**: 30 tables
+**Total Tables**: 34 tables
 
 ---
 
