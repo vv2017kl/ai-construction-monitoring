@@ -219,577 +219,161 @@ export const constructionSites = [
   }
 ];
 
-export const mockCameras = {
-  'dubai-001': [
-    {
-      id: 'cam-dubai-001-001',
-      name: 'Main Entrance Security',
-      site_id: 'dubai-001',
-      coordinates: [55.2745, 25.1973, 15], // [longitude, latitude, height in meters]
-      status: 'critical',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-001',
-      alerts: {
-        active: 2,
-        last_alert: '2025-01-20T14:30:00Z',
-        alert_type: 'PPE Violation'
-      },
-      technical_status: 'online',
-      field_of_view: 90,
-      camera_direction: 45 // degrees from north
-    },
-    {
-      id: 'cam-dubai-001-002',
-      name: 'Crane Operation Zone A',
-      site_id: 'dubai-001',
-      coordinates: [55.2743, 25.1971, 25],
-      status: 'normal',
-      type: 'equipment',
-      zoneminder_monitor_id: 'zm-002',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T09:15:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 60,
-      camera_direction: 180
-    },
-    {
-      id: 'cam-dubai-001-003',
-      name: 'Floor 25 Construction Overview',
-      site_id: 'dubai-001',
-      coordinates: [55.2744, 25.1970, 75],
-      status: 'warning',
-      type: 'overview',
-      zoneminder_monitor_id: 'zm-003',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T13:45:00Z',
-        alert_type: 'Unauthorized Access'
-      },
-      technical_status: 'online',
-      field_of_view: 120,
-      camera_direction: 270
-    },
-    {
-      id: 'cam-dubai-001-004',
-      name: 'Material Storage Area',
-      site_id: 'dubai-001',
-      coordinates: [55.2746, 25.1974, 10],
-      status: 'normal',
-      type: 'storage',
-      zoneminder_monitor_id: 'zm-004',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T08:30:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 75,
-      camera_direction: 90
-    }
-  ],
-  'dubai-002': [
-    {
-      id: 'cam-dubai-002-001',
-      name: 'Marina Entrance Gate',
-      site_id: 'dubai-002',
-      coordinates: [55.1385, 25.0778, 12],
-      status: 'normal',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-005',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T11:20:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 80,
-      camera_direction: 0
-    },
-    {
-      id: 'cam-dubai-002-002',
-      name: 'Residential Block A',
-      site_id: 'dubai-002',
-      coordinates: [55.1383, 25.0776, 20],
-      status: 'warning',
-      type: 'construction',
-      zoneminder_monitor_id: 'zm-006',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T15:10:00Z',
-        alert_type: 'Equipment Safety'
-      },
-      technical_status: 'online',
-      field_of_view: 100,
-      camera_direction: 135
-    },
-    {
-      id: 'cam-dubai-002-003',
-      name: 'Swimming Pool Construction',
-      site_id: 'dubai-002',
-      coordinates: [55.1386, 25.0775, 8],
-      status: 'normal',
-      type: 'amenity',
-      zoneminder_monitor_id: 'zm-007',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T07:45:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 90,
-      camera_direction: 225
-    }
-  ],
-  'dubai-003': [
-    {
-      id: 'cam-dubai-003-001',
-      name: 'Villa Plot 1 Overview',
-      site_id: 'dubai-003',
-      coordinates: [55.1168, 25.1125, 15],
-      status: 'normal',
-      type: 'overview',
-      zoneminder_monitor_id: 'zm-008',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T12:30:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 110,
-      camera_direction: 45
-    },
-    {
-      id: 'cam-dubai-003-002',
-      name: 'Beach Access Road',
-      site_id: 'dubai-003',
-      coordinates: [55.1166, 25.1123, 8],
-      status: 'maintenance',
-      type: 'access',
-      zoneminder_monitor_id: 'zm-009',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T10:15:00Z',
-        alert_type: 'Camera Maintenance Required'
-      },
-      technical_status: 'offline',
-      field_of_view: 85,
-      camera_direction: 180
-    },
-    {
-      id: 'cam-dubai-003-003',
-      name: 'Villa Plot 2 Construction',
-      site_id: 'dubai-003',
-      coordinates: [55.1169, 25.1122, 12],
-      status: 'normal',
-      type: 'construction',
-      zoneminder_monitor_id: 'zm-010',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T14:00:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 95,
-      camera_direction: 315
-    },
-    {
-      id: 'cam-dubai-003-004',
-      name: 'Landscaping Area',
-      site_id: 'dubai-003',
-      coordinates: [55.1170, 25.1126, 6],
-      status: 'warning',
-      type: 'landscaping',
-      zoneminder_monitor_id: 'zm-011',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T16:20:00Z',
-        alert_type: 'Personnel Safety'
-      },
-      technical_status: 'online',
-      field_of_view: 70,
-      camera_direction: 270
-    }
-  ],
-  'dubai-004': [
-    {
-      id: 'cam-dubai-004-001',
-      name: 'DIFC Main Entrance',
-      site_id: 'dubai-004',
-      coordinates: [55.2090, 25.2136, 10],
-      status: 'normal',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-012',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T09:30:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 85,
-      camera_direction: 90
-    },
-    {
-      id: 'cam-dubai-004-002',
-      name: 'Foundation Work Area',
-      site_id: 'dubai-004',
-      coordinates: [55.2088, 25.2134, 5],
-      status: 'normal',
-      type: 'foundation',
-      zoneminder_monitor_id: 'zm-013',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T11:45:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 100,
-      camera_direction: 180
-    },
-    {
-      id: 'cam-dubai-004-003',
-      name: 'Site Office Complex',
-      site_id: 'dubai-004',
-      coordinates: [55.2091, 25.2133, 8],
-      status: 'normal',
-      type: 'office',
-      zoneminder_monitor_id: 'zm-014',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T13:15:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 75,
-      camera_direction: 0
-    }
-  ],
-  'mumbai-001': [
-    {
-      id: 'cam-mumbai-001-001',
-      name: 'BKC Tower Main Gate',
-      site_id: 'mumbai-001',
-      coordinates: [72.8698, 19.0626, 12],
-      status: 'critical',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-015',
-      alerts: {
-        active: 3,
-        last_alert: '2025-01-20T15:30:00Z',
-        alert_type: 'Multiple PPE Violations'
-      },
-      technical_status: 'online',
-      field_of_view: 90,
-      camera_direction: 45
-    },
-    {
-      id: 'cam-mumbai-001-002',
-      name: 'High-rise Construction Floor 15',
-      site_id: 'mumbai-001',
-      coordinates: [72.8696, 19.0624, 45],
-      status: 'warning',
-      type: 'construction',
-      zoneminder_monitor_id: 'zm-016',
-      alerts: {
-        active: 2,
-        last_alert: '2025-01-20T14:15:00Z',
-        alert_type: 'Height Safety'
-      },
-      technical_status: 'online',
-      field_of_view: 120,
-      camera_direction: 180
-    },
-    {
-      id: 'cam-mumbai-001-003',
-      name: 'Crane Operations Central',
-      site_id: 'mumbai-001',
-      coordinates: [72.8695, 19.0623, 30],
-      status: 'normal',
-      type: 'equipment',
-      zoneminder_monitor_id: 'zm-017',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T10:20:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 150,
-      camera_direction: 270
-    },
-    {
-      id: 'cam-mumbai-001-004',
-      name: 'Material Delivery Dock',
-      site_id: 'mumbai-001',
-      coordinates: [72.8699, 19.0627, 8],
-      status: 'normal',
-      type: 'logistics',
-      zoneminder_monitor_id: 'zm-018',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T08:45:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 80,
-      camera_direction: 90
-    }
-  ],
-  'bangalore-001': [
-    {
-      id: 'cam-bangalore-001-001',
-      name: 'Electronic City Main Access',
-      site_id: 'bangalore-001',
-      coordinates: [77.6649, 12.8457, 10],
-      status: 'normal',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-019',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T12:00:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 85,
-      camera_direction: 0
-    },
-    {
-      id: 'cam-bangalore-001-002',
-      name: 'IT Block A Construction',
-      site_id: 'bangalore-001',
-      coordinates: [77.6647, 12.8455, 20],
-      status: 'warning',
-      type: 'construction',
-      zoneminder_monitor_id: 'zm-020',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T13:30:00Z',
-        alert_type: 'Equipment Safety Check'
-      },
-      technical_status: 'online',
-      field_of_view: 95,
-      camera_direction: 135
-    },
-    {
-      id: 'cam-bangalore-001-003',
-      name: 'Parking Structure Build',
-      site_id: 'bangalore-001',
-      coordinates: [77.6650, 12.8458, 15],
-      status: 'normal',
-      type: 'infrastructure',
-      zoneminder_monitor_id: 'zm-021',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T09:45:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 100,
-      camera_direction: 225
-    }
-  ],
-  'delhi-001': [
-    {
-      id: 'cam-delhi-001-001',
-      name: 'Cyber Hub Extension Gate',
-      site_id: 'delhi-001',
-      coordinates: [77.0689, 28.4596, 12],
-      status: 'warning',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-022',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T14:45:00Z',
-        alert_type: 'Unauthorized Vehicle'
-      },
-      technical_status: 'online',
-      field_of_view: 90,
-      camera_direction: 90
-    },
-    {
-      id: 'cam-delhi-001-002',
-      name: 'Office Tower Foundation',
-      site_id: 'delhi-001',
-      coordinates: [77.0687, 28.4594, 8],
-      status: 'critical',
-      type: 'foundation',
-      zoneminder_monitor_id: 'zm-023',
-      alerts: {
-        active: 2,
-        last_alert: '2025-01-20T15:15:00Z',
-        alert_type: 'Structural Safety'
-      },
-      technical_status: 'online',
-      field_of_view: 110,
-      camera_direction: 180
-    },
-    {
-      id: 'cam-delhi-001-003',
-      name: 'Equipment Storage Yard',
-      site_id: 'delhi-001',
-      coordinates: [77.0685, 28.4593, 5],
-      status: 'normal',
-      type: 'storage',
-      zoneminder_monitor_id: 'zm-024',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T11:30:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 75,
-      camera_direction: 270
-    },
-    {
-      id: 'cam-delhi-001-004',
-      name: 'Server Room Construction',
-      site_id: 'delhi-001',
-      coordinates: [77.0691, 28.4597, 18],
-      status: 'maintenance',
-      type: 'technical',
-      zoneminder_monitor_id: 'zm-025',
-      alerts: {
-        active: 1,
-        last_alert: '2025-01-20T10:00:00Z',
-        alert_type: 'Camera Maintenance'
-      },
-      technical_status: 'offline',
-      field_of_view: 60,
-      camera_direction: 45
-    }
-  ],
-  'pune-001': [
-    {
-      id: 'cam-pune-001-001',
-      name: 'Hinjewadi Phase 4 Main Gate',
-      site_id: 'pune-001',
-      coordinates: [73.7275, 18.5913, 8],
-      status: 'normal',
-      type: 'entrance',
-      zoneminder_monitor_id: 'zm-026',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T09:15:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 80,
-      camera_direction: 0
-    },
-    {
-      id: 'cam-pune-001-002',
-      name: 'Tech Park Building A',
-      site_id: 'pune-001',
-      coordinates: [73.7273, 18.5911, 15],
-      status: 'normal',
-      type: 'construction',
-      zoneminder_monitor_id: 'zm-027',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T12:20:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 100,
-      camera_direction: 180
-    },
-    {
-      id: 'cam-pune-001-003',
-      name: 'Landscaping and Utilities',
-      site_id: 'pune-001',
-      coordinates: [73.7276, 18.5914, 6],
-      status: 'normal',
-      type: 'infrastructure',
-      zoneminder_monitor_id: 'zm-028',
-      alerts: {
-        active: 0,
-        last_alert: '2025-01-20T08:30:00Z',
-        alert_type: null
-      },
-      technical_status: 'online',
-      field_of_view: 90,
-      camera_direction: 270
-    }
-  ]
-};
+// Camera Data with IP Camera Types and Positions
+export const constructionCameras = [
+  // Downtown Dubai Tower Complex Cameras
+  { id: 'cam_1_1', siteId: 'site_1', name: 'Tower Crane Cam 1', type: 'fisheye', coordinates: [55.2745, 25.1973], angle: 0, status: 'active', alerts: ['critical', 'high'] },
+  { id: 'cam_1_2', siteId: 'site_1', name: 'Foundation Monitoring', type: 'ptz', coordinates: [55.2743, 25.1971], angle: 45, status: 'active', alerts: ['medium'] },
+  { id: 'cam_1_3', siteId: 'site_1', name: 'Main Entrance Security', type: 'fixed', coordinates: [55.2742, 25.1970], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_1_4', siteId: 'site_1', name: 'Material Storage Area', type: 'fisheye', coordinates: [55.2746, 25.1974], angle: 270, status: 'active', alerts: ['low'] },
+  { id: 'cam_1_5', siteId: 'site_1', name: 'Worker Safety Zone', type: 'ptz', coordinates: [55.2744, 25.1972], angle: 90, status: 'maintenance', alerts: ['critical'] },
+  { id: 'cam_1_6', siteId: 'site_1', name: 'Perimeter North', type: 'fixed', coordinates: [55.2745, 25.1975], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_1_7', siteId: 'site_1', name: 'Concrete Pour Area', type: 'fisheye', coordinates: [55.2743, 25.1969], angle: 135, status: 'active', alerts: ['high', 'medium'] },
+  { id: 'cam_1_8', siteId: 'site_1', name: 'Tower Crane Cam 2', type: 'ptz', coordinates: [55.2747, 25.1973], angle: 315, status: 'active', alerts: ['info'] },
 
-// Alert details for cameras
-export const mockCameraAlerts = [
-  {
-    id: 'alert-001',
-    camera_id: 'cam-dubai-001-001',
-    site_id: 'dubai-001',
-    type: 'PPE Violation',
-    severity: 'critical',
-    title: 'Hard Hat Not Worn',
-    description: 'Worker detected without hard hat in restricted area',
-    timestamp: '2025-01-20T14:30:00Z',
-    status: 'active',
-    evidence_url: '/api/alerts/alert-001/evidence.jpg'
-  },
-  {
-    id: 'alert-002',
-    camera_id: 'cam-dubai-001-001',
-    site_id: 'dubai-001',
-    type: 'PPE Violation',
-    severity: 'high',
-    title: 'Safety Vest Missing',
-    description: 'Personnel without high-visibility safety vest',
-    timestamp: '2025-01-20T13:45:00Z',
-    status: 'active',
-    evidence_url: '/api/alerts/alert-002/evidence.jpg'
-  },
-  {
-    id: 'alert-003',
-    camera_id: 'cam-mumbai-001-001',
-    site_id: 'mumbai-001',
-    type: 'PPE Violation',
-    severity: 'critical',
-    title: 'Multiple Safety Violations',
-    description: 'Multiple workers without proper PPE equipment',
-    timestamp: '2025-01-20T15:30:00Z',
-    status: 'active',
-    evidence_url: '/api/alerts/alert-003/evidence.jpg'
-  }
+  // Dubai Marina Residential Tower Cameras
+  { id: 'cam_2_1', siteId: 'site_2', name: 'Facade Installation Cam', type: 'fisheye', coordinates: [55.1417, 25.0824], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_2_2', siteId: 'site_2', name: 'Elevator Shaft Monitor', type: 'fixed', coordinates: [55.1415, 25.0822], angle: 90, status: 'active', alerts: ['low'] },
+  { id: 'cam_2_3', siteId: 'site_2', name: 'Balcony Work Area', type: 'ptz', coordinates: [55.1418, 25.0825], angle: 180, status: 'active', alerts: ['medium'] },
+  { id: 'cam_2_4', siteId: 'site_2', name: 'Marina View Security', type: 'fisheye', coordinates: [55.1414, 25.0821], angle: 270, status: 'active', alerts: [] },
+  { id: 'cam_2_5', siteId: 'site_2', name: 'Rooftop Equipment', type: 'fixed', coordinates: [55.1419, 25.0826], angle: 45, status: 'active', alerts: ['info'] },
+  { id: 'cam_2_6', siteId: 'site_2', name: 'Parking Garage', type: 'ptz', coordinates: [55.1413, 25.0820], angle: 225, status: 'active', alerts: ['high'] },
+
+  // Business Bay Commercial Complex Cameras  
+  { id: 'cam_3_1', siteId: 'site_3', name: 'Lobby Construction Cam', type: 'fisheye', coordinates: [55.2635, 25.1849], angle: 0, status: 'active', alerts: ['medium'] },
+  { id: 'cam_3_2', siteId: 'site_3', name: 'Office Floor Progress', type: 'ptz', coordinates: [55.2633, 25.1847], angle: 90, status: 'active', alerts: [] },
+  { id: 'cam_3_3', siteId: 'site_3', name: 'Bay View Exterior', type: 'fixed', coordinates: [55.2636, 25.1850], angle: 180, status: 'active', alerts: ['low'] },
+  { id: 'cam_3_4', siteId: 'site_3', name: 'HVAC Installation', type: 'fisheye', coordinates: [55.2632, 25.1846], angle: 270, status: 'active', alerts: ['critical'] },
+  { id: 'cam_3_5', siteId: 'site_3', name: 'Electrical Room', type: 'fixed', coordinates: [55.2637, 25.1851], angle: 45, status: 'active', alerts: [] },
+  { id: 'cam_3_6', siteId: 'site_3', name: 'Fire Safety Systems', type: 'ptz', coordinates: [55.2634, 25.1848], angle: 135, status: 'maintenance', alerts: ['high'] },
+  { id: 'cam_3_7', siteId: 'site_3', name: 'Retail Space Fit-out', type: 'fisheye', coordinates: [55.2635, 25.1847], angle: 225, status: 'active', alerts: ['medium'] },
+  { id: 'cam_3_8', siteId: 'site_3', name: 'Loading Dock', type: 'fixed', coordinates: [55.2631, 25.1845], angle: 315, status: 'active', alerts: ['info'] },
+  { id: 'cam_3_9', siteId: 'site_3', name: 'Perimeter Security', type: 'ptz', coordinates: [55.2638, 25.1852], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_3_10', siteId: 'site_3', name: 'Conference Room Build', type: 'fisheye', coordinates: [55.2633, 25.1849], angle: 90, status: 'active', alerts: ['low'] },
+
+  // Dubai Silicon Oasis Data Center Cameras
+  { id: 'cam_4_1', siteId: 'site_4', name: 'Server Room Construction', type: 'fisheye', coordinates: [55.3782, 25.1208], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_4_2', siteId: 'site_4', name: 'Cooling System Install', type: 'ptz', coordinates: [55.3780, 25.1206], angle: 90, status: 'active', alerts: ['info'] },
+  { id: 'cam_4_3', siteId: 'site_4', name: 'Power Infrastructure', type: 'fixed', coordinates: [55.3783, 25.1209], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_4_4', siteId: 'site_4', name: 'Security Perimeter', type: 'fisheye', coordinates: [55.3779, 25.1205], angle: 270, status: 'active', alerts: ['low'] },
+  { id: 'cam_4_5', siteId: 'site_4', name: 'Cable Management', type: 'ptz', coordinates: [55.3784, 25.1210], angle: 45, status: 'active', alerts: [] },
+  { id: 'cam_4_6', siteId: 'site_4', name: 'Generator Room', type: 'fixed', coordinates: [55.3778, 25.1204], angle: 225, status: 'active', alerts: [] },
+  { id: 'cam_4_7', siteId: 'site_4', name: 'Clean Room Setup', type: 'fisheye', coordinates: [55.3785, 25.1211], angle: 135, status: 'active', alerts: [] },
+  { id: 'cam_4_8', siteId: 'site_4', name: 'Fire Suppression', type: 'ptz', coordinates: [55.3777, 25.1203], angle: 315, status: 'active', alerts: [] },
+  { id: 'cam_4_9', siteId: 'site_4', name: 'Network Operations', type: 'fixed', coordinates: [55.3786, 25.1212], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_4_10', siteId: 'site_4', name: 'Loading Bay Monitor', type: 'fisheye', coordinates: [55.3776, 25.1202], angle: 90, status: 'active', alerts: [] },
+  { id: 'cam_4_11', siteId: 'site_4', name: 'Exterior North Wall', type: 'ptz', coordinates: [55.3787, 25.1213], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_4_12', siteId: 'site_4', name: 'Emergency Exit Monitor', type: 'fixed', coordinates: [55.3775, 25.1201], angle: 270, status: 'active', alerts: [] },
+
+  // Bandra-Kurla Complex Office Tower Cameras
+  { id: 'cam_5_1', siteId: 'site_5', name: 'Main Structure Progress', type: 'fisheye', coordinates: [72.8698, 19.0607], angle: 0, status: 'active', alerts: ['critical', 'high'] },
+  { id: 'cam_5_2', siteId: 'site_5', name: 'Foundation Monitoring', type: 'ptz', coordinates: [72.8696, 19.0605], angle: 90, status: 'active', alerts: ['medium'] },
+  { id: 'cam_5_3', siteId: 'site_5', name: 'BKC Road Entrance', type: 'fixed', coordinates: [72.8699, 19.0608], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_5_4', siteId: 'site_5', name: 'Worker Assembly Area', type: 'fisheye', coordinates: [72.8695, 19.0604], angle: 270, status: 'active', alerts: ['high'] },
+  { id: 'cam_5_5', siteId: 'site_5', name: 'Material Hoist Operations', type: 'ptz', coordinates: [72.8700, 19.0609], angle: 45, status: 'maintenance', alerts: ['critical'] },
+  { id: 'cam_5_6', siteId: 'site_5', name: 'Concrete Batching Plant', type: 'fixed', coordinates: [72.8694, 19.0603], angle: 225, status: 'active', alerts: ['low'] },
+  { id: 'cam_5_7', siteId: 'site_5', name: 'Tower Crane Operations', type: 'fisheye', coordinates: [72.8701, 19.0610], angle: 135, status: 'active', alerts: ['medium'] },
+  { id: 'cam_5_8', siteId: 'site_5', name: 'Safety Compliance Zone', type: 'ptz', coordinates: [72.8693, 19.0602], angle: 315, status: 'active', alerts: ['high'] },
+  { id: 'cam_5_9', siteId: 'site_5', name: 'Quality Control Point', type: 'fixed', coordinates: [72.8702, 19.0611], angle: 0, status: 'active', alerts: ['info'] },
+
+  // Powai Tech Park Expansion Cameras
+  { id: 'cam_6_1', siteId: 'site_6', name: 'Excavation Progress', type: 'fisheye', coordinates: [72.9082, 19.1137], angle: 0, status: 'active', alerts: ['medium'] },
+  { id: 'cam_6_2', siteId: 'site_6', name: 'Soil Testing Area', type: 'ptz', coordinates: [72.9080, 19.1135], angle: 90, status: 'active', alerts: [] },
+  { id: 'cam_6_3', siteId: 'site_6', name: 'Equipment Storage', type: 'fixed', coordinates: [72.9083, 19.1138], angle: 180, status: 'active', alerts: ['low'] },
+  { id: 'cam_6_4', siteId: 'site_6', name: 'Powai Lake View', type: 'fisheye', coordinates: [72.9079, 19.1134], angle: 270, status: 'active', alerts: [] },
+  { id: 'cam_6_5', siteId: 'site_6', name: 'Tech Campus Entrance', type: 'ptz', coordinates: [72.9084, 19.1139], angle: 45, status: 'active', alerts: ['critical'] },
+  { id: 'cam_6_6', siteId: 'site_6', name: 'Utility Installation', type: 'fixed', coordinates: [72.9078, 19.1133], angle: 225, status: 'active', alerts: ['high'] },
+  { id: 'cam_6_7', siteId: 'site_6', name: 'Environmental Monitor', type: 'fisheye', coordinates: [72.9085, 19.1140], angle: 135, status: 'active', alerts: ['info'] },
+
+  // Andheri Metro Station Hub Cameras  
+  { id: 'cam_7_1', siteId: 'site_7', name: 'Underground Excavation', type: 'fisheye', coordinates: [72.8468, 19.1198], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_7_2', siteId: 'site_7', name: 'Station Platform Area', type: 'ptz', coordinates: [72.8466, 19.1196], angle: 90, status: 'active', alerts: ['medium'] },
+  { id: 'cam_7_3', siteId: 'site_7', name: 'Main Road Interface', type: 'fixed', coordinates: [72.8469, 19.1199], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_7_4', siteId: 'site_7', name: 'Metro Line Connection', type: 'fisheye', coordinates: [72.8465, 19.1195], angle: 270, status: 'active', alerts: ['low'] },
+  { id: 'cam_7_5', siteId: 'site_7', name: 'Tunnel Boring Progress', type: 'ptz', coordinates: [72.8470, 19.1200], angle: 45, status: 'active', alerts: [] },
+  { id: 'cam_7_6', siteId: 'site_7', name: 'Ventilation Shaft', type: 'fixed', coordinates: [72.8464, 19.1194], angle: 225, status: 'active', alerts: ['high'] },
+  { id: 'cam_7_7', siteId: 'site_7', name: 'Emergency Access', type: 'fisheye', coordinates: [72.8471, 19.1201], angle: 135, status: 'active', alerts: [] },
+  { id: 'cam_7_8', siteId: 'site_7', name: 'Power Substation', type: 'ptz', coordinates: [72.8463, 19.1193], angle: 315, status: 'active', alerts: ['info'] },
+  { id: 'cam_7_9', siteId: 'site_7', name: 'Ticketing Area Build', type: 'fixed', coordinates: [72.8472, 19.1202], angle: 0, status: 'active', alerts: ['medium'] },
+  { id: 'cam_7_10', siteId: 'site_7', name: 'Concourse Construction', type: 'fisheye', coordinates: [72.8462, 19.1192], angle: 90, status: 'active', alerts: [] },
+  { id: 'cam_7_11', siteId: 'site_7', name: 'Escalator Installation', type: 'ptz', coordinates: [72.8473, 19.1203], angle: 180, status: 'active', alerts: ['low'] },
+
+  // Navi Mumbai Smart City Phase 2 Cameras
+  { id: 'cam_8_1', siteId: 'site_8', name: 'Smart Infrastructure Hub', type: 'fisheye', coordinates: [73.0298, 19.0331], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_8_2', siteId: 'site_8', name: 'IoT Sensor Network', type: 'ptz', coordinates: [73.0296, 19.0329], angle: 90, status: 'active', alerts: ['info'] },
+  { id: 'cam_8_3', siteId: 'site_8', name: 'Digital Signage Install', type: 'fixed', coordinates: [73.0299, 19.0332], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_8_4', siteId: 'site_8', name: 'Fiber Optic Deployment', type: 'fisheye', coordinates: [73.0295, 19.0328], angle: 270, status: 'active', alerts: ['low'] },
+  { id: 'cam_8_5', siteId: 'site_8', name: 'Traffic Management', type: 'ptz', coordinates: [73.0300, 19.0333], angle: 45, status: 'active', alerts: [] },
+  { id: 'cam_8_6', siteId: 'site_8', name: 'Green Building Systems', type: 'fixed', coordinates: [73.0294, 19.0327], angle: 225, status: 'active', alerts: [] },
+  { id: 'cam_8_7', siteId: 'site_8', name: 'Water Management', type: 'fisheye', coordinates: [73.0301, 19.0334], angle: 135, status: 'active', alerts: [] },
+  { id: 'cam_8_8', siteId: 'site_8', name: 'Solar Panel Array', type: 'ptz', coordinates: [73.0293, 19.0326], angle: 315, status: 'active', alerts: [] },
+  { id: 'cam_8_9', siteId: 'site_8', name: 'Waste Processing Unit', type: 'fixed', coordinates: [73.0302, 19.0335], angle: 0, status: 'active', alerts: [] },
+  { id: 'cam_8_10', siteId: 'site_8', name: 'Community Center Build', type: 'fisheye', coordinates: [73.0292, 19.0325], angle: 90, status: 'active', alerts: [] },
+  { id: 'cam_8_11', siteId: 'site_8', name: 'Smart Parking System', type: 'ptz', coordinates: [73.0303, 19.0336], angle: 180, status: 'active', alerts: [] },
+  { id: 'cam_8_12', siteId: 'site_8', name: 'Emergency Response', type: 'fixed', coordinates: [73.0291, 19.0324], angle: 270, status: 'active', alerts: [] },
+  { id: 'cam_8_13', siteId: 'site_8', name: 'Public Wi-Fi Network', type: 'fisheye', coordinates: [73.0304, 19.0337], angle: 45, status: 'active', alerts: [] },
+  { id: 'cam_8_14', siteId: 'site_8', name: 'Environmental Sensors', type: 'ptz', coordinates: [73.0290, 19.0323], angle: 225, status: 'active', alerts: [] },
+  { id: 'cam_8_15', siteId: 'site_8', name: 'Central Control Room', type: 'fixed', coordinates: [73.0298, 19.0330], angle: 135, status: 'active', alerts: [] }
 ];
 
-// Pin styling configuration
-export const sitePinColors = {
-  critical: '#FF0000',    // Red
-  high: '#FF8C00',        // Orange
-  medium: '#FFD700',      // Gold
-  low: '#32CD32',         // Green
-  normal: '#32CD32',      // Green
-  offline: '#808080'      // Gray
-};
-
-export const cameraPinColors = {
-  critical: '#FF0000',    // Red - Safety violations
-  warning: '#FFA500',     // Orange - PPE issues
-  maintenance: '#FFFF00', // Yellow - Maintenance required
-  normal: '#00FF00',      // Green - Operating normally  
-  offline: '#808080'      // Gray - Camera offline
-};
-
-// Regional groupings for map navigation
-export const regions = {
-  'Middle East': {
-    center: [55.2744, 25.1972],
-    zoom: 8,
-    sites: ['dubai-001', 'dubai-002', 'dubai-003', 'dubai-004']
+// Layer Configuration for Cesium Map
+export const mapLayers = {
+  SATELLITE: {
+    id: 'satellite',
+    name: 'Satellite Imagery',
+    type: 'imagery',
+    enabled: true,
+    opacity: 1.0
   },
-  'South Asia': {
-    center: [75.7873, 22.9734], // Central India
-    zoom: 5,
-    sites: ['mumbai-001', 'bangalore-001', 'delhi-001', 'pune-001']
+  TERRAIN: {
+    id: 'terrain',
+    name: '3D Terrain',
+    type: 'terrain',
+    enabled: true,
+    opacity: 1.0
+  },
+  SITES: {
+    id: 'sites',
+    name: 'Construction Sites',
+    type: 'vector',
+    enabled: true,
+    opacity: 1.0
+  },
+  CAMERAS: {
+    id: 'cameras',
+    name: 'Security Cameras',
+    type: 'vector',
+    enabled: true,
+    opacity: 0.8
+  },
+  ALERTS: {
+    id: 'alerts',
+    name: 'Alert Indicators',
+    type: 'vector',
+    enabled: true,
+    opacity: 0.9
+  },
+  REGIONS: {
+    id: 'regions',
+    name: 'Regional Boundaries',
+    type: 'vector',
+    enabled: false,
+    opacity: 0.5
+  },
+  LABELS: {
+    id: 'labels',
+    name: 'Site Labels',
+    type: 'vector',
+    enabled: true,
+    opacity: 1.0
   }
 };
 
-// Default map settings
-export const mapDefaults = {
-  globalCenter: [65.0000, 20.0000], // Between Dubai and India
+// Default view settings
+export const defaultMapSettings = {
+  globalCenter: [65.0000, 20.0000], // Between Middle East and South Asia
   globalZoom: 4,
+  regionalZoom: 7,
   siteZoom: 16,
   cameraZoom: 18
 };
