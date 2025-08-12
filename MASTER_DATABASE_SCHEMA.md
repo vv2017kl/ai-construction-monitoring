@@ -639,6 +639,161 @@ CREATE TABLE alerts (
 );
 ```
 
+### **alert_comments**
+```sql
+CREATE TABLE alert_comments (
+    id UUID PRIMARY KEY,
+    alert_id UUID NOT NULL,
+    author_id UUID NOT NULL,
+    
+    -- Comment content
+    comment_text TEXT NOT NULL,
+    comment_type ENUM('note', 'status_update', 'evidence', 'resolution', 'escalation') DEFAULT 'note',
+    
+    -- Threading support
+    parent_comment_id UUID NULL, -- For reply threading
+    thread_level INT DEFAULT 0,
+    
+    -- Mentions and notifications
+    mentioned_users JSON, -- Array of user IDs mentioned
+    notifications_sent JSON, -- Notification delivery tracking
+    
+    -- Attachments
+    attachment_urls JSON, -- Array of attachment URLs
+    attachment_metadata JSON, -- File names, sizes, types
+    
+    -- Status and visibility
+    is_internal BOOLEAN DEFAULT FALSE, -- Internal vs external comments
+    is_edited BOOLEAN DEFAULT FALSE,
+    edit_history JSON, -- Edit tracking
+    visibility_level ENUM('public', 'team', 'management', 'admin') DEFAULT 'team',
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (alert_id) REFERENCES alerts(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id),
+    FOREIGN KEY (parent_comment_id) REFERENCES alert_comments(id),
+    
+    INDEX idx_alert_comments_alert (alert_id, created_at DESC),
+    INDEX idx_alert_comments_author (author_id),
+    INDEX idx_alert_comments_thread (parent_comment_id, thread_level),
+    INDEX idx_alert_comments_mentions (mentioned_users),
+    FULLTEXT INDEX idx_alert_comments_search (comment_text)
+);
+```
+
+### **alert_evidence**
+```sql
+CREATE TABLE alert_evidence (
+    id UUID PRIMARY KEY,
+    alert_id UUID NOT NULL,
+    
+    -- Evidence source
+    source_type ENUM('ai_detection', 'manual_upload', 'zoneminder_event', 'camera_snapshot', 'document') NOT NULL,
+    source_reference_id VARCHAR(255), -- Reference to source (detection_id, event_id, etc.)
+    
+    -- File information
+    evidence_type ENUM('image', 'video', 'document', 'audio', 'data') NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    original_file_name VARCHAR(255),
+    file_path VARCHAR(500) NOT NULL,
+    file_size_bytes BIGINT,
+    file_format VARCHAR(50), -- jpg, mp4, pdf, json, etc.
+    
+    -- Content metadata
+    duration_seconds INT NULL, -- For videos/audio
+    image_width INT NULL,
+    image_height INT NULL,
+    thumbnail_path VARCHAR(500),
+    
+    -- Evidence details
+    title VARCHAR(255),
+    description TEXT,
+    evidence_timestamp TIMESTAMP, -- When evidence was captured (vs when added)
+    location_metadata JSON, -- Camera position, GPS, etc.
+    
+    -- AI Analysis metadata
+    ai_annotations JSON, -- Bounding boxes, detections, etc.
+    analysis_metadata JSON, -- Confidence scores, model versions, etc.
+    
+    -- Access and workflow
+    uploaded_by UUID NOT NULL,
+    is_primary_evidence BOOLEAN DEFAULT FALSE,
+    evidence_chain_verified BOOLEAN DEFAULT FALSE,
+    access_permissions JSON, -- Who can view this evidence
+    
+    -- Status
+    status ENUM('processing', 'available', 'archived', 'deleted') DEFAULT 'available',
+    retention_date DATE, -- When evidence expires
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (alert_id) REFERENCES alerts(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id),
+    
+    INDEX idx_alert_evidence_alert (alert_id, evidence_timestamp DESC),
+    INDEX idx_alert_evidence_type (evidence_type, source_type),
+    INDEX idx_alert_evidence_uploader (uploaded_by),
+    INDEX idx_alert_evidence_primary (is_primary_evidence),
+    INDEX idx_alert_evidence_retention (retention_date)
+);
+```
+
+### **alert_assignments**
+```sql
+CREATE TABLE alert_assignments (
+    id UUID PRIMARY KEY,
+    alert_id UUID NOT NULL,
+    
+    -- Assignment details
+    assigned_to UUID NOT NULL,
+    assigned_by UUID NOT NULL,
+    assignment_type ENUM('manual', 'automatic', 'escalation', 'reassignment') DEFAULT 'manual',
+    
+    -- Timing
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    accepted_at TIMESTAMP NULL,
+    started_work_at TIMESTAMP NULL,
+    estimated_completion TIMESTAMP NULL,
+    actual_completion TIMESTAMP NULL,
+    
+    -- Assignment metadata
+    assignment_reason TEXT,
+    priority_override ENUM('critical', 'high', 'medium', 'low') NULL,
+    skill_requirements JSON, -- Required skills/certifications
+    assignment_notes TEXT,
+    
+    -- Status tracking
+    status ENUM('assigned', 'accepted', 'in_progress', 'completed', 'reassigned', 'declined') DEFAULT 'assigned',
+    completion_percentage INT DEFAULT 0,
+    
+    -- Performance metrics
+    response_time_minutes INT, -- Time to start work
+    resolution_time_minutes INT, -- Total time to complete
+    quality_score DECIMAL(3,1), -- 1-10 quality rating
+    
+    -- Workload context
+    concurrent_assignments INT, -- How many other active assignments at time of assignment
+    workload_score DECIMAL(5,2), -- Calculated workload at assignment time
+    
+    -- Status changes
+    status_changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status_changed_by UUID,
+    
+    FOREIGN KEY (alert_id) REFERENCES alerts(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id),
+    FOREIGN KEY (assigned_by) REFERENCES users(id),
+    FOREIGN KEY (status_changed_by) REFERENCES users(id),
+    
+    INDEX idx_alert_assignments_alert (alert_id, assigned_at DESC),
+    INDEX idx_alert_assignments_user (assigned_to, status, assigned_at DESC),
+    INDEX idx_alert_assignments_performance (resolution_time_minutes, quality_score),
+    INDEX idx_alert_assignments_workload (workload_score, concurrent_assignments)
+);
+```
+
 ### **safety_metrics**
 ```sql
 CREATE TABLE safety_metrics (
