@@ -83,11 +83,12 @@ const CesiumContainer = ({
 
   // Site pin color determination
   const getSitePinColor = (site) => {
-    const { critical, high, medium } = site.alert_summary || {};
-    if (critical > 0) return '#FF0000'; // Red
-    if (high > 0) return '#FF8C00';     // Orange
-    if (medium > 0) return '#FFD700';   // Gold
-    return '#32CD32';                   // Green
+    const { critical, high, medium, low } = site.alerts || {};
+    if (critical > 0) return '#DC2626'; // Red - Critical
+    if (high > 0) return '#EA580C';     // Orange - High
+    if (medium > 0) return '#D97706';   // Amber - Medium
+    if (low > 0) return '#65A30D';      // Green - Low
+    return '#6B7280';                   // Gray - No alerts
   };
 
   // Camera pin color determination
