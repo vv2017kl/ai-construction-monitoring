@@ -183,7 +183,7 @@ const CesiumDashboard = () => {
                   className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors"
                 >
                   <Maximize className="w-4 h-4" />
-                  <span>Fullscreen</span>
+                  <span>Exit Immersive</span>
                 </button>
               </div>
             </div>
