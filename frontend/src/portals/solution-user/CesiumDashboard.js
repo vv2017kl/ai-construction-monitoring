@@ -37,7 +37,7 @@ const CesiumDashboard = () => {
 
   const getCurrentCameras = () => {
     if (!selectedSite) return [];
-    return constructionCameras[selectedSite.id] || [];
+    return constructionCameras.filter(camera => camera.siteId === selectedSite.id);
   };
 
   // Navigation breadcrumb
