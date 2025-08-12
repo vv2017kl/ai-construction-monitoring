@@ -566,6 +566,183 @@ CREATE TABLE recording_sessions (
 );
 ```
 
+### **ai_model_performance_logs**
+```sql
+CREATE TABLE ai_model_performance_logs (
+    id UUID PRIMARY KEY,
+    model_id UUID NOT NULL,
+    
+    -- Performance metrics
+    evaluation_date DATE NOT NULL,
+    evaluation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    accuracy_score DECIMAL(5,2) NOT NULL,
+    precision_score DECIMAL(5,2) NOT NULL,
+    recall_score DECIMAL(5,2) NOT NULL,
+    f1_score DECIMAL(5,2) NOT NULL,
+    
+    -- Processing performance
+    avg_processing_time_ms INT NOT NULL,
+    median_processing_time_ms INT,
+    max_processing_time_ms INT,
+    min_processing_time_ms INT,
+    
+    -- Detection statistics
+    total_detections_processed INT DEFAULT 0,
+    true_positives INT DEFAULT 0,
+    false_positives INT DEFAULT 0,
+    false_negatives INT DEFAULT 0,
+    confidence_score_avg DECIMAL(5,2),
+    confidence_score_std DECIMAL(5,2),
+    
+    -- Context information
+    test_dataset_id UUID,
+    site_id UUID,
+    camera_subset JSON, -- Array of camera IDs used for evaluation
+    
+    -- Evaluation metadata
+    evaluation_type ENUM('automated', 'manual', 'field_test', 'benchmark') DEFAULT 'automated',
+    evaluated_by UUID,
+    evaluation_notes TEXT,
+    
+    -- Comparison data
+    compared_to_model_id UUID,
+    performance_change_percentage DECIMAL(6,2),
+    
+    FOREIGN KEY (model_id) REFERENCES ai_models(id),
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (evaluated_by) REFERENCES users(id),
+    FOREIGN KEY (compared_to_model_id) REFERENCES ai_models(id),
+    
+    INDEX idx_model_performance_model_date (model_id, evaluation_date DESC),
+    INDEX idx_model_performance_accuracy (accuracy_score DESC),
+    INDEX idx_model_performance_processing (avg_processing_time_ms),
+    INDEX idx_model_performance_site (site_id, evaluation_date DESC)
+);
+```
+
+### **ai_detection_analytics**
+```sql
+CREATE TABLE ai_detection_analytics (
+    id UUID PRIMARY KEY,
+    
+    -- Time and scope
+    analysis_date DATE NOT NULL,
+    analysis_hour INT, -- 0-23 for hourly granularity
+    site_id UUID NOT NULL,
+    camera_id UUID,
+    zone_id UUID,
+    
+    -- Detection counts by type
+    person_detections INT DEFAULT 0,
+    ppe_detections INT DEFAULT 0,
+    vehicle_detections INT DEFAULT 0,
+    safety_violation_detections INT DEFAULT 0,
+    equipment_detections INT DEFAULT 0,
+    activity_detections INT DEFAULT 0,
+    
+    -- Quality metrics
+    total_detections INT DEFAULT 0,
+    high_confidence_detections INT DEFAULT 0, -- confidence > 0.8
+    medium_confidence_detections INT DEFAULT 0, -- confidence 0.6-0.8
+    low_confidence_detections INT DEFAULT 0, -- confidence < 0.6
+    avg_confidence_score DECIMAL(5,2),
+    
+    -- Performance metrics
+    avg_processing_time_ms INT,
+    total_processing_time_ms BIGINT,
+    failed_processing_count INT DEFAULT 0,
+    
+    -- Safety analysis
+    safety_violations_detected INT DEFAULT 0,
+    ppe_compliance_rate DECIMAL(5,2),
+    risk_level_high_count INT DEFAULT 0,
+    risk_level_medium_count INT DEFAULT 0,
+    risk_level_low_count INT DEFAULT 0,
+    
+    -- Trend indicators
+    detection_trend ENUM('increasing', 'stable', 'decreasing'),
+    accuracy_trend ENUM('improving', 'stable', 'declining'),
+    
+    -- Model information
+    primary_model_id UUID,
+    model_version VARCHAR(50),
+    
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id),
+    FOREIGN KEY (primary_model_id) REFERENCES ai_models(id),
+    
+    UNIQUE KEY unique_analytics_scope (site_id, camera_id, zone_id, analysis_date, analysis_hour),
+    INDEX idx_detection_analytics_site_date (site_id, analysis_date DESC),
+    INDEX idx_detection_analytics_camera_date (camera_id, analysis_date DESC),
+    INDEX idx_detection_analytics_confidence (avg_confidence_score DESC),
+    INDEX idx_detection_analytics_performance (avg_processing_time_ms)
+);
+```
+
+### **camera_ai_performance**
+```sql
+CREATE TABLE camera_ai_performance (
+    id UUID PRIMARY KEY,
+    camera_id UUID NOT NULL,
+    analysis_date DATE NOT NULL,
+    
+    -- Detection performance
+    total_detections INT DEFAULT 0,
+    successful_detections INT DEFAULT 0,
+    failed_detections INT DEFAULT 0,
+    detection_success_rate DECIMAL(5,2),
+    
+    -- Accuracy metrics
+    validated_detections INT DEFAULT 0,
+    confirmed_true_positives INT DEFAULT 0,
+    confirmed_false_positives INT DEFAULT 0,
+    accuracy_rate DECIMAL(5,2),
+    
+    -- Processing performance
+    avg_processing_time_ms INT,
+    max_processing_time_ms INT,
+    min_processing_time_ms INT,
+    timeout_count INT DEFAULT 0,
+    
+    -- Quality scores
+    image_quality_score DECIMAL(5,2), -- Based on resolution, lighting, etc.
+    detection_quality_score DECIMAL(5,2), -- Based on detection success
+    overall_performance_score DECIMAL(5,2),
+    
+    -- Camera health indicators
+    uptime_percentage DECIMAL(5,2),
+    connection_issues_count INT DEFAULT 0,
+    stream_quality_issues_count INT DEFAULT 0,
+    
+    -- Detection type breakdown
+    person_detection_rate DECIMAL(5,2),
+    ppe_detection_rate DECIMAL(5,2),
+    vehicle_detection_rate DECIMAL(5,2),
+    equipment_detection_rate DECIMAL(5,2),
+    
+    -- Comparative ranking
+    site_ranking INT, -- Rank among cameras at the site
+    performance_tier ENUM('excellent', 'good', 'average', 'poor', 'critical'),
+    
+    -- Environment factors
+    lighting_conditions_avg DECIMAL(5,2), -- 0-10 scale
+    weather_impact_score DECIMAL(5,2), -- Weather effect on performance
+    
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    
+    UNIQUE KEY unique_camera_date (camera_id, analysis_date),
+    INDEX idx_camera_performance_date (analysis_date DESC),
+    INDEX idx_camera_performance_score (overall_performance_score DESC),
+    INDEX idx_camera_performance_accuracy (accuracy_rate DESC),
+    INDEX idx_camera_performance_tier (performance_tier, overall_performance_score DESC)
+);
+```
+
 ---
 
 ## 🚨 **ALERTS & SAFETY**
