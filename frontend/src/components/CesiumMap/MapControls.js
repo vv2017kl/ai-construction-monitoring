@@ -54,10 +54,12 @@ const MapControls = ({
   };
 
   const getSiteStatusIcon = (site) => {
-    const { critical, high } = site.alert_summary || {};
-    if (critical > 0) return <span className="text-red-500">🔴</span>;
-    if (high > 0) return <span className="text-orange-500">🟠</span>;
-    return <span className="text-green-500">🟢</span>;
+    const { critical, high, medium, low } = site.alerts || {};
+    if (critical > 0) return <span className="text-red-600">🔴</span>;
+    if (high > 0) return <span className="text-orange-600">🟠</span>;
+    if (medium > 0) return <span className="text-amber-600">🟡</span>;
+    if (low > 0) return <span className="text-green-600">🟢</span>;
+    return <span className="text-gray-500">⚫</span>;
   };
 
   const handleSiteSelect = (site) => {
