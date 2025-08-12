@@ -27,7 +27,7 @@ const MapLiveView = () => {
   
   // Find camera and site data
   const findCameraAndSite = () => {
-    for (const [siteId, cameras] of Object.entries(mockCameras)) {
+    for (const [siteId, cameras] of Object.entries(constructionCameras)) {
       const camera = cameras.find(c => c.id === cameraId);
       if (camera) {
         const site = mockSites.find(s => s.id === siteId);
