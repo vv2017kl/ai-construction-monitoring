@@ -2589,6 +2589,402 @@ CREATE TABLE construction_milestones (
 );
 ```
 
+### **street_view_cameras**
+```sql
+CREATE TABLE street_view_cameras (
+    id UUID PRIMARY KEY,
+    camera_id UUID NOT NULL, -- Reference to main cameras table
+    
+    -- Street view specific configuration
+    is_street_view_enabled BOOLEAN DEFAULT FALSE,
+    street_view_priority INT DEFAULT 1, -- 1=highest, 10=lowest
+    
+    -- Camera positioning and coverage
+    field_of_view_degrees INT DEFAULT 90, -- Horizontal field of view
+    tilt_angle_degrees INT DEFAULT 0, -- Up/down tilt from horizontal
+    pan_range_start_degrees INT DEFAULT 0, -- Start of pan range (0-360)
+    pan_range_end_degrees INT DEFAULT 360, -- End of pan range
+    zoom_capability ENUM('none', 'digital', 'optical', 'both') DEFAULT 'digital',
+    
+    -- PTZ (Pan-Tilt-Zoom) capabilities
+    ptz_enabled BOOLEAN DEFAULT FALSE,
+    pan_speed_degrees_per_second DECIMAL(6,2) DEFAULT 10.0,
+    tilt_speed_degrees_per_second DECIMAL(6,2) DEFAULT 10.0,
+    zoom_levels JSON, -- Array of available zoom levels
+    preset_positions JSON, -- Array of preset PTZ positions
+    
+    -- Street view quality settings
+    streaming_resolution VARCHAR(20) DEFAULT '1080p', -- 720p, 1080p, 4K
+    streaming_fps INT DEFAULT 30,
+    streaming_bitrate_kbps INT DEFAULT 5000,
+    low_light_enhancement BOOLEAN DEFAULT TRUE,
+    image_stabilization BOOLEAN DEFAULT TRUE,
+    
+    -- GPS and positioning
+    precise_latitude DECIMAL(10,7),
+    precise_longitude DECIMAL(10,7),
+    precise_elevation DECIMAL(6,2),
+    mounting_height_meters DECIMAL(5,2) DEFAULT 3.0,
+    orientation_degrees DECIMAL(6,2) DEFAULT 0, -- 0=North, 90=East, etc.
+    
+    -- Coverage and routing integration
+    route_coverage JSON, -- Array of route IDs this camera covers
+    waypoint_coverage JSON, -- Array of waypoint IDs this camera monitors
+    coverage_radius_meters DECIMAL(6,2) DEFAULT 50,
+    optimal_viewing_distance_meters DECIMAL(6,2) DEFAULT 25,
+    
+    -- AI and analytics integration
+    ai_detection_enabled BOOLEAN DEFAULT TRUE,
+    real_time_analysis BOOLEAN DEFAULT TRUE,
+    detection_confidence_threshold DECIMAL(3,2) DEFAULT 0.70,
+    alert_trigger_types JSON, -- Types of detections that should trigger alerts
+    
+    -- Overlay and augmented reality
+    overlay_enabled BOOLEAN DEFAULT TRUE,
+    overlay_elements JSON, -- Array of overlay element configurations
+    ar_markers_supported BOOLEAN DEFAULT FALSE,
+    compass_overlay BOOLEAN DEFAULT TRUE,
+    coordinate_overlay BOOLEAN DEFAULT FALSE,
+    
+    -- Environmental considerations
+    weather_protection_rating VARCHAR(10), -- IP rating (IP65, IP67, etc.)
+    operating_temperature_min_celsius DECIMAL(4,1) DEFAULT -20,
+    operating_temperature_max_celsius DECIMAL(4,1) DEFAULT 50,
+    night_vision_capability BOOLEAN DEFAULT FALSE,
+    infrared_illumination BOOLEAN DEFAULT FALSE,
+    
+    -- Maintenance and monitoring
+    health_check_interval_minutes INT DEFAULT 60,
+    last_health_check TIMESTAMP,
+    health_status ENUM('excellent', 'good', 'fair', 'poor', 'offline') DEFAULT 'good',
+    maintenance_schedule JSON, -- Maintenance schedule configuration
+    
+    -- Performance metrics
+    uptime_percentage DECIMAL(5,2) DEFAULT 99.0,
+    average_response_time_ms INT DEFAULT 200,
+    data_usage_mb_per_hour DECIMAL(8,2) DEFAULT 1000,
+    viewer_session_count INT DEFAULT 0,
+    
+    -- Access control
+    public_access BOOLEAN DEFAULT FALSE,
+    authorized_user_roles JSON, -- Array of roles that can access this camera
+    viewing_restrictions JSON, -- Time-based or condition-based restrictions
+    
+    -- Integration settings
+    zoneminder_monitor_id VARCHAR(50),
+    streaming_protocol ENUM('RTSP', 'HTTP', 'WebRTC', 'HLS') DEFAULT 'RTSP',
+    streaming_url VARCHAR(500),
+    backup_streaming_url VARCHAR(500),
+    
+    -- Status and lifecycle
+    status ENUM('active', 'inactive', 'maintenance', 'decommissioned') DEFAULT 'active',
+    installation_date DATE,
+    warranty_expiration_date DATE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (camera_id) REFERENCES cameras(id),
+    
+    INDEX idx_street_view_cameras_enabled (is_street_view_enabled, street_view_priority),
+    INDEX idx_street_view_cameras_ptz (ptz_enabled, status),
+    INDEX idx_street_view_cameras_coordinates (precise_latitude, precise_longitude),
+    INDEX idx_street_view_cameras_health (health_status, last_health_check),
+    INDEX idx_street_view_cameras_route_coverage (route_coverage),
+    INDEX idx_street_view_cameras_performance (uptime_percentage DESC, average_response_time_ms)
+);
+```
+
+---
+
+## 🗺️ **NAVIGATION & STREET VIEW**
+
+### **navigation_routes**
+```sql
+CREATE TABLE navigation_routes (
+    id UUID PRIMARY KEY,
+    site_id UUID NOT NULL,
+    
+    -- Route identification
+    route_name VARCHAR(255) NOT NULL,
+    route_code VARCHAR(50) UNIQUE,
+    description TEXT,
+    
+    -- Route type and purpose
+    route_type ENUM('patrol', 'inspection', 'emergency_evacuation', 'material_transport', 'visitor_tour', 'maintenance', 'custom') NOT NULL,
+    purpose VARCHAR(255),
+    priority_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    
+    -- Geographic information
+    start_coordinates JSON NOT NULL, -- {lat: float, lng: float, elevation: float}
+    end_coordinates JSON NOT NULL,
+    bounding_box JSON, -- Geographic boundary for the route
+    
+    -- Route characteristics
+    total_distance_meters DECIMAL(10,2) NOT NULL,
+    estimated_duration_minutes INT NOT NULL,
+    elevation_change_meters DECIMAL(6,2) DEFAULT 0,
+    difficulty_level ENUM('easy', 'moderate', 'difficult', 'expert') DEFAULT 'easy',
+    
+    -- Safety and accessibility
+    safety_rating ENUM('very_safe', 'safe', 'caution', 'hazardous', 'restricted') DEFAULT 'safe',
+    accessibility_level ENUM('wheelchair', 'mobility_aid', 'walking', 'restricted') DEFAULT 'walking',
+    ppe_requirements JSON, -- Array of required PPE for this route
+    hazard_warnings JSON, -- Array of potential hazards along route
+    
+    -- Time and weather constraints
+    time_restrictions JSON, -- Operating hours and restricted times
+    weather_limitations JSON, -- Weather conditions that restrict route usage
+    seasonal_availability JSON, -- Seasonal restrictions or modifications
+    
+    -- Performance tracking
+    usage_count INT DEFAULT 0,
+    completion_rate DECIMAL(5,2) DEFAULT 100.00,
+    average_completion_time_minutes DECIMAL(6,2),
+    success_rate DECIMAL(5,2) DEFAULT 100.00,
+    last_successful_completion TIMESTAMP,
+    
+    -- Route optimization
+    optimization_score DECIMAL(5,2), -- Route efficiency score 0-10
+    alternative_routes JSON, -- Array of alternative route IDs
+    traffic_pattern_data JSON, -- Historical traffic/usage patterns
+    
+    -- Maintenance and updates
+    last_survey_date DATE,
+    next_maintenance_date DATE,
+    route_condition ENUM('excellent', 'good', 'fair', 'poor', 'closed') DEFAULT 'good',
+    maintenance_notes TEXT,
+    
+    -- Access control
+    access_level ENUM('public', 'staff', 'supervisor', 'manager', 'restricted') DEFAULT 'staff',
+    authorized_roles JSON, -- Array of roles that can use this route
+    restricted_users JSON, -- Array of user IDs with restricted access
+    
+    -- Version control
+    version_number INT DEFAULT 1,
+    previous_version_id UUID,
+    change_log JSON, -- History of route modifications
+    
+    -- Status
+    status ENUM('active', 'inactive', 'maintenance', 'archived') DEFAULT 'active',
+    created_by UUID NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (site_id) REFERENCES sites(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (previous_version_id) REFERENCES navigation_routes(id),
+    
+    INDEX idx_navigation_routes_site (site_id, status),
+    INDEX idx_navigation_routes_type (route_type, priority_level),
+    INDEX idx_navigation_routes_performance (completion_rate DESC, success_rate DESC),
+    INDEX idx_navigation_routes_safety (safety_rating, accessibility_level),
+    INDEX idx_navigation_routes_creator (created_by, created_at DESC),
+    UNIQUE KEY unique_site_route_code (site_id, route_code)
+);
+```
+
+### **route_waypoints**
+```sql
+CREATE TABLE route_waypoints (
+    id UUID PRIMARY KEY,
+    route_id UUID NOT NULL,
+    
+    -- Waypoint identification
+    waypoint_name VARCHAR(255) NOT NULL,
+    waypoint_code VARCHAR(50),
+    sequence_order INT NOT NULL, -- Order of waypoint in route
+    
+    -- Geographic coordinates
+    latitude DECIMAL(10,7) NOT NULL,
+    longitude DECIMAL(10,7) NOT NULL,
+    elevation DECIMAL(6,2) DEFAULT 0,
+    coordinate_system VARCHAR(50) DEFAULT 'WGS84',
+    
+    -- Positioning accuracy
+    horizontal_accuracy_meters DECIMAL(5,2) DEFAULT 3.0,
+    vertical_accuracy_meters DECIMAL(5,2) DEFAULT 5.0,
+    gps_quality_score DECIMAL(3,1) DEFAULT 8.0, -- 0-10 GPS signal quality
+    
+    -- Waypoint type and purpose
+    waypoint_type ENUM('start', 'checkpoint', 'turn', 'caution', 'stop', 'inspection', 'emergency', 'end', 'custom') NOT NULL,
+    action_required ENUM('pass_through', 'pause', 'inspect', 'report', 'confirm', 'emergency_check') DEFAULT 'pass_through',
+    
+    -- Navigation instructions
+    approach_instructions TEXT NOT NULL,
+    departure_instructions TEXT,
+    audio_instructions TEXT, -- Text-to-speech navigation guidance
+    visual_markers TEXT, -- Description of visual landmarks
+    
+    -- Distance and timing
+    distance_from_previous_meters DECIMAL(8,2) DEFAULT 0,
+    estimated_travel_time_minutes DECIMAL(5,2) DEFAULT 0,
+    recommended_pause_duration_seconds INT DEFAULT 0,
+    
+    -- Safety and hazard information
+    safety_level ENUM('safe', 'caution', 'danger', 'restricted') DEFAULT 'safe',
+    hazard_types JSON, -- Array of hazard types at this waypoint
+    safety_equipment_required JSON, -- Additional safety equipment needed
+    emergency_procedures TEXT, -- Emergency procedures specific to this waypoint
+    
+    -- Camera and monitoring
+    associated_camera_ids JSON, -- Array of camera IDs covering this waypoint
+    monitoring_required BOOLEAN DEFAULT FALSE,
+    photo_documentation_required BOOLEAN DEFAULT FALSE,
+    
+    -- Environmental conditions
+    indoor_outdoor ENUM('indoor', 'outdoor', 'covered') DEFAULT 'outdoor',
+    lighting_conditions ENUM('excellent', 'good', 'poor', 'requires_flashlight') DEFAULT 'good',
+    weather_exposure ENUM('none', 'partial', 'full') DEFAULT 'partial',
+    
+    -- Interactive features
+    qr_code_present BOOLEAN DEFAULT FALSE,
+    qr_code_data VARCHAR(255),
+    nfc_tag_present BOOLEAN DEFAULT FALSE,
+    beacon_uuid VARCHAR(255), -- Bluetooth beacon identifier
+    
+    -- Validation and verification
+    checkpoint_validation_required BOOLEAN DEFAULT FALSE,
+    validation_method ENUM('gps', 'qr_code', 'nfc', 'manual_confirmation', 'photo') DEFAULT 'gps',
+    validation_radius_meters DECIMAL(5,2) DEFAULT 5.0,
+    
+    -- Performance tracking
+    average_arrival_time_minutes DECIMAL(6,2),
+    completion_rate DECIMAL(5,2) DEFAULT 100.00,
+    skip_rate DECIMAL(5,2) DEFAULT 0.00, -- Percentage of times waypoint was skipped
+    issue_report_count INT DEFAULT 0,
+    
+    -- Maintenance
+    last_inspection_date DATE,
+    condition_status ENUM('excellent', 'good', 'fair', 'poor', 'blocked') DEFAULT 'good',
+    maintenance_required BOOLEAN DEFAULT FALSE,
+    maintenance_notes TEXT,
+    
+    -- Status
+    status ENUM('active', 'inactive', 'temporary', 'archived') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (route_id) REFERENCES navigation_routes(id) ON DELETE CASCADE,
+    
+    INDEX idx_route_waypoints_route_sequence (route_id, sequence_order),
+    INDEX idx_route_waypoints_coordinates (latitude, longitude),
+    INDEX idx_route_waypoints_type (waypoint_type, action_required),
+    INDEX idx_route_waypoints_safety (safety_level, hazard_types),
+    INDEX idx_route_waypoints_performance (completion_rate DESC),
+    UNIQUE KEY unique_route_sequence (route_id, sequence_order),
+    UNIQUE KEY unique_route_waypoint_code (route_id, waypoint_code)
+);
+```
+
+### **navigation_sessions**
+```sql
+CREATE TABLE navigation_sessions (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    route_id UUID NOT NULL,
+    
+    -- Session identification
+    session_name VARCHAR(255),
+    session_purpose ENUM('patrol', 'inspection', 'emergency', 'training', 'tour', 'maintenance', 'other') NOT NULL,
+    
+    -- Timing information
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP,
+    total_duration_minutes DECIMAL(8,2),
+    planned_duration_minutes INT,
+    
+    -- Session status
+    session_status ENUM('started', 'in_progress', 'paused', 'completed', 'cancelled', 'emergency_stopped') NOT NULL DEFAULT 'started',
+    completion_percentage DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Route progress
+    current_waypoint_id UUID,
+    waypoints_completed INT DEFAULT 0,
+    waypoints_skipped INT DEFAULT 0,
+    total_waypoints INT NOT NULL,
+    
+    -- Distance and movement
+    total_distance_traveled_meters DECIMAL(10,2) DEFAULT 0,
+    planned_distance_meters DECIMAL(10,2),
+    deviation_distance_meters DECIMAL(8,2) DEFAULT 0, -- Distance off planned route
+    
+    -- Performance metrics
+    average_speed_mps DECIMAL(5,2), -- Meters per second
+    max_speed_mps DECIMAL(5,2),
+    pause_count INT DEFAULT 0,
+    total_pause_duration_minutes DECIMAL(8,2) DEFAULT 0,
+    
+    -- GPS tracking data
+    gps_track_data JSON, -- Array of GPS coordinates with timestamps
+    gps_accuracy_average DECIMAL(5,2),
+    gps_signal_quality_average DECIMAL(3,1),
+    indoor_positioning_used BOOLEAN DEFAULT FALSE,
+    
+    -- Safety and compliance
+    safety_incidents INT DEFAULT 0,
+    ppe_compliance_checks INT DEFAULT 0,
+    ppe_compliance_failures INT DEFAULT 0,
+    hazard_encounters INT DEFAULT 0,
+    emergency_stops INT DEFAULT 0,
+    
+    -- Communication and reporting
+    reports_submitted INT DEFAULT 0,
+    photos_taken INT DEFAULT 0,
+    voice_notes_recorded INT DEFAULT 0,
+    emergency_calls_made INT DEFAULT 0,
+    
+    -- Device and connectivity
+    device_type VARCHAR(100),
+    device_id VARCHAR(255),
+    connectivity_issues INT DEFAULT 0,
+    offline_periods JSON, -- Array of offline time periods
+    
+    -- Weather and environmental
+    weather_conditions JSON, -- Weather data during session
+    visibility_conditions ENUM('excellent', 'good', 'fair', 'poor', 'very_poor') DEFAULT 'good',
+    temperature_celsius DECIMAL(4,1),
+    
+    -- Session quality assessment
+    navigation_accuracy_score DECIMAL(3,1), -- 0-10 score
+    route_efficiency_score DECIMAL(3,1),
+    safety_compliance_score DECIMAL(3,1),
+    overall_session_rating DECIMAL(3,1),
+    
+    -- Issues and feedback
+    technical_issues JSON, -- Array of technical issues encountered
+    route_feedback TEXT,
+    improvement_suggestions TEXT,
+    
+    -- Approval and verification
+    supervisor_review_required BOOLEAN DEFAULT FALSE,
+    reviewed_by UUID,
+    reviewed_at TIMESTAMP,
+    approved BOOLEAN DEFAULT FALSE,
+    
+    -- Data export and sharing
+    session_report_generated BOOLEAN DEFAULT FALSE,
+    report_file_path VARCHAR(500),
+    shared_with_users JSON, -- Array of user IDs who have access
+    
+    -- Status
+    archived BOOLEAN DEFAULT FALSE,
+    archived_at TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (route_id) REFERENCES navigation_routes(id),
+    FOREIGN KEY (current_waypoint_id) REFERENCES route_waypoints(id),
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    
+    INDEX idx_navigation_sessions_user_time (user_id, started_at DESC),
+    INDEX idx_navigation_sessions_route (route_id, started_at DESC),
+    INDEX idx_navigation_sessions_status (session_status, started_at DESC),
+    INDEX idx_navigation_sessions_performance (completion_percentage DESC, total_duration_minutes),
+    INDEX idx_navigation_sessions_safety (safety_incidents, ppe_compliance_failures),
+    INDEX idx_navigation_sessions_reviewed (supervisor_review_required, reviewed_by)
+);
+```
+
 ---
 
 **Document Maintained By**: AI Construction Management System Team
