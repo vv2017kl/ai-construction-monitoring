@@ -67,8 +67,9 @@ This document serves as the **single source of truth** for all database table de
 - **Field Operations & Assessment**: 5 tables
 - **Temporal Analysis & Comparison**: 4 tables
 - **Street View Comparison & Analysis**: 5 tables
+- **Path Administration & Routing**: 5 tables
 
-**Total Tables**: 68 tables
+**Total Tables**: 73 tables
 
 ---
 
