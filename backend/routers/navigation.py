@@ -9,12 +9,16 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 import uuid
 
-from ..database import get_db
-from ..models import (
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from database import get_db
+from models import (
     NavigationRoute, RouteWaypoint, NavigationSession, StreetViewCamera,
     Site, User, Camera
 )
-from ..schemas import (
+from schemas import (
     NavigationRouteResponse, NavigationRouteCreateRequest,
     RouteWaypointResponse, RouteWaypointCreateRequest,
     NavigationSessionResponse, NavigationSessionCreateRequest,
