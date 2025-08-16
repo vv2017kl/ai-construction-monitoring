@@ -2470,3 +2470,562 @@ class PathTemplate(Base):
         Index('idx_path_templates_popularity', 'usage_count', 'user_rating'),
         Index('idx_path_templates_creator', 'created_by', 'created_at'),
     )
+
+
+# NAVIGATION & STREET VIEW TABLES
+
+# Navigation enums
+class RouteType(enum.Enum):
+    patrol = "patrol"
+    inspection = "inspection"
+    emergency_evacuation = "emergency_evacuation"
+    material_transport = "material_transport"
+    visitor_tour = "visitor_tour"
+    maintenance = "maintenance"
+    custom = "custom"
+
+class PriorityLevel(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+class DifficultyLevel(enum.Enum):
+    easy = "easy"
+    moderate = "moderate"
+    difficult = "difficult"
+    expert = "expert"
+
+class SafetyRating(enum.Enum):
+    very_safe = "very_safe"
+    safe = "safe"
+    caution = "caution"
+    hazardous = "hazardous"
+    restricted = "restricted"
+
+class AccessibilityLevel(enum.Enum):
+    wheelchair = "wheelchair"
+    mobility_aid = "mobility_aid"
+    walking = "walking"
+    restricted = "restricted"
+
+class RouteCondition(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    closed = "closed"
+
+class AccessLevel(enum.Enum):
+    public = "public"
+    staff = "staff"
+    supervisor = "supervisor"
+    manager = "manager"
+    restricted = "restricted"
+
+class WaypointType(enum.Enum):
+    start = "start"
+    checkpoint = "checkpoint"
+    turn = "turn"
+    caution = "caution"
+    stop = "stop"
+    inspection = "inspection"
+    emergency = "emergency"
+    end = "end"
+    custom = "custom"
+
+class ActionRequired(enum.Enum):
+    pass_through = "pass_through"
+    pause = "pause"
+    inspect = "inspect"
+    report = "report"
+    confirm = "confirm"
+    emergency_check = "emergency_check"
+
+class WaypointSafetyLevel(enum.Enum):
+    safe = "safe"
+    caution = "caution"
+    danger = "danger"
+    restricted = "restricted"
+
+class IndoorOutdoor(enum.Enum):
+    indoor = "indoor"
+    outdoor = "outdoor"
+    covered = "covered"
+
+class LightingConditions(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    poor = "poor"
+    requires_flashlight = "requires_flashlight"
+
+class WeatherExposure(enum.Enum):
+    none = "none"
+    partial = "partial"
+    full = "full"
+
+class ValidationMethod(enum.Enum):
+    gps = "gps"
+    qr_code = "qr_code"
+    nfc = "nfc"
+    manual_confirmation = "manual_confirmation"
+    photo = "photo"
+
+class ConditionStatus(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    blocked = "blocked"
+
+class SessionPurpose(enum.Enum):
+    patrol = "patrol"
+    inspection = "inspection"
+    emergency = "emergency"
+    training = "training"
+    tour = "tour"
+    maintenance = "maintenance"
+    other = "other"
+
+class SessionStatus(enum.Enum):
+    started = "started"
+    in_progress = "in_progress"
+    paused = "paused"
+    completed = "completed"
+    cancelled = "cancelled"
+    emergency_stopped = "emergency_stopped"
+
+class VisibilityConditions(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    very_poor = "very_poor"
+
+class ZoomCapability(enum.Enum):
+    none = "none"
+    digital = "digital"
+    optical = "optical"
+    both = "both"
+
+class StreamingProtocol(enum.Enum):
+    RTSP = "RTSP"
+    HTTP = "HTTP"
+    WebRTC = "WebRTC"
+    HLS = "HLS"
+
+class HealthStatus(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    offline = "offline"
+
+class CameraStatus(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    maintenance = "maintenance"
+    decommissioned = "decommissioned"
+
+
+class NavigationRoute(Base):
+    __tablename__ = 'navigation_routes'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Route identification
+    route_name = Column(String(255), nullable=False)
+    route_code = Column(String(50))
+    description = Column(Text)
+    
+    # Route type and purpose
+    route_type = Column(SQLEnum(RouteType), nullable=False)
+    purpose = Column(String(255))
+    priority_level = Column(SQLEnum(PriorityLevel), default=PriorityLevel.medium)
+    
+    # Geographic information
+    start_coordinates = Column(JSON, nullable=False)
+    end_coordinates = Column(JSON, nullable=False)
+    bounding_box = Column(JSON)
+    
+    # Route characteristics
+    total_distance_meters = Column(Decimal(10,2), nullable=False)
+    estimated_duration_minutes = Column(Integer, nullable=False)
+    elevation_change_meters = Column(Decimal(6,2), default=0)
+    difficulty_level = Column(SQLEnum(DifficultyLevel), default=DifficultyLevel.easy)
+    
+    # Safety and accessibility
+    safety_rating = Column(SQLEnum(SafetyRating), default=SafetyRating.safe)
+    accessibility_level = Column(SQLEnum(AccessibilityLevel), default=AccessibilityLevel.walking)
+    ppe_requirements = Column(JSON)
+    hazard_warnings = Column(JSON)
+    
+    # Time and weather constraints
+    time_restrictions = Column(JSON)
+    weather_limitations = Column(JSON)
+    seasonal_availability = Column(JSON)
+    
+    # Performance tracking
+    usage_count = Column(Integer, default=0)
+    completion_rate = Column(Decimal(5,2), default=100.00)
+    average_completion_time_minutes = Column(Decimal(6,2))
+    success_rate = Column(Decimal(5,2), default=100.00)
+    last_successful_completion = Column(TIMESTAMP)
+    
+    # Route optimization
+    optimization_score = Column(Decimal(5,2))
+    alternative_routes = Column(JSON)
+    traffic_pattern_data = Column(JSON)
+    
+    # Maintenance and updates
+    last_survey_date = Column(Date)
+    next_maintenance_date = Column(Date)
+    route_condition = Column(SQLEnum(RouteCondition), default=RouteCondition.good)
+    maintenance_notes = Column(Text)
+    
+    # Access control
+    access_level = Column(SQLEnum(AccessLevel), default=AccessLevel.staff)
+    authorized_roles = Column(JSON)
+    restricted_users = Column(JSON)
+    
+    # Version control
+    version_number = Column(Integer, default=1)
+    previous_version_id = Column(CHAR(36), ForeignKey('navigation_routes.id'))
+    change_log = Column(JSON)
+    
+    # Status
+    status = Column(SQLEnum(Status), default=Status.active)
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    previous_version = relationship("NavigationRoute", remote_side=[id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_navigation_routes_site', 'site_id', 'status'),
+        Index('idx_navigation_routes_type', 'route_type', 'priority_level'),
+        Index('idx_navigation_routes_performance', 'completion_rate', 'success_rate'),
+        Index('idx_navigation_routes_safety', 'safety_rating', 'accessibility_level'),
+        Index('idx_navigation_routes_creator', 'created_by', 'created_at'),
+        UniqueConstraint('site_id', 'route_code', name='unique_site_route_code'),
+    )
+
+
+class RouteWaypoint(Base):
+    __tablename__ = 'route_waypoints'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    route_id = Column(CHAR(36), ForeignKey('navigation_routes.id'), nullable=False)
+    
+    # Waypoint identification
+    waypoint_name = Column(String(255), nullable=False)
+    waypoint_code = Column(String(50))
+    sequence_order = Column(Integer, nullable=False)
+    
+    # Geographic coordinates
+    latitude = Column(Decimal(10,7), nullable=False)
+    longitude = Column(Decimal(10,7), nullable=False)
+    elevation = Column(Decimal(6,2), default=0)
+    coordinate_system = Column(String(50), default='WGS84')
+    
+    # Positioning accuracy
+    horizontal_accuracy_meters = Column(Decimal(5,2), default=3.0)
+    vertical_accuracy_meters = Column(Decimal(5,2), default=5.0)
+    gps_quality_score = Column(Decimal(3,1), default=8.0)
+    
+    # Waypoint type and purpose
+    waypoint_type = Column(SQLEnum(WaypointType), nullable=False)
+    action_required = Column(SQLEnum(ActionRequired), default=ActionRequired.pass_through)
+    
+    # Navigation instructions
+    approach_instructions = Column(Text, nullable=False)
+    departure_instructions = Column(Text)
+    audio_instructions = Column(Text)
+    visual_markers = Column(Text)
+    
+    # Distance and timing
+    distance_from_previous_meters = Column(Decimal(8,2), default=0)
+    estimated_travel_time_minutes = Column(Decimal(5,2), default=0)
+    recommended_pause_duration_seconds = Column(Integer, default=0)
+    
+    # Safety and hazard information
+    safety_level = Column(SQLEnum(WaypointSafetyLevel), default=WaypointSafetyLevel.safe)
+    hazard_types = Column(JSON)
+    safety_equipment_required = Column(JSON)
+    emergency_procedures = Column(Text)
+    
+    # Camera and monitoring
+    associated_camera_ids = Column(JSON)
+    monitoring_required = Column(Boolean, default=False)
+    photo_documentation_required = Column(Boolean, default=False)
+    
+    # Environmental conditions
+    indoor_outdoor = Column(SQLEnum(IndoorOutdoor), default=IndoorOutdoor.outdoor)
+    lighting_conditions = Column(SQLEnum(LightingConditions), default=LightingConditions.good)
+    weather_exposure = Column(SQLEnum(WeatherExposure), default=WeatherExposure.partial)
+    
+    # Interactive features
+    qr_code_present = Column(Boolean, default=False)
+    qr_code_data = Column(String(255))
+    nfc_tag_present = Column(Boolean, default=False)
+    beacon_uuid = Column(String(255))
+    
+    # Validation and verification
+    checkpoint_validation_required = Column(Boolean, default=False)
+    validation_method = Column(SQLEnum(ValidationMethod), default=ValidationMethod.gps)
+    validation_radius_meters = Column(Decimal(5,2), default=5.0)
+    
+    # Performance tracking
+    average_arrival_time_minutes = Column(Decimal(6,2))
+    completion_rate = Column(Decimal(5,2), default=100.00)
+    skip_rate = Column(Decimal(5,2), default=0.00)
+    issue_report_count = Column(Integer, default=0)
+    
+    # Maintenance
+    last_inspection_date = Column(Date)
+    condition_status = Column(SQLEnum(ConditionStatus), default=ConditionStatus.good)
+    maintenance_required = Column(Boolean, default=False)
+    maintenance_notes = Column(Text)
+    
+    # Status
+    status = Column(SQLEnum(Status), default=Status.active)
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    route = relationship("NavigationRoute")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_route_waypoints_route_sequence', 'route_id', 'sequence_order'),
+        Index('idx_route_waypoints_coordinates', 'latitude', 'longitude'),
+        Index('idx_route_waypoints_type', 'waypoint_type', 'action_required'),
+        Index('idx_route_waypoints_safety', 'safety_level'),
+        Index('idx_route_waypoints_performance', 'completion_rate'),
+        UniqueConstraint('route_id', 'sequence_order', name='unique_route_sequence'),
+        UniqueConstraint('route_id', 'waypoint_code', name='unique_route_waypoint_code'),
+    )
+
+
+class NavigationSession(Base):
+    __tablename__ = 'navigation_sessions'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    route_id = Column(CHAR(36), ForeignKey('navigation_routes.id'), nullable=False)
+    
+    # Session identification
+    session_name = Column(String(255))
+    session_purpose = Column(SQLEnum(SessionPurpose), nullable=False)
+    
+    # Timing information
+    started_at = Column(TIMESTAMP, default=func.current_timestamp())
+    ended_at = Column(TIMESTAMP)
+    total_duration_minutes = Column(Decimal(8,2))
+    planned_duration_minutes = Column(Integer)
+    
+    # Session status
+    session_status = Column(SQLEnum(SessionStatus), nullable=False, default=SessionStatus.started)
+    completion_percentage = Column(Decimal(5,2), default=0.00)
+    
+    # Route progress
+    current_waypoint_id = Column(CHAR(36), ForeignKey('route_waypoints.id'))
+    waypoints_completed = Column(Integer, default=0)
+    waypoints_skipped = Column(Integer, default=0)
+    total_waypoints = Column(Integer, nullable=False)
+    
+    # Distance and movement
+    total_distance_traveled_meters = Column(Decimal(10,2), default=0)
+    planned_distance_meters = Column(Decimal(10,2))
+    deviation_distance_meters = Column(Decimal(8,2), default=0)
+    
+    # Performance metrics
+    average_speed_mps = Column(Decimal(5,2))
+    max_speed_mps = Column(Decimal(5,2))
+    pause_count = Column(Integer, default=0)
+    total_pause_duration_minutes = Column(Decimal(8,2), default=0)
+    
+    # GPS tracking data
+    gps_track_data = Column(JSON)
+    gps_accuracy_average = Column(Decimal(5,2))
+    gps_signal_quality_average = Column(Decimal(3,1))
+    indoor_positioning_used = Column(Boolean, default=False)
+    
+    # Safety and compliance
+    safety_incidents = Column(Integer, default=0)
+    ppe_compliance_checks = Column(Integer, default=0)
+    ppe_compliance_failures = Column(Integer, default=0)
+    hazard_encounters = Column(Integer, default=0)
+    emergency_stops = Column(Integer, default=0)
+    
+    # Communication and reporting
+    reports_submitted = Column(Integer, default=0)
+    photos_taken = Column(Integer, default=0)
+    voice_notes_recorded = Column(Integer, default=0)
+    emergency_calls_made = Column(Integer, default=0)
+    
+    # Device and connectivity
+    device_type = Column(String(100))
+    device_id = Column(String(255))
+    connectivity_issues = Column(Integer, default=0)
+    offline_periods = Column(JSON)
+    
+    # Weather and environmental
+    weather_conditions = Column(JSON)
+    visibility_conditions = Column(SQLEnum(VisibilityConditions), default=VisibilityConditions.good)
+    temperature_celsius = Column(Decimal(4,1))
+    
+    # Session quality assessment
+    navigation_accuracy_score = Column(Decimal(3,1))
+    route_efficiency_score = Column(Decimal(3,1))
+    safety_compliance_score = Column(Decimal(3,1))
+    overall_session_rating = Column(Decimal(3,1))
+    
+    # Issues and feedback
+    technical_issues = Column(JSON)
+    route_feedback = Column(Text)
+    improvement_suggestions = Column(Text)
+    
+    # Approval and verification
+    supervisor_review_required = Column(Boolean, default=False)
+    reviewed_by = Column(CHAR(36), ForeignKey('users.id'))
+    reviewed_at = Column(TIMESTAMP)
+    approved = Column(Boolean, default=False)
+    
+    # Data export and sharing
+    session_report_generated = Column(Boolean, default=False)
+    report_file_path = Column(String(500))
+    shared_with_users = Column(JSON)
+    
+    # Status
+    archived = Column(Boolean, default=False)
+    archived_at = Column(TIMESTAMP)
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    route = relationship("NavigationRoute")
+    current_waypoint = relationship("RouteWaypoint")
+    reviewed_by_user = relationship("User", foreign_keys=[reviewed_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_navigation_sessions_user_time', 'user_id', 'started_at'),
+        Index('idx_navigation_sessions_route', 'route_id', 'started_at'),
+        Index('idx_navigation_sessions_status', 'session_status', 'started_at'),
+        Index('idx_navigation_sessions_performance', 'completion_percentage', 'total_duration_minutes'),
+        Index('idx_navigation_sessions_safety', 'safety_incidents', 'ppe_compliance_failures'),
+        Index('idx_navigation_sessions_reviewed', 'supervisor_review_required', 'reviewed_by'),
+    )
+
+
+class StreetViewCamera(Base):
+    __tablename__ = 'street_view_cameras'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    
+    # Street view specific configuration
+    is_street_view_enabled = Column(Boolean, default=False)
+    street_view_priority = Column(Integer, default=1)
+    
+    # Camera positioning and coverage
+    field_of_view_degrees = Column(Integer, default=90)
+    tilt_angle_degrees = Column(Integer, default=0)
+    pan_range_start_degrees = Column(Integer, default=0)
+    pan_range_end_degrees = Column(Integer, default=360)
+    zoom_capability = Column(SQLEnum(ZoomCapability), default=ZoomCapability.digital)
+    
+    # PTZ capabilities
+    ptz_enabled = Column(Boolean, default=False)
+    pan_speed_degrees_per_second = Column(Decimal(6,2), default=10.0)
+    tilt_speed_degrees_per_second = Column(Decimal(6,2), default=10.0)
+    zoom_levels = Column(JSON)
+    preset_positions = Column(JSON)
+    
+    # Street view quality settings
+    streaming_resolution = Column(String(20), default='1080p')
+    streaming_fps = Column(Integer, default=30)
+    streaming_bitrate_kbps = Column(Integer, default=5000)
+    low_light_enhancement = Column(Boolean, default=True)
+    image_stabilization = Column(Boolean, default=True)
+    
+    # GPS and positioning
+    precise_latitude = Column(Decimal(10,7))
+    precise_longitude = Column(Decimal(10,7))
+    precise_elevation = Column(Decimal(6,2))
+    mounting_height_meters = Column(Decimal(5,2), default=3.0)
+    orientation_degrees = Column(Decimal(6,2), default=0)
+    
+    # Coverage and routing integration
+    route_coverage = Column(JSON)
+    waypoint_coverage = Column(JSON)
+    coverage_radius_meters = Column(Decimal(6,2), default=50)
+    optimal_viewing_distance_meters = Column(Decimal(6,2), default=25)
+    
+    # AI and analytics integration
+    ai_detection_enabled = Column(Boolean, default=True)
+    real_time_analysis = Column(Boolean, default=True)
+    detection_confidence_threshold = Column(Decimal(3,2), default=0.70)
+    alert_trigger_types = Column(JSON)
+    
+    # Overlay and augmented reality
+    overlay_enabled = Column(Boolean, default=True)
+    overlay_elements = Column(JSON)
+    ar_markers_supported = Column(Boolean, default=False)
+    compass_overlay = Column(Boolean, default=True)
+    coordinate_overlay = Column(Boolean, default=False)
+    
+    # Environmental considerations
+    weather_protection_rating = Column(String(10))
+    operating_temperature_min_celsius = Column(Decimal(4,1), default=-20)
+    operating_temperature_max_celsius = Column(Decimal(4,1), default=50)
+    night_vision_capability = Column(Boolean, default=False)
+    infrared_illumination = Column(Boolean, default=False)
+    
+    # Maintenance and monitoring
+    health_check_interval_minutes = Column(Integer, default=60)
+    last_health_check = Column(TIMESTAMP)
+    health_status = Column(SQLEnum(HealthStatus), default=HealthStatus.good)
+    maintenance_schedule = Column(JSON)
+    
+    # Performance metrics
+    uptime_percentage = Column(Decimal(5,2), default=99.0)
+    average_response_time_ms = Column(Integer, default=200)
+    data_usage_mb_per_hour = Column(Decimal(8,2), default=1000)
+    viewer_session_count = Column(Integer, default=0)
+    
+    # Access control
+    public_access = Column(Boolean, default=False)
+    authorized_user_roles = Column(JSON)
+    viewing_restrictions = Column(JSON)
+    
+    # Integration settings
+    zoneminder_monitor_id = Column(String(50))
+    streaming_protocol = Column(SQLEnum(StreamingProtocol), default=StreamingProtocol.RTSP)
+    streaming_url = Column(String(500))
+    backup_streaming_url = Column(String(500))
+    
+    # Status and lifecycle
+    status = Column(SQLEnum(CameraStatus), default=CameraStatus.active)
+    installation_date = Column(Date)
+    warranty_expiration_date = Column(Date)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    camera = relationship("Camera")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_street_view_cameras_enabled', 'is_street_view_enabled', 'street_view_priority'),
+        Index('idx_street_view_cameras_ptz', 'ptz_enabled', 'status'),
+        Index('idx_street_view_cameras_coordinates', 'precise_latitude', 'precise_longitude'),
+        Index('idx_street_view_cameras_health', 'health_status', 'last_health_check'),
+        Index('idx_street_view_cameras_performance', 'uptime_percentage', 'average_response_time_ms'),
+    )
