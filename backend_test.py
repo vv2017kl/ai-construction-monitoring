@@ -24,8 +24,8 @@ print("=" * 80)
 
 # Test data for creating records
 TEST_SITE_DATA = {
-    "name": "Construction Site Alpha",
-    "code": "CSA-001",
+    "name": f"Construction Site Alpha {uuid.uuid4().hex[:8]}",
+    "code": f"CSA-{uuid.uuid4().hex[:8].upper()}",
     "address": "123 Construction Ave, Builder City, BC 12345",
     "type": "commercial",
     "phase": "construction",
