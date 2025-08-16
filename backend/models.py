@@ -1315,3 +1315,284 @@ class Notification(Base):
         Index('idx_notifications_priority', 'priority', 'created_at'),
         Index('idx_notifications_expires', 'expires_at'),
     )
+
+# VIDEO & EVIDENCE MANAGEMENT TABLES
+class VideoBookmark(Base):
+    __tablename__ = "video_bookmarks"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Temporal information
+    bookmark_date = Column(Date, nullable=False)
+    timestamp_seconds = Column(Integer, nullable=False)  # Seconds from start of day
+    duration_seconds = Column(Integer, default=10)  # Bookmark duration for clips
+    
+    # Bookmark details
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    bookmark_type = Column(SQLEnum(BookmarkType), nullable=False)
+    
+    # Classification and priority
+    priority_level = Column(SQLEnum(PriorityLevel), default=PriorityLevel.medium)
+    severity = Column(SQLEnum(Severity), default=Severity.info)
+    
+    # Evidence and correlation
+    related_alert_id = Column(CHAR(36), ForeignKey('alerts.id'))
+    related_detection_id = Column(CHAR(36), ForeignKey('ai_detections.id'))
+    evidence_quality = Column(SQLEnum(EvidenceQuality), default=EvidenceQuality.good)
+    
+    # User interaction
+    is_shared = Column(Boolean, default=False)
+    share_permissions = Column(JSON)  # Array of user IDs or roles with access
+    
+    # Visual markers
+    thumbnail_timestamp = Column(Integer)  # Best representative frame
+    color_code = Column(String(7), default='#FFA500')  # Hex color for timeline display
+    
+    # Metadata
+    video_quality_at_time = Column(String(50))  # Resolution/quality at bookmark time
+    weather_conditions = Column(String(100))
+    lighting_conditions = Column(SQLEnum(LightingCondition))
+    
+    # Workflow status
+    status = Column(SQLEnum(BookmarkStatus), default=BookmarkStatus.active)
+    reviewed_by = Column(CHAR(36), ForeignKey('users.id'))
+    reviewed_at = Column(TIMESTAMP)
+    review_notes = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    camera = relationship("Camera")
+    user = relationship("User", foreign_keys=[user_id])
+    related_alert = relationship("Alert")
+    related_detection = relationship("AIDetection")
+    reviewed_by_user = relationship("User", foreign_keys=[reviewed_by])
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('user_id', 'camera_id', 'bookmark_date', 'timestamp_seconds', 
+                        name='unique_user_camera_timestamp'),
+        Index('idx_video_bookmarks_camera_date', 'camera_id', 'bookmark_date'),
+        Index('idx_video_bookmarks_user', 'user_id', 'created_at'),
+        Index('idx_video_bookmarks_type', 'bookmark_type', 'priority_level'),
+        Index('idx_video_bookmarks_timestamp', 'bookmark_date', 'timestamp_seconds'),
+        Index('idx_video_bookmarks_status', 'status', 'created_at'),
+        Index('idx_video_bookmarks_shared', 'is_shared'),
+    )
+
+class VideoAccessLog(Base):
+    __tablename__ = "video_access_logs"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    
+    # Access session details
+    session_id = Column(CHAR(36), nullable=False)
+    access_start = Column(TIMESTAMP, default=func.current_timestamp())
+    access_end = Column(TIMESTAMP)
+    session_duration_minutes = Column(Integer)
+    
+    # Video details accessed
+    video_date = Column(Date, nullable=False)
+    start_timestamp_seconds = Column(Integer, nullable=False)  # Start time in video
+    end_timestamp_seconds = Column(Integer)  # End time (if session completed)
+    total_video_watched_seconds = Column(Integer, default=0)
+    
+    # Access method and context
+    access_method = Column(SQLEnum(AccessMethod), default=AccessMethod.web_browser)
+    access_reason = Column(SQLEnum(AccessReason), nullable=False)
+    
+    # User activity during session
+    bookmarks_created = Column(Integer, default=0)
+    screenshots_taken = Column(Integer, default=0)
+    clips_exported = Column(Integer, default=0)
+    playback_speed_changes = Column(Integer, default=0)
+    
+    # Technical details
+    ip_address = Column(String(45))  # IPv6 compatible
+    user_agent = Column(Text)
+    browser_info = Column(JSON)
+    
+    # Legal and compliance
+    legal_hold_flag = Column(Boolean, default=False)
+    audit_flag = Column(Boolean, default=False)
+    retention_period_override = Column(Integer)  # Days to retain this access record
+    
+    # Performance metrics
+    initial_load_time_ms = Column(Integer)
+    average_seek_time_ms = Column(Integer)
+    total_pause_time_seconds = Column(Integer, default=0)
+    
+    # Access outcome
+    session_complete = Column(Boolean, default=False)
+    premature_termination_reason = Column(SQLEnum(TerminationReason))
+    
+    # Data export tracking
+    export_count = Column(Integer, default=0)
+    export_details = Column(JSON)  # Details of any exports performed
+    
+    # Relationships
+    user = relationship("User")
+    camera = relationship("Camera")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_video_access_user_time', 'user_id', 'access_start'),
+        Index('idx_video_access_camera_date', 'camera_id', 'video_date'),
+        Index('idx_video_access_session', 'session_id'),
+        Index('idx_video_access_legal', 'legal_hold_flag', 'audit_flag'),
+        Index('idx_video_access_reason', 'access_reason', 'access_start'),
+    )
+
+class VideoExport(Base):
+    __tablename__ = "video_exports"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    
+    # Export source details
+    source_video_date = Column(Date, nullable=False)
+    start_timestamp_seconds = Column(Integer, nullable=False)
+    end_timestamp_seconds = Column(Integer, nullable=False)
+    export_duration_seconds = Column(Integer, nullable=False)
+    
+    # Export configuration
+    export_type = Column(SQLEnum(ExportType), nullable=False)
+    export_format = Column(String(20), nullable=False)  # mp4, jpg, png, pdf, zip
+    resolution = Column(String(20))  # Original, 1080p, 720p, 480p
+    quality_setting = Column(SQLEnum(QualitySetting), default=QualitySetting.high)
+    include_audio = Column(Boolean, default=True)
+    
+    # Evidence and legal
+    export_purpose = Column(SQLEnum(ExportPurpose), nullable=False)
+    chain_of_custody = Column(JSON)  # Evidence handling chain
+    hash_verification = Column(String(128))  # File integrity hash
+    digital_signature = Column(String(512))  # Legal authentication
+    
+    # File information
+    original_filename = Column(String(255))
+    stored_filename = Column(String(255))
+    file_path = Column(String(500))
+    file_size_bytes = Column(BigInteger)
+    
+    # Processing status
+    export_status = Column(SQLEnum(ExportStatus), default=ExportStatus.requested)
+    processing_started_at = Column(TIMESTAMP)
+    processing_completed_at = Column(TIMESTAMP)
+    processing_time_seconds = Column(Integer)
+    error_message = Column(Text)
+    
+    # Access and sharing
+    download_url = Column(String(500))
+    share_token = Column(String(255), unique=True)
+    download_expires_at = Column(TIMESTAMP)
+    download_count = Column(Integer, default=0)
+    max_download_count = Column(Integer, default=5)
+    
+    # Metadata preservation
+    original_metadata = Column(JSON)  # Camera settings, weather, etc.
+    bookmark_data = Column(JSON)  # Any bookmarks within the export timeframe
+    incident_data = Column(JSON)  # Related alerts and detections
+    
+    # Audit and compliance
+    export_justification = Column(Text, nullable=False)
+    approval_required = Column(Boolean, default=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approved_at = Column(TIMESTAMP)
+    legal_hold_applied = Column(Boolean, default=False)
+    retention_period_days = Column(Integer, default=90)
+    
+    # Performance tracking
+    compression_ratio = Column(Decimal(5,2))  # Original size vs final size
+    processing_efficiency_score = Column(Decimal(3,1))  # 1-10 efficiency rating
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    camera = relationship("Camera")
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_video_exports_user_date', 'user_id', 'created_at'),
+        Index('idx_video_exports_camera', 'camera_id', 'source_video_date'),
+        Index('idx_video_exports_status', 'export_status', 'created_at'),
+        Index('idx_video_exports_purpose', 'export_purpose', 'created_at'),
+        Index('idx_video_exports_legal', 'legal_hold_applied', 'retention_period_days'),
+        Index('idx_video_exports_share', 'share_token', 'download_expires_at'),
+    )
+
+class VideoQualityMetric(Base):
+    __tablename__ = "video_quality_metrics"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    analysis_date = Column(Date, nullable=False)
+    analysis_hour = Column(Integer, default=0)  # 0-23 for hourly analysis
+    
+    # Technical quality metrics
+    average_bitrate_kbps = Column(Integer)
+    average_fps = Column(Decimal(5,2))
+    resolution_width = Column(Integer)
+    resolution_height = Column(Integer)
+    
+    # Visual quality assessment
+    sharpness_score = Column(Decimal(5,2))  # 0-10 scale
+    brightness_score = Column(Decimal(5,2))  # 0-10 scale
+    contrast_score = Column(Decimal(5,2))  # 0-10 scale
+    color_accuracy_score = Column(Decimal(5,2))  # 0-10 scale
+    noise_level_score = Column(Decimal(5,2))  # 0-10 scale (lower is better)
+    
+    # Environmental factors
+    lighting_condition = Column(SQLEnum(LightingCondition))
+    weather_impact = Column(SQLEnum(WeatherImpact))
+    obstruction_detected = Column(Boolean, default=False)
+    camera_shake_detected = Column(Boolean, default=False)
+    
+    # Usability for analysis
+    forensic_quality_rating = Column(SQLEnum(ForensicQuality))
+    person_identification_viability = Column(SQLEnum(IdentificationViability))
+    activity_recognition_viability = Column(SQLEnum(IdentificationViability))
+    
+    # Storage and compression
+    compression_efficiency = Column(Decimal(5,2))
+    storage_size_mb = Column(Decimal(10,2))
+    file_corruption_detected = Column(Boolean, default=False)
+    
+    # Recording continuity
+    recording_gaps_detected = Column(Boolean, default=False)
+    total_gap_duration_seconds = Column(Integer, default=0)
+    frame_drops_count = Column(Integer, default=0)
+    sync_issues_detected = Column(Boolean, default=False)
+    
+    # Analysis metadata
+    analysis_method = Column(SQLEnum(AnalysisMethod), default=AnalysisMethod.automated)
+    analysis_tool = Column(String(100))
+    analysis_confidence = Column(Decimal(5,2))  # Confidence in the quality assessment
+    
+    # Improvement recommendations
+    recommended_adjustments = Column(JSON)  # Settings adjustments to improve quality
+    maintenance_flags = Column(JSON)  # Issues requiring camera maintenance
+    
+    calculated_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    camera = relationship("Camera")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('camera_id', 'analysis_date', 'analysis_hour', 
+                        name='unique_camera_datetime'),
+        Index('idx_video_quality_camera_date', 'camera_id', 'analysis_date'),
+        Index('idx_video_quality_forensic', 'forensic_quality_rating', 'camera_id'),
+        Index('idx_video_quality_overall', 'sharpness_score', 'brightness_score', 'contrast_score'),
+        Index('idx_video_quality_issues', 'file_corruption_detected', 'recording_gaps_detected'),
+        Index('idx_video_quality_lighting', 'lighting_condition', 'analysis_date'),
+    )
