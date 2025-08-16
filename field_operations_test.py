@@ -297,7 +297,7 @@ def test_field_operations_path_executions(path_id, user_id):
         print(f"   ❌ Unexpected error: {e}")
         return False, created_execution_id
 
-def test_field_operations_path_templates():
+def test_field_operations_path_templates(user_id):
     """Test Field Operations - Path Templates API endpoints"""
     print("\n4. Testing Field Operations - Path Templates API")
     created_template_id = None
@@ -330,10 +330,10 @@ def test_field_operations_path_templates():
             "is_public": True
         }
         
-        # Test POST create path template
+        # Test POST create path template (with user_id as query param)
         print("   4b. Testing POST /api/path-templates")
         response = requests.post(
-            f"{API_BASE_URL}/path-templates",
+            f"{API_BASE_URL}/path-templates?current_user_id={user_id}",
             json=test_template_data,
             headers={"Content-Type": "application/json"},
             timeout=10
