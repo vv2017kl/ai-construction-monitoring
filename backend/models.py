@@ -4775,3 +4775,298 @@ class ModelDeployment(Base):
         Index('idx_deployments_type', 'deployment_type', 'deployment_strategy'),
         Index('idx_deployments_performance', 'performance_alert_threshold', 'error_rate_alert_threshold'),
     )
+
+
+class ModelPerformanceMetric(Base):
+    __tablename__ = 'model_performance_metrics'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    deployment_id = Column(CHAR(36), ForeignKey('model_deployments.id'), nullable=False)
+    metric_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    collection_period_minutes = Column(Integer, default=5)
+    
+    # Performance metrics
+    accuracy_percentage = Column(Decimal(5,2))
+    precision_percentage = Column(Decimal(5,2))
+    recall_percentage = Column(Decimal(5,2))
+    f1_score = Column(Decimal(5,2))
+    confidence_score_avg = Column(Decimal(3,2))
+    inference_time_avg_ms = Column(Decimal(8,3))
+    inference_time_p95_ms = Column(Decimal(8,3))
+    throughput_fps = Column(Decimal(8,2))
+    
+    # Detection statistics
+    total_detections = Column(Integer, default=0)
+    true_positives = Column(Integer, default=0)
+    false_positives = Column(Integer, default=0)
+    true_negatives = Column(Integer, default=0)
+    false_negatives = Column(Integer, default=0)
+    detection_rate_per_hour = Column(Decimal(8,2))
+    
+    # Resource utilization
+    cpu_utilization_avg = Column(Decimal(5,2))
+    cpu_utilization_max = Column(Decimal(5,2))
+    gpu_utilization_avg = Column(Decimal(5,2))
+    gpu_utilization_max = Column(Decimal(5,2))
+    memory_usage_avg_gb = Column(Decimal(8,2))
+    memory_usage_max_gb = Column(Decimal(8,2))
+    gpu_memory_usage_avg_gb = Column(Decimal(6,2))
+    gpu_memory_usage_max_gb = Column(Decimal(6,2))
+    
+    # Error tracking
+    total_errors = Column(Integer, default=0)
+    preprocessing_errors = Column(Integer, default=0)
+    inference_errors = Column(Integer, default=0)
+    postprocessing_errors = Column(Integer, default=0)
+    error_rate_percentage = Column(Decimal(5,2))
+    
+    # Quality and business metrics
+    data_quality_score = Column(Decimal(5,2))
+    prediction_consistency_score = Column(Decimal(5,2))
+    drift_detection_score = Column(Decimal(5,2))
+    cost_per_inference = Column(Decimal(10,6))
+    roi_impact_score = Column(Decimal(8,2))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    calculated_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    deployment = relationship("ModelDeployment")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_performance_deployment_time', 'deployment_id', 'metric_timestamp'),
+        Index('idx_performance_metrics', 'accuracy_percentage', 'f1_score'),
+        Index('idx_performance_resource', 'cpu_utilization_avg', 'gpu_utilization_avg'),
+        Index('idx_performance_errors', 'error_rate_percentage', 'total_errors'),
+    )
+
+
+# Training and evaluation enums
+class TrainingType(enum.Enum):
+    initial_training = "initial_training"
+    fine_tuning = "fine_tuning"
+    transfer_learning = "transfer_learning"
+    incremental_learning = "incremental_learning"
+    reinforcement_learning = "reinforcement_learning"
+
+class JobStatus(enum.Enum):
+    queued = "queued"
+    initializing = "initializing"
+    running = "running"
+    paused = "paused"
+    completed = "completed"
+    failed = "failed"
+    cancelled = "cancelled"
+
+class EvaluationType(enum.Enum):
+    validation = "validation"
+    test = "test"
+    benchmark = "benchmark"
+    production_sample = "production_sample"
+    a_b_test = "a_b_test"
+    stress_test = "stress_test"
+
+class ReviewStatus(enum.Enum):
+    pending = "pending"
+    approved = "approved"
+    requires_revision = "requires_revision"
+    rejected = "rejected"
+
+
+class ModelTrainingJob(Base):
+    __tablename__ = 'model_training_jobs'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    model_id = Column(CHAR(36), ForeignKey('ai_models.id'), nullable=False)
+    job_name = Column(String(255), nullable=False)
+    job_description = Column(Text)
+    
+    # Job configuration
+    training_type = Column(SQLEnum(TrainingType), nullable=False)
+    base_model_id = Column(CHAR(36), ForeignKey('ai_models.id'))
+    dataset_id = Column(CHAR(36))
+    hyperparameters = Column(JSON)
+    
+    # Resource allocation
+    compute_instance_type = Column(String(100))
+    gpu_count = Column(Integer, default=1)
+    gpu_type = Column(String(100))
+    cpu_cores = Column(Integer, default=8)
+    memory_gb = Column(Integer, default=32)
+    storage_gb = Column(Integer, default=100)
+    
+    # Training parameters
+    epochs = Column(Integer, default=100)
+    batch_size = Column(Integer, default=32)
+    learning_rate = Column(Decimal(10,8), default=0.001)
+    optimizer = Column(String(50), default='Adam')
+    loss_function = Column(String(100))
+    validation_split = Column(Decimal(3,2), default=0.20)
+    early_stopping_patience = Column(Integer, default=10)
+    
+    # Status tracking
+    job_status = Column(SQLEnum(JobStatus), default=JobStatus.queued)
+    progress_percentage = Column(Decimal(5,2), default=0.00)
+    current_epoch = Column(Integer, default=0)
+    estimated_completion_time = Column(TIMESTAMP)
+    actual_completion_time = Column(TIMESTAMP)
+    
+    # Performance tracking
+    current_loss = Column(Decimal(12,8))
+    current_accuracy = Column(Decimal(5,2))
+    best_loss = Column(Decimal(12,8))
+    best_accuracy = Column(Decimal(5,2))
+    best_epoch = Column(Integer)
+    validation_loss = Column(Decimal(12,8))
+    validation_accuracy = Column(Decimal(5,2))
+    
+    # Cost tracking
+    compute_cost_per_hour = Column(Decimal(8,4))
+    estimated_total_cost = Column(Decimal(10,2))
+    actual_cost = Column(Decimal(10,2))
+    cost_budget_limit = Column(Decimal(10,2))
+    
+    # Results and artifacts
+    output_model_path = Column(String(500))
+    checkpoint_paths = Column(JSON)
+    log_file_path = Column(String(500))
+    metrics_file_path = Column(String(500))
+    
+    # Error handling
+    error_message = Column(Text)
+    retry_count = Column(Integer, default=0)
+    max_retries = Column(Integer, default=3)
+    auto_restart_on_failure = Column(Boolean, default=True)
+    
+    # Notifications and experiment tracking
+    notification_recipients = Column(JSON)
+    notification_on_completion = Column(Boolean, default=True)
+    notification_on_failure = Column(Boolean, default=True)
+    experiment_name = Column(String(255))
+    experiment_tags = Column(JSON)
+    parent_experiment_id = Column(CHAR(36), ForeignKey('model_training_jobs.id'))
+    reproducibility_seed = Column(Integer)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    started_at = Column(TIMESTAMP)
+    completed_at = Column(TIMESTAMP)
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    model = relationship("AIModel", foreign_keys=[model_id])
+    base_model = relationship("AIModel", foreign_keys=[base_model_id])
+    parent_experiment = relationship("ModelTrainingJob", remote_side=[id])
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_training_jobs_model', 'model_id', 'job_status'),
+        Index('idx_training_jobs_status', 'job_status', 'created_at'),
+        Index('idx_training_jobs_performance', 'best_accuracy', 'current_accuracy'),
+        Index('idx_training_jobs_cost', 'actual_cost', 'cost_budget_limit'),
+    )
+
+
+class ModelEvaluationResult(Base):
+    __tablename__ = 'model_evaluation_results'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    model_id = Column(CHAR(36), ForeignKey('ai_models.id'), nullable=False)
+    evaluation_name = Column(String(255), nullable=False)
+    evaluation_type = Column(SQLEnum(EvaluationType), nullable=False)
+    
+    # Evaluation dataset information
+    dataset_id = Column(CHAR(36))
+    dataset_size = Column(Integer)
+    dataset_description = Column(Text)
+    evaluation_date = Column(TIMESTAMP, default=func.current_timestamp())
+    evaluation_duration_minutes = Column(Integer)
+    
+    # Overall performance metrics
+    overall_accuracy = Column(Decimal(5,2))
+    overall_precision = Column(Decimal(5,2))
+    overall_recall = Column(Decimal(5,2))
+    overall_f1_score = Column(Decimal(5,2))
+    micro_f1_score = Column(Decimal(5,2))
+    macro_f1_score = Column(Decimal(5,2))
+    weighted_f1_score = Column(Decimal(5,2))
+    
+    # Per-class and detailed metrics
+    class_wise_metrics = Column(JSON)
+    confusion_matrix = Column(JSON)
+    classification_report = Column(JSON)
+    
+    # Detection-specific metrics
+    mean_average_precision_50 = Column(Decimal(5,2))
+    mean_average_precision_75 = Column(Decimal(5,2))
+    mean_average_precision_50_95 = Column(Decimal(5,2))
+    average_recall_100 = Column(Decimal(5,2))
+    
+    # Performance distribution
+    confidence_score_distribution = Column(JSON)
+    inference_time_distribution = Column(JSON)
+    accuracy_by_confidence_threshold = Column(JSON)
+    roc_curve_data = Column(JSON)
+    precision_recall_curve_data = Column(JSON)
+    
+    # Resource performance
+    evaluation_cpu_time_seconds = Column(Decimal(10,3))
+    evaluation_gpu_time_seconds = Column(Decimal(10,3))
+    peak_memory_usage_gb = Column(Decimal(8,2))
+    average_inference_time_ms = Column(Decimal(8,3))
+    throughput_images_per_second = Column(Decimal(8,2))
+    
+    # Robustness and bias metrics
+    adversarial_accuracy = Column(Decimal(5,2))
+    noise_robustness_score = Column(Decimal(5,2))
+    lighting_robustness_score = Column(Decimal(5,2))
+    demographic_parity_score = Column(Decimal(5,2))
+    calibration_score = Column(Decimal(5,2))
+    bias_detection_results = Column(JSON)
+    fairness_constraints_met = Column(Boolean, default=False)
+    
+    # Business impact assessment
+    cost_per_evaluation = Column(Decimal(8,4))
+    business_accuracy_score = Column(Decimal(5,2))
+    false_positive_cost_impact = Column(Decimal(10,2))
+    false_negative_cost_impact = Column(Decimal(10,2))
+    roi_projection = Column(Decimal(10,2))
+    
+    # Comparison and quality metrics
+    baseline_model_comparison = Column(JSON)
+    previous_version_comparison = Column(JSON)
+    human_performance_comparison = Column(Decimal(6,2))
+    model_quality_score = Column(Decimal(5,2))
+    deployment_readiness_score = Column(Decimal(5,2))
+    risk_assessment_score = Column(Decimal(5,2))
+    
+    # Files and artifacts
+    evaluation_report_path = Column(String(500))
+    detailed_results_path = Column(String(500))
+    visualization_files = Column(JSON)
+    raw_predictions_path = Column(String(500))
+    
+    # Review and approval
+    reviewed_by = Column(CHAR(36), ForeignKey('users.id'))
+    review_status = Column(SQLEnum(ReviewStatus), default=ReviewStatus.pending)
+    review_date = Column(TIMESTAMP)
+    review_comments = Column(Text)
+    approval_for_production = Column(Boolean, default=False)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    evaluated_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    model = relationship("AIModel")
+    reviewed_by_user = relationship("User", foreign_keys=[reviewed_by])
+    evaluated_by_user = relationship("User", foreign_keys=[evaluated_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_evaluation_model_type', 'model_id', 'evaluation_type', 'evaluation_date'),
+        Index('idx_evaluation_performance', 'overall_accuracy', 'overall_f1_score'),
+        Index('idx_evaluation_review', 'review_status', 'approval_for_production'),
+        Index('idx_evaluation_business', 'business_accuracy_score', 'roi_projection'),
+    )
