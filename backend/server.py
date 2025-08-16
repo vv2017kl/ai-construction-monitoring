@@ -350,6 +350,78 @@ class VideoQualityMetricResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class TimelapseSequenceResponse(BaseModel):
+    id: str
+    title: str
+    site_id: str
+    created_by: str
+    primary_camera_id: str
+    start_datetime: datetime
+    end_datetime: datetime
+    duration_seconds: int
+    generation_status: str
+    activity_score: Optional[float] = None
+    quality_score: Optional[float] = None
+    view_count: int = 0
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TimelapseSequenceCreateRequest(BaseModel):
+    title: str
+    site_id: str
+    primary_camera_id: str
+    start_datetime: str  # ISO format string
+    end_datetime: str    # ISO format string
+    description: Optional[str] = None
+    compression_level: Optional[str] = "medium"
+    frame_rate_fps: Optional[int] = 30
+
+class TimelapseBookmarkResponse(BaseModel):
+    id: str
+    timelapse_sequence_id: str
+    user_id: str
+    bookmark_name: str
+    timestamp_seconds: float
+    bookmark_type: str
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TimelapseBookmarkCreateRequest(BaseModel):
+    timelapse_sequence_id: str
+    bookmark_name: str
+    timestamp_seconds: float
+    description: Optional[str] = None
+    bookmark_type: Optional[str] = "manual"
+
+class ConstructionMilestoneResponse(BaseModel):
+    id: str
+    site_id: str
+    milestone_name: str
+    milestone_code: Optional[str] = None
+    description: Optional[str] = None
+    status: str
+    completion_percentage: Optional[float] = None
+    planned_completion_date: Optional[datetime] = None
+    actual_completion_date: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ConstructionMilestoneCreateRequest(BaseModel):
+    site_id: str
+    milestone_name: str
+    milestone_code: Optional[str] = None
+    description: Optional[str] = None
+    project_phase: Optional[str] = None
+    planned_start_date: Optional[str] = None    # YYYY-MM-DD format
+    planned_completion_date: Optional[str] = None  # YYYY-MM-DD format
+
 # Basic API routes
 @api_router.get("/")
 async def root():
