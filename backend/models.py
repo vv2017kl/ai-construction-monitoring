@@ -615,3 +615,365 @@ class Alert(Base):
         Index('idx_alerts_camera', 'camera_id'),
         Index('idx_alerts_escalated', 'escalated', 'escalated_at'),
     )
+
+# AI & DETECTION TABLES
+class AIDetection(Base):
+    __tablename__ = "ai_detections"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    zone_id = Column(CHAR(36), ForeignKey('zones.id'))
+    zone_name = Column(String(100))
+    
+    # Detection Data
+    detection_type = Column(SQLEnum(DetectionType))
+    person_count = Column(Integer, default=0)
+    confidence_score = Column(Decimal(5,2))
+    overall_confidence = Column(Decimal(5,2))
+    
+    # AI Results
+    bounding_boxes = Column(JSON)  # All detection coordinates
+    detection_results = Column(JSON)  # Complete AI model response
+    ppe_compliance_data = Column(JSON)  # Detailed PPE analysis
+    safety_violations = Column(JSON)  # List of detected violations
+    
+    # Activity Analysis
+    activity_summary = Column(Text)
+    activity_level = Column(SQLEnum(ActivityLevel))
+    risk_assessment = Column(String(20))  # 'safe', 'caution', 'danger'
+    safety_score = Column(Decimal(5,2))
+    
+    # Media Evidence
+    snapshot_image_url = Column(String(500))
+    video_clip_url = Column(String(500))
+    annotated_image_url = Column(String(500))
+    
+    timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    processed = Column(Boolean, default=False)
+    alert_generated = Column(Boolean, default=False)
+    alert_ids = Column(JSON)  # Array of generated alert IDs
+    
+    # Processing Metadata
+    model_version = Column(String(50))
+    processing_time_ms = Column(Integer)
+    ai_server_id = Column(String(100))
+    
+    # Relationships
+    camera = relationship("Camera")
+    site = relationship("Site")
+    zone = relationship("Zone")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_detections_camera_time', 'camera_id', 'timestamp'),
+        Index('idx_detections_site_time', 'site_id', 'timestamp'),
+        Index('idx_detections_zone', 'zone_id'),
+        Index('idx_detections_type', 'detection_type'),
+        Index('idx_detections_alerts', 'alert_generated'),
+        Index('idx_detections_confidence', 'confidence_score'),
+        Index('idx_detections_processed', 'processed', 'timestamp'),
+    )
+
+class AIModel(Base):
+    __tablename__ = "ai_models"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    model_type = Column(SQLEnum(ModelType))
+    provider = Column(String(100))  # 'roboflow', 'custom', 'openai', etc.
+    
+    # Model configuration
+    endpoint_url = Column(String(500))
+    model_version = Column(String(50))
+    confidence_threshold = Column(Decimal(5,2), default=0.50)
+    overlap_threshold = Column(Decimal(5,2), default=0.30)
+    
+    # Performance metrics
+    accuracy_score = Column(Decimal(5,2))
+    precision_score = Column(Decimal(5,2))
+    recall_score = Column(Decimal(5,2))
+    avg_processing_time_ms = Column(Integer)
+    
+    # Status & lifecycle
+    status = Column(SQLEnum(ModelStatus), default=ModelStatus.active)
+    deployed_at = Column(TIMESTAMP)
+    last_updated = Column(TIMESTAMP)
+    
+    # Configuration
+    input_requirements = Column(JSON)  # Image size, format, etc.
+    output_format = Column(JSON)  # Expected response structure
+    api_configuration = Column(JSON)  # API keys, headers, etc.
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_models_type', 'model_type'),
+        Index('idx_models_provider', 'provider'),
+        Index('idx_models_status', 'status'),
+        Index('idx_models_performance', 'accuracy_score'),
+    )
+
+class EventCorrelation(Base):
+    __tablename__ = "event_correlations"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    zoneminder_event_id = Column(BigInteger, nullable=False)
+    ai_detection_id = Column(CHAR(36), ForeignKey('ai_detections.id'), nullable=False)
+    correlation_confidence = Column(Decimal(5,2))
+    correlation_type = Column(SQLEnum(CorrelationType), nullable=False)
+    time_diff_seconds = Column(Integer)  # Time difference between ZM event and AI detection
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    ai_detection = relationship("AIDetection")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_correlations_zm_event', 'zoneminder_event_id'),
+        Index('idx_correlations_ai_detection', 'ai_detection_id'),
+        Index('idx_correlations_confidence', 'correlation_confidence'),
+    )
+
+class RecordingSession(Base):
+    __tablename__ = "recording_sessions"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Session details
+    session_type = Column(SQLEnum(RecordingSessionType), nullable=False)
+    trigger_type = Column(SQLEnum(TriggerType), default=TriggerType.user_initiated)
+    trigger_event_id = Column(CHAR(36))  # Reference to alert or detection that triggered recording
+    
+    # Timing
+    start_time = Column(TIMESTAMP, default=func.current_timestamp())
+    end_time = Column(TIMESTAMP)
+    planned_duration_seconds = Column(Integer)
+    actual_duration_seconds = Column(Integer)
+    
+    # Quality & Storage
+    recording_quality = Column(String(10), default='high')  # 'low', 'medium', 'high', 'ultra'
+    resolution = Column(String(20))  # '1920x1080'
+    frame_rate = Column(Integer, default=30)
+    bitrate_kbps = Column(Integer)
+    
+    # File information
+    file_path = Column(String(500))
+    file_size_mb = Column(Decimal(10,2))
+    segment_count = Column(Integer, default=1)
+    current_segment = Column(Integer, default=1)
+    storage_location = Column(String(500))
+    
+    # Status
+    status = Column(SQLEnum(RecordingStatus), default=RecordingStatus.starting)
+    error_message = Column(Text)
+    
+    # Metadata
+    include_ai_overlay = Column(Boolean, default=False)
+    retention_days = Column(Integer, default=30)
+    created_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # ZoneMinder Integration
+    zoneminder_event_id = Column(BigInteger)
+    
+    # Relationships
+    camera = relationship("Camera")
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_recording_camera_active', 'camera_id', 'status'),
+        Index('idx_recording_site_time', 'site_id', 'start_time'),
+        Index('idx_recording_status', 'status'),
+        Index('idx_recording_trigger', 'trigger_type', 'trigger_event_id'),
+    )
+
+class AIModelPerformanceLog(Base):
+    __tablename__ = "ai_model_performance_logs"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    model_id = Column(CHAR(36), ForeignKey('ai_models.id'), nullable=False)
+    
+    # Performance metrics
+    evaluation_date = Column(Date, nullable=False)
+    evaluation_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    accuracy_score = Column(Decimal(5,2), nullable=False)
+    precision_score = Column(Decimal(5,2), nullable=False)
+    recall_score = Column(Decimal(5,2), nullable=False)
+    f1_score = Column(Decimal(5,2), nullable=False)
+    
+    # Processing performance
+    avg_processing_time_ms = Column(Integer, nullable=False)
+    median_processing_time_ms = Column(Integer)
+    max_processing_time_ms = Column(Integer)
+    min_processing_time_ms = Column(Integer)
+    
+    # Detection statistics
+    total_detections_processed = Column(Integer, default=0)
+    true_positives = Column(Integer, default=0)
+    false_positives = Column(Integer, default=0)
+    false_negatives = Column(Integer, default=0)
+    confidence_score_avg = Column(Decimal(5,2))
+    confidence_score_std = Column(Decimal(5,2))
+    
+    # Context information
+    test_dataset_id = Column(CHAR(36))
+    site_id = Column(CHAR(36), ForeignKey('sites.id'))
+    camera_subset = Column(JSON)  # Array of camera IDs used for evaluation
+    
+    # Evaluation metadata
+    evaluation_type = Column(SQLEnum(EvaluationType), default=EvaluationType.automated)
+    evaluated_by = Column(CHAR(36), ForeignKey('users.id'))
+    evaluation_notes = Column(Text)
+    
+    # Comparison data
+    compared_to_model_id = Column(CHAR(36), ForeignKey('ai_models.id'))
+    performance_change_percentage = Column(Decimal(6,2))
+    
+    # Relationships
+    model = relationship("AIModel", foreign_keys=[model_id])
+    site = relationship("Site")
+    evaluated_by_user = relationship("User")
+    compared_to_model = relationship("AIModel", foreign_keys=[compared_to_model_id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_model_performance_model_date', 'model_id', 'evaluation_date'),
+        Index('idx_model_performance_accuracy', 'accuracy_score'),
+        Index('idx_model_performance_processing', 'avg_processing_time_ms'),
+        Index('idx_model_performance_site', 'site_id', 'evaluation_date'),
+    )
+
+class AIDetectionAnalytics(Base):
+    __tablename__ = "ai_detection_analytics"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    
+    # Time and scope
+    analysis_date = Column(Date, nullable=False)
+    analysis_hour = Column(Integer)  # 0-23 for hourly granularity
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'))
+    zone_id = Column(CHAR(36), ForeignKey('zones.id'))
+    
+    # Detection counts by type
+    person_detections = Column(Integer, default=0)
+    ppe_detections = Column(Integer, default=0)
+    vehicle_detections = Column(Integer, default=0)
+    safety_violation_detections = Column(Integer, default=0)
+    equipment_detections = Column(Integer, default=0)
+    activity_detections = Column(Integer, default=0)
+    
+    # Quality metrics
+    total_detections = Column(Integer, default=0)
+    high_confidence_detections = Column(Integer, default=0)  # confidence > 0.8
+    medium_confidence_detections = Column(Integer, default=0)  # confidence 0.6-0.8
+    low_confidence_detections = Column(Integer, default=0)  # confidence < 0.6
+    avg_confidence_score = Column(Decimal(5,2))
+    
+    # Performance metrics
+    avg_processing_time_ms = Column(Integer)
+    total_processing_time_ms = Column(BigInteger)
+    failed_processing_count = Column(Integer, default=0)
+    
+    # Safety analysis
+    safety_violations_detected = Column(Integer, default=0)
+    ppe_compliance_rate = Column(Decimal(5,2))
+    risk_level_high_count = Column(Integer, default=0)
+    risk_level_medium_count = Column(Integer, default=0)
+    risk_level_low_count = Column(Integer, default=0)
+    
+    # Trend indicators
+    detection_trend = Column(SQLEnum(TrendType))
+    accuracy_trend = Column(SQLEnum(TrendType))
+    
+    # Model information
+    primary_model_id = Column(CHAR(36), ForeignKey('ai_models.id'))
+    model_version = Column(String(50))
+    
+    calculated_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    camera = relationship("Camera")
+    zone = relationship("Zone")
+    primary_model = relationship("AIModel")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('site_id', 'camera_id', 'zone_id', 'analysis_date', 'analysis_hour', 
+                        name='unique_analytics_scope'),
+        Index('idx_detection_analytics_site_date', 'site_id', 'analysis_date'),
+        Index('idx_detection_analytics_camera_date', 'camera_id', 'analysis_date'),
+        Index('idx_detection_analytics_confidence', 'avg_confidence_score'),
+        Index('idx_detection_analytics_performance', 'avg_processing_time_ms'),
+    )
+
+class CameraAIPerformance(Base):
+    __tablename__ = "camera_ai_performance"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    analysis_date = Column(Date, nullable=False)
+    
+    # Detection performance
+    total_detections = Column(Integer, default=0)
+    successful_detections = Column(Integer, default=0)
+    failed_detections = Column(Integer, default=0)
+    detection_success_rate = Column(Decimal(5,2))
+    
+    # Accuracy metrics
+    validated_detections = Column(Integer, default=0)
+    confirmed_true_positives = Column(Integer, default=0)
+    confirmed_false_positives = Column(Integer, default=0)
+    accuracy_rate = Column(Decimal(5,2))
+    
+    # Processing performance
+    avg_processing_time_ms = Column(Integer)
+    max_processing_time_ms = Column(Integer)
+    min_processing_time_ms = Column(Integer)
+    timeout_count = Column(Integer, default=0)
+    
+    # Quality scores
+    image_quality_score = Column(Decimal(5,2))  # Based on resolution, lighting, etc.
+    detection_quality_score = Column(Decimal(5,2))  # Based on detection success
+    overall_performance_score = Column(Decimal(5,2))
+    
+    # Camera health indicators
+    uptime_percentage = Column(Decimal(5,2))
+    connection_issues_count = Column(Integer, default=0)
+    stream_quality_issues_count = Column(Integer, default=0)
+    
+    # Detection type breakdown
+    person_detection_rate = Column(Decimal(5,2))
+    ppe_detection_rate = Column(Decimal(5,2))
+    vehicle_detection_rate = Column(Decimal(5,2))
+    equipment_detection_rate = Column(Decimal(5,2))
+    
+    # Comparative ranking
+    site_ranking = Column(Integer)  # Rank among cameras at the site
+    performance_tier = Column(SQLEnum(PerformanceTier))
+    
+    # Environment factors
+    lighting_conditions_avg = Column(Decimal(5,2))  # 0-10 scale
+    weather_impact_score = Column(Decimal(5,2))  # Weather effect on performance
+    
+    calculated_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    camera = relationship("Camera")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('camera_id', 'analysis_date', name='unique_camera_date'),
+        Index('idx_camera_performance_date', 'analysis_date'),
+        Index('idx_camera_performance_score', 'overall_performance_score'),
+        Index('idx_camera_performance_accuracy', 'accuracy_rate'),
+        Index('idx_camera_performance_tier', 'performance_tier', 'overall_performance_score'),
+    )
