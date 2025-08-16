@@ -1484,7 +1484,617 @@ def test_video_database_verification():
         print(f"   ❌ Unexpected error: {e}")
         return False
 
-def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookmark_id=None, export_id=None):
+def test_field_operations_inspection_paths(site_id, user_id):
+    """Test Field Operations - Inspection Paths API endpoints"""
+    print("\n23. Testing Field Operations - Inspection Paths API")
+    created_path_id = None
+    
+    try:
+        # Test GET all inspection paths
+        print("   23a. Testing GET /api/inspection-paths")
+        response = requests.get(f"{API_BASE_URL}/inspection-paths", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            paths = response.json()
+            print(f"      Found {len(paths)} total inspection paths")
+            print("      ✅ GET all inspection paths working")
+        else:
+            print("      ❌ GET all inspection paths failed")
+            return False, None
+        
+        # Create test inspection path data
+        test_path_data = {
+            "site_id": site_id,
+            "name": f"Safety Inspection Route {uuid.uuid4().hex[:8]}",
+            "description": "Comprehensive safety inspection path for construction site",
+            "path_type": "safety_inspection",
+            "priority": "high",
+            "assigned_to": user_id,
+            "estimated_duration_minutes": 45,
+            "zone_coverage": ["zone1", "zone2", "zone3"],
+            "is_scheduled": True,
+            "schedule_frequency": "daily"
+        }
+        
+        # Test POST create inspection path
+        print("   23b. Testing POST /api/inspection-paths")
+        response = requests.post(
+            f"{API_BASE_URL}/inspection-paths",
+            json=test_path_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            path = response.json()
+            created_path_id = path.get("id")
+            print(f"      Created inspection path ID: {created_path_id}")
+            print("      ✅ POST inspection path creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST inspection path creation failed")
+            return False, None
+        
+        # Test GET specific inspection path
+        print("   23c. Testing GET /api/inspection-paths/{path_id}")
+        response = requests.get(f"{API_BASE_URL}/inspection-paths/{created_path_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            path = response.json()
+            if path.get("name") == test_path_data["name"]:
+                print("      ✅ GET specific inspection path working")
+            else:
+                print("      ❌ Inspection path data mismatch")
+                return False, created_path_id
+        else:
+            print("      ❌ GET specific inspection path failed")
+            return False, created_path_id
+        
+        # Test PUT update inspection path
+        print("   23d. Testing PUT /api/inspection-paths/{path_id}")
+        update_data = {
+            "site_id": site_id,
+            "name": test_path_data["name"],
+            "description": "Updated comprehensive safety inspection path",
+            "path_type": test_path_data["path_type"],
+            "priority": "medium",
+            "estimated_duration_minutes": 60
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/inspection-paths/{created_path_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_path = response.json()
+            if updated_path.get("priority") == update_data["priority"]:
+                print("      ✅ PUT inspection path update working")
+            else:
+                print("      ❌ Inspection path update data mismatch")
+                return False, created_path_id
+        else:
+            print("      ❌ PUT inspection path update failed")
+            return False, created_path_id
+        
+        # Test GET site inspection paths
+        print("   23e. Testing GET /api/sites/{site_id}/inspection-paths")
+        response = requests.get(f"{API_BASE_URL}/sites/{site_id}/inspection-paths", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            site_paths = response.json()
+            print(f"      Found {len(site_paths)} inspection paths for site")
+            print("      ✅ GET site inspection paths working")
+        else:
+            print("      ❌ GET site inspection paths failed")
+            return False, created_path_id
+        
+        return True, created_path_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_path_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_path_id
+
+def test_field_operations_path_waypoints(path_id):
+    """Test Field Operations - Path Waypoints API endpoints"""
+    print("\n24. Testing Field Operations - Path Waypoints API")
+    created_waypoint_ids = []
+    
+    try:
+        # Test GET all path waypoints
+        print("   24a. Testing GET /api/path-waypoints")
+        response = requests.get(f"{API_BASE_URL}/path-waypoints", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            waypoints = response.json()
+            print(f"      Found {len(waypoints)} total path waypoints")
+            print("      ✅ GET all path waypoints working")
+        else:
+            print("      ❌ GET all path waypoints failed")
+            return False, []
+        
+        # Create multiple test waypoints
+        waypoint_data_list = [
+            {
+                "path_id": path_id,
+                "waypoint_order": 1,
+                "waypoint_name": "Main Entrance Check",
+                "description": "Verify security and safety protocols at main entrance",
+                "coordinates_x": 100.5,
+                "coordinates_y": 200.3,
+                "waypoint_type": "checkpoint",
+                "is_mandatory": True,
+                "estimated_time_minutes": 5,
+                "inspection_checklist": {"items": ["security_check", "ppe_verification"]}
+            },
+            {
+                "path_id": path_id,
+                "waypoint_order": 2,
+                "waypoint_name": "Construction Zone Alpha",
+                "description": "Inspect active construction area for safety compliance",
+                "coordinates_x": 150.7,
+                "coordinates_y": 250.9,
+                "waypoint_type": "inspection_point",
+                "is_mandatory": True,
+                "estimated_time_minutes": 15,
+                "inspection_checklist": {"items": ["safety_barriers", "equipment_check", "worker_ppe"]}
+            },
+            {
+                "path_id": path_id,
+                "waypoint_order": 3,
+                "waypoint_name": "Equipment Storage",
+                "description": "Check equipment storage and maintenance area",
+                "coordinates_x": 75.2,
+                "coordinates_y": 180.6,
+                "waypoint_type": "maintenance_check",
+                "is_mandatory": False,
+                "estimated_time_minutes": 10,
+                "inspection_checklist": {"items": ["equipment_condition", "storage_organization"]}
+            }
+        ]
+        
+        # Test POST create path waypoints
+        for i, waypoint_data in enumerate(waypoint_data_list):
+            print(f"   24b.{i+1}. Testing POST /api/path-waypoints (Waypoint {i+1})")
+            response = requests.post(
+                f"{API_BASE_URL}/path-waypoints",
+                json=waypoint_data,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                waypoint = response.json()
+                waypoint_id = waypoint.get("id")
+                created_waypoint_ids.append(waypoint_id)
+                print(f"      Created waypoint ID: {waypoint_id}")
+                print(f"      ✅ POST waypoint {i+1} creation working")
+            else:
+                print(f"      Response: {response.text}")
+                print(f"      ❌ POST waypoint {i+1} creation failed")
+                return False, created_waypoint_ids
+        
+        # Test GET specific path waypoint
+        if created_waypoint_ids:
+            print("   24c. Testing GET /api/path-waypoints/{waypoint_id}")
+            response = requests.get(f"{API_BASE_URL}/path-waypoints/{created_waypoint_ids[0]}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                waypoint = response.json()
+                if waypoint.get("waypoint_name") == waypoint_data_list[0]["waypoint_name"]:
+                    print("      ✅ GET specific path waypoint working")
+                else:
+                    print("      ❌ Path waypoint data mismatch")
+                    return False, created_waypoint_ids
+            else:
+                print("      ❌ GET specific path waypoint failed")
+                return False, created_waypoint_ids
+        
+        # Test GET waypoints by path
+        print("   24d. Testing GET /api/inspection-paths/{path_id}/waypoints")
+        response = requests.get(f"{API_BASE_URL}/inspection-paths/{path_id}/waypoints", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            path_waypoints = response.json()
+            print(f"      Found {len(path_waypoints)} waypoints for path")
+            if len(path_waypoints) >= len(waypoint_data_list):
+                print("      ✅ GET waypoints by path working")
+            else:
+                print("      ❌ Unexpected waypoint count")
+                return False, created_waypoint_ids
+        else:
+            print("      ❌ GET waypoints by path failed")
+            return False, created_waypoint_ids
+        
+        return True, created_waypoint_ids
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_waypoint_ids
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_waypoint_ids
+
+def test_field_operations_path_executions(path_id, user_id):
+    """Test Field Operations - Path Executions API endpoints"""
+    print("\n25. Testing Field Operations - Path Executions API")
+    created_execution_id = None
+    
+    try:
+        # Test GET all path executions
+        print("   25a. Testing GET /api/path-executions")
+        response = requests.get(f"{API_BASE_URL}/path-executions", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            executions = response.json()
+            print(f"      Found {len(executions)} total path executions")
+            print("      ✅ GET all path executions working")
+        else:
+            print("      ❌ GET all path executions failed")
+            return False, None
+        
+        # Create test path execution data
+        test_execution_data = {
+            "path_id": path_id,
+            "execution_type": "scheduled_inspection",
+            "execution_reason": "Daily safety compliance check",
+            "planned_duration_minutes": 45,
+            "weather_conditions": "Clear, 22°C",
+            "equipment_used": ["tablet", "camera", "safety_meter", "checklist"]
+        }
+        
+        # Test POST create path execution
+        print("   25b. Testing POST /api/path-executions")
+        response = requests.post(
+            f"{API_BASE_URL}/path-executions",
+            json=test_execution_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            execution = response.json()
+            created_execution_id = execution.get("id")
+            print(f"      Created path execution ID: {created_execution_id}")
+            print("      ✅ POST path execution creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST path execution creation failed")
+            return False, None
+        
+        # Test GET specific path execution
+        print("   25c. Testing GET /api/path-executions/{execution_id}")
+        response = requests.get(f"{API_BASE_URL}/path-executions/{created_execution_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            execution = response.json()
+            if execution.get("execution_type") == test_execution_data["execution_type"]:
+                print("      ✅ GET specific path execution working")
+            else:
+                print("      ❌ Path execution data mismatch")
+                return False, created_execution_id
+        else:
+            print("      ❌ GET specific path execution failed")
+            return False, created_execution_id
+        
+        # Test PUT update execution status
+        print("   25d. Testing PUT /api/path-executions/{execution_id}/status")
+        status_update_data = {
+            "status": "in_progress",
+            "completion_percentage": 25.0
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/path-executions/{created_execution_id}/status",
+            params=status_update_data,
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "message" in result:
+                print("      ✅ PUT execution status update working")
+            else:
+                print("      ❌ Unexpected status update response")
+                return False, created_execution_id
+        else:
+            print("      ❌ PUT execution status update failed")
+            return False, created_execution_id
+        
+        # Test GET executions by path
+        print("   25e. Testing GET /api/inspection-paths/{path_id}/executions")
+        response = requests.get(f"{API_BASE_URL}/inspection-paths/{path_id}/executions", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            path_executions = response.json()
+            print(f"      Found {len(path_executions)} executions for path")
+            print("      ✅ GET executions by path working")
+        else:
+            print("      ❌ GET executions by path failed")
+            return False, created_execution_id
+        
+        return True, created_execution_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_execution_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_execution_id
+
+def test_field_operations_execution_waypoints(execution_id, waypoint_ids):
+    """Test Field Operations - Path Execution Waypoints API endpoints"""
+    print("\n26. Testing Field Operations - Path Execution Waypoints API")
+    
+    try:
+        # Test GET all execution waypoints
+        print("   26a. Testing GET /api/path-execution-waypoints")
+        response = requests.get(f"{API_BASE_URL}/path-execution-waypoints", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            execution_waypoints = response.json()
+            print(f"      Found {len(execution_waypoints)} total execution waypoints")
+            print("      ✅ GET all execution waypoints working")
+        else:
+            print("      ❌ GET all execution waypoints failed")
+            return False
+        
+        # Test GET execution waypoints by execution
+        print("   26b. Testing GET /api/path-executions/{execution_id}/waypoints")
+        response = requests.get(f"{API_BASE_URL}/path-executions/{execution_id}/waypoints", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            execution_waypoints = response.json()
+            print(f"      Found {len(execution_waypoints)} waypoints for execution")
+            print("      ✅ GET execution waypoints by execution working")
+        else:
+            print("      ❌ GET execution waypoints by execution failed")
+            return False
+        
+        # Test POST record waypoint visits
+        if waypoint_ids:
+            for i, waypoint_id in enumerate(waypoint_ids[:2]):  # Test first 2 waypoints
+                print(f"   26c.{i+1}. Testing POST /api/path-executions/{execution_id}/waypoints/{waypoint_id}/visit")
+                visit_data = {
+                    "inspection_completed": True,
+                    "issues_found": i,  # 0 for first, 1 for second
+                    "photos_taken": 3 + i,
+                    "notes": f"Waypoint {i+1} inspection completed successfully"
+                }
+                response = requests.post(
+                    f"{API_BASE_URL}/path-executions/{execution_id}/waypoints/{waypoint_id}/visit",
+                    params=visit_data,
+                    timeout=10
+                )
+                print(f"      Status Code: {response.status_code}")
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    if "message" in result:
+                        print(f"      ✅ POST waypoint {i+1} visit recording working")
+                    else:
+                        print(f"      ❌ Unexpected waypoint {i+1} visit response")
+                        return False
+                else:
+                    print(f"      ❌ POST waypoint {i+1} visit recording failed")
+                    return False
+        
+        # Test GET execution waypoints again to verify visits were recorded
+        print("   26d. Testing GET /api/path-executions/{execution_id}/waypoints (after visits)")
+        response = requests.get(f"{API_BASE_URL}/path-executions/{execution_id}/waypoints", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            execution_waypoints = response.json()
+            visited_count = len([w for w in execution_waypoints if w.get("visited_at")])
+            print(f"      Found {visited_count} visited waypoints out of {len(execution_waypoints)} total")
+            if visited_count > 0:
+                print("      ✅ Waypoint visits recorded successfully")
+            else:
+                print("      ⚠️ No waypoint visits found (may be expected)")
+        else:
+            print("      ❌ GET execution waypoints verification failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_field_operations_path_templates():
+    """Test Field Operations - Path Templates API endpoints"""
+    print("\n27. Testing Field Operations - Path Templates API")
+    created_template_id = None
+    
+    try:
+        # Test GET all path templates
+        print("   27a. Testing GET /api/path-templates")
+        response = requests.get(f"{API_BASE_URL}/path-templates", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            templates = response.json()
+            print(f"      Found {len(templates)} total path templates")
+            print("      ✅ GET all path templates working")
+        else:
+            print("      ❌ GET all path templates failed")
+            return False, None
+        
+        # Create test path template data
+        test_template_data = {
+            "template_name": f"Standard Safety Inspection Template {uuid.uuid4().hex[:8]}",
+            "description": "Comprehensive template for daily safety inspections",
+            "template_type": "safety_inspection",
+            "difficulty_level": "intermediate",
+            "safety_level": "high",
+            "base_waypoint_count": 5,
+            "estimated_duration_minutes": 60,
+            "recommended_zones": ["construction_area", "equipment_storage", "office_area"],
+            "required_equipment": ["tablet", "camera", "safety_meter"],
+            "is_public": True
+        }
+        
+        # Test POST create path template
+        print("   27b. Testing POST /api/path-templates")
+        response = requests.post(
+            f"{API_BASE_URL}/path-templates",
+            json=test_template_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            template = response.json()
+            created_template_id = template.get("id")
+            print(f"      Created path template ID: {created_template_id}")
+            print("      ✅ POST path template creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST path template creation failed")
+            return False, None
+        
+        # Test GET specific path template
+        print("   27c. Testing GET /api/path-templates/{template_id}")
+        response = requests.get(f"{API_BASE_URL}/path-templates/{created_template_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            template = response.json()
+            if template.get("template_name") == test_template_data["template_name"]:
+                print("      ✅ GET specific path template working")
+            else:
+                print("      ❌ Path template data mismatch")
+                return False, created_template_id
+        else:
+            print("      ❌ GET specific path template failed")
+            return False, created_template_id
+        
+        # Test PUT update path template
+        print("   27d. Testing PUT /api/path-templates/{template_id}")
+        update_data = {
+            "template_name": test_template_data["template_name"],
+            "description": "Updated comprehensive template for enhanced safety inspections",
+            "template_type": test_template_data["template_type"],
+            "difficulty_level": "advanced",
+            "safety_level": test_template_data["safety_level"],
+            "estimated_duration_minutes": 75
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/path-templates/{created_template_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_template = response.json()
+            if updated_template.get("difficulty_level") == update_data["difficulty_level"]:
+                print("      ✅ PUT path template update working")
+            else:
+                print("      ❌ Path template update data mismatch")
+                return False, created_template_id
+        else:
+            print("      ❌ PUT path template update failed")
+            return False, created_template_id
+        
+        return True, created_template_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_template_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_template_id
+
+def test_field_operations_analytics(site_id):
+    """Test Field Operations - Analytics API endpoints"""
+    print("\n28. Testing Field Operations - Analytics API")
+    
+    try:
+        # Test GET path analytics summary
+        print("   28a. Testing GET /api/path-analytics/summary")
+        response = requests.get(f"{API_BASE_URL}/path-analytics/summary", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            analytics = response.json()
+            if "message" in analytics or "total_executions" in analytics:
+                print("      ✅ GET path analytics summary working")
+            else:
+                print("      ❌ Unexpected analytics response structure")
+                return False
+        else:
+            print("      ❌ GET path analytics summary failed")
+            return False
+        
+        # Test GET path analytics summary with site filter
+        print("   28b. Testing GET /api/path-analytics/summary?site_id={site_id}")
+        response = requests.get(f"{API_BASE_URL}/path-analytics/summary?site_id={site_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            site_analytics = response.json()
+            if "message" in site_analytics or "total_executions" in site_analytics:
+                print("      ✅ GET site path analytics working")
+            else:
+                print("      ❌ Unexpected site analytics response")
+                return False
+        else:
+            print("      ❌ GET site path analytics failed")
+            return False
+        
+        # Test GET path analytics summary with days filter
+        print("   28c. Testing GET /api/path-analytics/summary?days=7")
+        response = requests.get(f"{API_BASE_URL}/path-analytics/summary?days=7", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            weekly_analytics = response.json()
+            if "date_range" in weekly_analytics or "message" in weekly_analytics:
+                print("      ✅ GET weekly path analytics working")
+            else:
+                print("      ❌ Unexpected weekly analytics response")
+                return False
+        else:
+            print("      ❌ GET weekly path analytics failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookmark_id=None, export_id=None, 
+                     path_id=None, waypoint_ids=None, execution_id=None, template_id=None):
     """Clean up test data created during testing"""
     print("\n23. Cleaning up test data")
     
