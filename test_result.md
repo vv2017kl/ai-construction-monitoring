@@ -487,7 +487,10 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "User Management & Administration Tables and APIs Implementation"
+    - "Access Control & Security Management Tables and APIs Implementation"
+    - "AI Model Management & Deployment Tables and APIs Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
