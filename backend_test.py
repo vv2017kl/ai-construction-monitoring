@@ -546,7 +546,7 @@ def test_ai_detections_api(site_id, camera_id=None):
             "camera_id": camera_id or str(uuid.uuid4()),
             "site_id": site_id,
             "zone_id": str(uuid.uuid4()),
-            "detection_type": "person_detection",
+            "detection_type": "person",  # Fixed: using valid enum value
             "person_count": 3,
             "confidence_score": 0.85,
             "detection_results": {"objects": ["person", "helmet", "vest"]},
