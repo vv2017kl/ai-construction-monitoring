@@ -1540,6 +1540,8 @@ def main():
     created_site_id = None
     created_detection_id = None
     created_model_id = None
+    created_bookmark_id = None
+    created_export_id = None
     
     # Test basic connectivity
     connectivity_ok = test_api_connectivity()
@@ -1588,7 +1590,7 @@ def main():
     legacy_ok = test_legacy_status_endpoints()
     results.append(("Legacy Status Endpoints", legacy_ok))
     
-    # NEW AI & DETECTION TESTS
+    # AI & DETECTION TESTS
     print("\n" + "=" * 80)
     print("STARTING AI & DETECTION API TESTS")
     print("=" * 80)
@@ -1613,8 +1615,33 @@ def main():
     db_verification_ok = test_database_verification()
     results.append(("Database Verification", db_verification_ok))
     
+    # VIDEO & EVIDENCE MANAGEMENT TESTS
+    print("\n" + "=" * 80)
+    print("STARTING VIDEO & EVIDENCE MANAGEMENT API TESTS")
+    print("=" * 80)
+    
+    # Test Video Bookmarks API
+    video_bookmarks_ok, created_bookmark_id = test_video_bookmarks_api()
+    results.append(("Video Bookmarks API", video_bookmarks_ok))
+    
+    # Test Video Access Logs API
+    video_access_logs_ok = test_video_access_logs_api()
+    results.append(("Video Access Logs API", video_access_logs_ok))
+    
+    # Test Video Exports API
+    video_exports_ok, created_export_id = test_video_exports_api()
+    results.append(("Video Exports API", video_exports_ok))
+    
+    # Test Video Quality Metrics API
+    video_quality_metrics_ok = test_video_quality_metrics_api()
+    results.append(("Video Quality Metrics API", video_quality_metrics_ok))
+    
+    # Test Video Database Verification
+    video_db_verification_ok = test_video_database_verification()
+    results.append(("Video Database Verification", video_db_verification_ok))
+    
     # Cleanup test data
-    cleanup_ok = cleanup_test_data(created_site_id, created_user_id, created_detection_id, created_model_id)
+    cleanup_ok = cleanup_test_data(created_site_id, created_user_id, created_detection_id, created_model_id, created_bookmark_id, created_export_id)
     results.append(("Test Data Cleanup", cleanup_ok))
     
     # Summary
@@ -1625,15 +1652,19 @@ def main():
     all_passed = True
     core_tests_passed = 0
     ai_tests_passed = 0
+    video_tests_passed = 0
     
     for test_name, passed in results:
         status = "✅ PASS" if passed else "❌ FAIL"
-        print(f"{test_name:<30} {status}")
+        print(f"{test_name:<35} {status}")
         if not passed:
             all_passed = False
         
-        # Count AI-specific tests
-        if any(ai_keyword in test_name for ai_keyword in ["AI", "Recording", "Analytics", "Database Verification"]):
+        # Count test categories
+        if any(video_keyword in test_name for video_keyword in ["Video", "video"]):
+            if passed:
+                video_tests_passed += 1
+        elif any(ai_keyword in test_name for ai_keyword in ["AI", "Recording", "Analytics", "Database Verification"]):
             if passed:
                 ai_tests_passed += 1
         else:
@@ -1643,12 +1674,14 @@ def main():
     print("=" * 80)
     print(f"Core Backend Tests: {core_tests_passed} passed")
     print(f"AI & Detection Tests: {ai_tests_passed} passed")
+    print(f"Video & Evidence Tests: {video_tests_passed} passed")
     
     if all_passed:
         print("🎉 ALL BACKEND TESTS PASSED!")
         print("✅ MySQL database connection working")
         print("✅ All core API endpoints functioning correctly")
         print("✅ All AI & Detection endpoints functioning correctly")
+        print("✅ All Video & Evidence Management endpoints functioning correctly")
         print("✅ CRUD operations working")
         print("✅ Error handling implemented")
         print("✅ Database tables verified")
