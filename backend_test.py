@@ -3694,7 +3694,7 @@ def test_ai_model_management_apis():
         
         # POST create AI model
         response = requests.post(
-            f"{API_BASE_URL}/ai-models",
+            f"{API_BASE_URL}/ai-models/",
             json=ai_model_data,
             headers={"Content-Type": "application/json"},
             timeout=10
