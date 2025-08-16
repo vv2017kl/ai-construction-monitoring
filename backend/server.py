@@ -203,7 +203,7 @@ async def create_site(site_data: SiteCreateRequest, db: Session = Depends(get_db
     return new_site
 
 @api_router.put("/sites/{site_id}", response_model=SiteResponse)
-async def update_site(site_id: str, site_data: SiteCreateRequest, db: Session = Depends(get_db)):
+async def update_site(site_id: str, site_data: SiteUpdateRequest, db: Session = Depends(get_db)):
     """Update an existing site"""
     site = db.query(Site).filter(Site.id == site_id).first()
     if not site:
