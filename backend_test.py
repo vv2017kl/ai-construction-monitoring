@@ -509,23 +509,438 @@ def test_legacy_status_endpoints():
         print(f"   ❌ Unexpected error: {e}")
         return False
 
-def cleanup_test_data(site_id, user_id):
-    """Clean up test data created during testing"""
-    print("\n13. Cleaning up test data")
+def test_ai_detections_api(site_id, camera_id=None):
+    """Test AI Detections API endpoints"""
+    print("\n13. Testing AI Detections API")
+    created_detection_id = None
     
     try:
+        # Test GET all AI detections
+        print("   13a. Testing GET /api/ai-detections")
+        response = requests.get(f"{API_BASE_URL}/ai-detections", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            detections = response.json()
+            print(f"      Found {len(detections)} total AI detections")
+            print("      ✅ GET all AI detections working")
+        else:
+            print("      ❌ GET all AI detections failed")
+            return False, None
+        
+        # Test GET AI detections by site
+        print("   13b. Testing GET /api/sites/{site_id}/ai-detections")
+        response = requests.get(f"{API_BASE_URL}/sites/{site_id}/ai-detections", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            site_detections = response.json()
+            print(f"      Found {len(site_detections)} AI detections for site")
+            print("      ✅ GET site AI detections working")
+        else:
+            print("      ❌ GET site AI detections failed")
+            return False, None
+        
+        # Create test AI detection data
+        test_detection_data = {
+            "camera_id": camera_id or str(uuid.uuid4()),
+            "site_id": site_id,
+            "zone_id": str(uuid.uuid4()),
+            "detection_type": "person_detection",
+            "person_count": 3,
+            "confidence_score": 0.85,
+            "detection_results": {"objects": ["person", "helmet", "vest"]},
+            "safety_score": 0.92
+        }
+        
+        # Test POST create AI detection
+        print("   13c. Testing POST /api/ai-detections")
+        response = requests.post(
+            f"{API_BASE_URL}/ai-detections",
+            json=test_detection_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            detection = response.json()
+            created_detection_id = detection.get("id")
+            print(f"      Created AI detection ID: {created_detection_id}")
+            print("      ✅ POST AI detection creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST AI detection creation failed")
+            return False, None
+        
+        # Test GET specific AI detection
+        print("   13d. Testing GET /api/ai-detections/{detection_id}")
+        response = requests.get(f"{API_BASE_URL}/ai-detections/{created_detection_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            detection = response.json()
+            if detection.get("detection_type") == test_detection_data["detection_type"]:
+                print("      ✅ GET specific AI detection working")
+            else:
+                print("      ❌ AI detection data mismatch")
+                return False, created_detection_id
+        else:
+            print("      ❌ GET specific AI detection failed")
+            return False, created_detection_id
+        
+        # Test GET AI detections by camera (if camera_id provided)
+        if camera_id:
+            print("   13e. Testing GET /api/cameras/{camera_id}/ai-detections")
+            response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/ai-detections", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                camera_detections = response.json()
+                print(f"      Found {len(camera_detections)} AI detections for camera")
+                print("      ✅ GET camera AI detections working")
+            else:
+                print("      ❌ GET camera AI detections failed")
+                return False, created_detection_id
+        
+        return True, created_detection_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_detection_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_detection_id
+
+def test_ai_models_api():
+    """Test AI Models API endpoints (full CRUD)"""
+    print("\n14. Testing AI Models API")
+    created_model_id = None
+    
+    try:
+        # Test GET all AI models
+        print("   14a. Testing GET /api/ai-models")
+        response = requests.get(f"{API_BASE_URL}/ai-models", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            models = response.json()
+            print(f"      Found {len(models)} total AI models")
+            print("      ✅ GET all AI models working")
+        else:
+            print("      ❌ GET all AI models failed")
+            return False, None
+        
+        # Create test AI model data
+        test_model_data = {
+            "name": f"YOLOv8 Construction Safety Model {uuid.uuid4().hex[:8]}",
+            "description": "Advanced AI model for construction site safety detection",
+            "model_type": "object_detection",
+            "provider": "Ultralytics",
+            "endpoint_url": "https://api.ultralytics.com/v1/predict",
+            "confidence_threshold": 0.75
+        }
+        
+        # Test POST create AI model
+        print("   14b. Testing POST /api/ai-models")
+        response = requests.post(
+            f"{API_BASE_URL}/ai-models",
+            json=test_model_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            model = response.json()
+            created_model_id = model.get("id")
+            print(f"      Created AI model ID: {created_model_id}")
+            print("      ✅ POST AI model creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST AI model creation failed")
+            return False, None
+        
+        # Test GET specific AI model
+        print("   14c. Testing GET /api/ai-models/{model_id}")
+        response = requests.get(f"{API_BASE_URL}/ai-models/{created_model_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            model = response.json()
+            if model.get("name") == test_model_data["name"]:
+                print("      ✅ GET specific AI model working")
+            else:
+                print("      ❌ AI model data mismatch")
+                return False, created_model_id
+        else:
+            print("      ❌ GET specific AI model failed")
+            return False, created_model_id
+        
+        # Test PUT update AI model
+        print("   14d. Testing PUT /api/ai-models/{model_id}")
+        update_data = {
+            "description": "Updated AI model for enhanced safety detection",
+            "confidence_threshold": 0.80
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/ai-models/{created_model_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_model = response.json()
+            if updated_model.get("description") == update_data["description"]:
+                print("      ✅ PUT AI model update working")
+            else:
+                print("      ❌ AI model update data mismatch")
+                return False, created_model_id
+        else:
+            print("      ❌ PUT AI model update failed")
+            return False, created_model_id
+        
+        return True, created_model_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_model_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_model_id
+
+def test_recording_sessions_api(site_id, camera_id=None):
+    """Test Recording Sessions API endpoints"""
+    print("\n15. Testing Recording Sessions API")
+    
+    try:
+        # Test GET all recording sessions
+        print("   15a. Testing GET /api/recording-sessions")
+        response = requests.get(f"{API_BASE_URL}/recording-sessions", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            sessions = response.json()
+            print(f"      Found {len(sessions)} total recording sessions")
+            print("      ✅ GET all recording sessions working")
+        else:
+            print("      ❌ GET all recording sessions failed")
+            return False
+        
+        # Test GET recording sessions by site
+        print("   15b. Testing GET /api/sites/{site_id}/recording-sessions")
+        response = requests.get(f"{API_BASE_URL}/sites/{site_id}/recording-sessions", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            site_sessions = response.json()
+            print(f"      Found {len(site_sessions)} recording sessions for site")
+            print("      ✅ GET site recording sessions working")
+        else:
+            print("      ❌ GET site recording sessions failed")
+            return False
+        
+        # Test GET recording sessions by camera (if camera_id provided)
+        if camera_id:
+            print("   15c. Testing GET /api/cameras/{camera_id}/recording-sessions")
+            response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/recording-sessions", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                camera_sessions = response.json()
+                print(f"      Found {len(camera_sessions)} recording sessions for camera")
+                print("      ✅ GET camera recording sessions working")
+            else:
+                print("      ❌ GET camera recording sessions failed")
+                return False
+        
+        # Test GET specific recording session (using fake ID to test endpoint structure)
+        fake_session_id = str(uuid.uuid4())
+        print("   15d. Testing GET /api/recording-sessions/{session_id}")
+        response = requests.get(f"{API_BASE_URL}/recording-sessions/{fake_session_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 404:
+            print("      ✅ GET specific recording session endpoint working (404 expected)")
+        else:
+            print("      ❌ GET specific recording session endpoint issue")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_ai_analytics_api(site_id, camera_id=None):
+    """Test AI Analytics API endpoints"""
+    print("\n16. Testing AI Analytics API")
+    
+    try:
+        # Test GET detection analytics (general)
+        print("   16a. Testing GET /api/ai-analytics/detection-stats")
+        response = requests.get(f"{API_BASE_URL}/ai-analytics/detection-stats", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            analytics = response.json()
+            required_fields = ["total_detections", "average_confidence", "analytics_records", "date_range"]
+            if all(field in analytics for field in required_fields):
+                print("      ✅ GET detection analytics working")
+            else:
+                print("      ❌ Missing required fields in detection analytics")
+                return False
+        else:
+            print("      ❌ GET detection analytics failed")
+            return False
+        
+        # Test GET detection analytics with site filter
+        print("   16b. Testing GET /api/ai-analytics/detection-stats?site_id={site_id}")
+        response = requests.get(f"{API_BASE_URL}/ai-analytics/detection-stats?site_id={site_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            site_analytics = response.json()
+            print("      ✅ GET site detection analytics working")
+        else:
+            print("      ❌ GET site detection analytics failed")
+            return False
+        
+        # Test GET detection analytics with camera filter (if camera_id provided)
+        if camera_id:
+            print("   16c. Testing GET /api/ai-analytics/detection-stats?camera_id={camera_id}")
+            response = requests.get(f"{API_BASE_URL}/ai-analytics/detection-stats?camera_id={camera_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                camera_analytics = response.json()
+                print("      ✅ GET camera detection analytics working")
+            else:
+                print("      ❌ GET camera detection analytics failed")
+                return False
+        
+        # Test GET camera AI performance (if camera_id provided)
+        if camera_id:
+            print("   16d. Testing GET /api/cameras/{camera_id}/ai-performance")
+            response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/ai-performance", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                performance = response.json()
+                # Check if it's a "no data" response or actual performance data
+                if "message" in performance or "camera_id" in performance:
+                    print("      ✅ GET camera AI performance working")
+                else:
+                    print("      ❌ Unexpected camera AI performance response")
+                    return False
+            else:
+                print("      ❌ GET camera AI performance failed")
+                return False
+        else:
+            # Test with fake camera ID to verify endpoint structure
+            fake_camera_id = str(uuid.uuid4())
+            print("   16d. Testing GET /api/cameras/{camera_id}/ai-performance (fake ID)")
+            response = requests.get(f"{API_BASE_URL}/cameras/{fake_camera_id}/ai-performance", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                performance = response.json()
+                if "message" in performance:
+                    print("      ✅ GET camera AI performance endpoint working")
+                else:
+                    print("      ❌ Unexpected camera AI performance response")
+                    return False
+            else:
+                print("      ❌ GET camera AI performance endpoint failed")
+                return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_database_verification():
+    """Test database verification for new AI tables"""
+    print("\n17. Testing Database Verification")
+    
+    try:
+        # Test health endpoint to verify database connection
+        print("   17a. Testing database connection via health endpoint")
+        response = requests.get(f"{API_BASE_URL}/health", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            health_data = response.json()
+            if health_data.get("database") == "connected":
+                print("      ✅ Database connection verified")
+            else:
+                print("      ❌ Database connection issue")
+                return False
+        else:
+            print("      ❌ Health endpoint failed")
+            return False
+        
+        # Test that AI endpoints are accessible (indicates tables exist)
+        print("   17b. Testing AI tables accessibility via endpoints")
+        endpoints_to_test = [
+            "/ai-detections",
+            "/ai-models", 
+            "/recording-sessions",
+            "/ai-analytics/detection-stats"
+        ]
+        
+        for endpoint in endpoints_to_test:
+            response = requests.get(f"{API_BASE_URL}{endpoint}", timeout=10)
+            if response.status_code == 200:
+                print(f"      ✅ {endpoint} accessible (table exists)")
+            else:
+                print(f"      ❌ {endpoint} failed (table may not exist)")
+                return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None):
+    """Clean up test data created during testing"""
+    print("\n18. Cleaning up test data")
+    
+    try:
+        # Delete test AI model
+        if model_id:
+            print("   18a. Deleting test AI model")
+            response = requests.delete(f"{API_BASE_URL}/ai-models/{model_id}", timeout=10)
+            if response.status_code == 200:
+                print("      ✅ Test AI model deleted successfully")
+            else:
+                print(f"      ⚠️ Could not delete test AI model: {response.status_code}")
+        
         # Delete test site
         if site_id:
-            print("   13a. Deleting test site")
+            print("   18b. Deleting test site")
             response = requests.delete(f"{API_BASE_URL}/sites/{site_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test site deleted successfully")
             else:
                 print(f"      ⚠️ Could not delete test site: {response.status_code}")
         
-        # Note: We don't delete the user as there's no DELETE endpoint implemented
+        # Note: We don't delete the user or AI detection as there are no DELETE endpoints implemented
         # This is acceptable for testing purposes
-        print("   13b. Test user cleanup skipped (no DELETE endpoint)")
+        print("   18c. Test user and AI detection cleanup skipped (no DELETE endpoints)")
         
         return True
         
