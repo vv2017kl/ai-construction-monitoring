@@ -248,7 +248,7 @@ def test_field_operations_path_executions(path_id, user_id):
         # Create test path execution data
         test_execution_data = {
             "path_id": path_id,
-            "execution_type": "scheduled_inspection",
+            "execution_type": "scheduled",  # Fixed: using valid enum value
             "execution_reason": "Daily safety compliance check",
             "planned_duration_minutes": 45,
             "weather_conditions": "Clear, 22°C",
