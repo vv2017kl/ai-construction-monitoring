@@ -503,7 +503,7 @@ class Zone(Base):
     coordinates = Column(Text)  # Simplified polygon representation
     safety_level = Column(SQLEnum(SafetyLevel), default=SafetyLevel.safe)
     required_ppe = Column(JSON)
-    access_level = Column(SQLEnum(AccessLevel), default=AccessLevel.personnel)
+    access_level = Column(SQLEnum(ZoneAccessLevel), default=ZoneAccessLevel.personnel)
     
     # Zone status
     status = Column(SQLEnum(ZoneStatus), default=ZoneStatus.active)
