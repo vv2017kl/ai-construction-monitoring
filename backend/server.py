@@ -79,6 +79,8 @@ api_router.include_router(system_reports.router, tags=["System & Reports"])
 api_router.include_router(timelapse.router, tags=["Time-lapse & Progress"])
 api_router.include_router(field_operations.router, tags=["Field Operations & Assessment"])
 api_router.include_router(navigation.router, tags=["Navigation & Street View"])
+api_router.include_router(analytics.router, tags=["Complete Analytics & Reporting"])
+api_router.include_router(admin.router, tags=["Admin Dashboard & System Management"])
 
 # Include the main router in the app
 app.include_router(api_router)
