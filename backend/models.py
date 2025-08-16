@@ -3,9 +3,9 @@ SQLAlchemy models for AI Construction Management System
 Based on MASTER_DATABASE_SCHEMA.md
 """
 from sqlalchemy import (
-    Column, String, Text, Integer, DateTime, Decimal, Boolean, 
+    Column, String, Text, Integer, DateTime, Boolean, 
     ForeignKey, Index, JSON, Enum as SQLEnum, Date, TIMESTAMP,
-    UniqueConstraint
+    UniqueConstraint, DECIMAL as Decimal
 )
 from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.ext.declarative import declarative_base
