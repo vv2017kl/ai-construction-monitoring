@@ -517,6 +517,11 @@ class AlertStatus(enum.Enum):
     resolved = "resolved"
     false_positive = "false_positive"
 
+class Status(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    archived = "archived"
+
 # SITES & LOCATIONS
 class Site(Base):
     __tablename__ = "sites"
