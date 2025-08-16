@@ -107,6 +107,7 @@ async def startup_event():
     logger.info("  - Video & Evidence: Bookmarks, Access Logs, Exports, Quality Metrics")
     logger.info("  - System & Reports: Reports, Config, Notifications, Audit Logs")
     logger.info("  - Time-lapse & Progress: Sequences, Bookmarks, Events, Milestones")
+    logger.info("  - Field Operations & Assessment: Inspection Paths, Waypoints, Executions, Templates")
 
 @app.on_event("shutdown")
 async def shutdown_event():
