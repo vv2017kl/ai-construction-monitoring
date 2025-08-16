@@ -4107,6 +4107,23 @@ def main():
     admin_analytics_ok = test_admin_analytics_api()
     results.append(("Admin Analytics API", admin_analytics_ok))
     
+    # NEW API TESTS - USER MANAGEMENT, ACCESS CONTROL, AI MODEL MANAGEMENT
+    print("\n" + "=" * 80)
+    print("STARTING NEW API TESTS - USER MANAGEMENT, ACCESS CONTROL, AI MODEL MANAGEMENT")
+    print("=" * 80)
+    
+    # Test User Management & Administration APIs
+    user_mgmt_ok, created_profile_id, created_role_assignment_id, created_user_session_id, created_activity_id = test_user_management_apis()
+    results.append(("User Management & Administration APIs", user_mgmt_ok))
+    
+    # Test Access Control & Security Management APIs
+    access_control_ok, created_ac_role_id, created_permission_id, created_policy_id, created_audit_log_id = test_access_control_apis()
+    results.append(("Access Control & Security Management APIs", access_control_ok))
+    
+    # Test AI Model Management & Deployment APIs
+    ai_model_mgmt_ok, created_ai_model_mgmt_id, created_deployment_mgmt_id, created_training_job_mgmt_id, created_evaluation_mgmt_id = test_ai_model_management_apis()
+    results.append(("AI Model Management & Deployment APIs", ai_model_mgmt_ok))
+    
     # Cleanup test data
     cleanup_ok = cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                                  created_bookmark_id, created_export_id, created_route_id, created_waypoint_id, 
