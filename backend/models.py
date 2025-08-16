@@ -1,11 +1,11 @@
 """
 SQLAlchemy models for AI Construction Management System
-Based on MASTER_DATABASE_SCHEMA.md
+Based on MASTER_DATABASE_SCHEMA.md - Phase 1: Core Tables
 """
 from sqlalchemy import (
     Column, String, Text, Integer, DateTime, Boolean, 
     ForeignKey, Index, JSON, Enum as SQLEnum, Date, TIMESTAMP,
-    UniqueConstraint, DECIMAL as Decimal
+    UniqueConstraint, DECIMAL as Decimal, BigInteger
 )
 from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.ext.declarative import declarative_base
@@ -85,6 +85,44 @@ class UserSiteAccessStatus(enum.Enum):
     active = "active"
     suspended = "suspended"
     expired = "expired"
+
+class CameraType(enum.Enum):
+    fixed = "fixed"
+    ptz = "ptz"
+    fisheye = "fisheye"
+    thermal = "thermal"
+    infrared = "infrared"
+
+class CameraStatus(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    maintenance = "maintenance"
+    offline = "offline"
+
+class PersonnelStatus(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    break_status = "break"
+    offsite = "offsite"
+
+class ActivityLevel(enum.Enum):
+    low = "low"
+    moderate = "moderate"
+    high = "high"
+
+class AlertPriority(enum.Enum):
+    critical = "critical"
+    high = "high"
+    medium = "medium"
+    low = "low"
+    info = "info"
+
+class AlertStatus(enum.Enum):
+    open = "open"
+    acknowledged = "acknowledged"
+    investigating = "investigating"
+    resolved = "resolved"
+    false_positive = "false_positive"
 
 # SITES & LOCATIONS
 class Site(Base):
@@ -299,4 +337,217 @@ class UserSiteAccess(Base):
         Index('idx_user_access_level', 'access_level'),
         Index('idx_user_access_status', 'status'),
         Index('idx_user_access_expires', 'expires_at'),
+    )
+
+class SitePersonnel(Base):
+    __tablename__ = "site_personnel"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    role = Column(String(100))
+    status = Column(SQLEnum(PersonnelStatus), default=PersonnelStatus.active)
+    check_in_time = Column(TIMESTAMP)
+    check_out_time = Column(TIMESTAMP)
+    
+    # Real-time Location Tracking
+    current_zone_id = Column(CHAR(36), ForeignKey('zones.id'))
+    current_zone_name = Column(String(100))
+    last_known_coordinates = Column(String(255))  # Simplified POINT
+    location_updated_at = Column(TIMESTAMP)
+    
+    # PPE Compliance Tracking
+    ppe_compliance_score = Column(Decimal(5,2), default=0.00)
+    ppe_status = Column(JSON)  # {"hardhat": true, "vest": true, "boots": false}
+    last_ppe_check_timestamp = Column(TIMESTAMP)
+    ppe_violations_count = Column(Integer, default=0)
+    
+    # Activity Tracking
+    last_detection_timestamp = Column(TIMESTAMP)
+    last_detection_camera_id = Column(CHAR(36), ForeignKey('cameras.id'))
+    activity_level = Column(SQLEnum(ActivityLevel), default=ActivityLevel.moderate)
+    break_start_time = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    user = relationship("User")
+    current_zone = relationship("Zone")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('site_id', 'user_id', 'status', name='unique_site_user_active'),
+        Index('idx_personnel_site_status', 'site_id', 'status'),
+        Index('idx_personnel_zone', 'current_zone_id'),
+        Index('idx_personnel_compliance', 'ppe_compliance_score'),
+        Index('idx_personnel_activity', 'last_detection_timestamp'),
+    )
+
+# CAMERAS & MONITORING
+class Camera(Base):
+    __tablename__ = "cameras"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    camera_type = Column(SQLEnum(CameraType), nullable=False)
+    manufacturer = Column(String(100))
+    model = Column(String(100))
+    serial_number = Column(String(100))
+    
+    # Technical specifications
+    resolution = Column(String(20))  # '1920x1080'
+    frame_rate = Column(Integer, default=30)
+    field_of_view = Column(Decimal(5,2))  # Degrees
+    night_vision = Column(Boolean, default=False)
+    weather_resistant = Column(Boolean, default=False)
+    
+    # Live View Enhancements
+    audio_enabled = Column(Boolean, default=False)
+    ptz_capabilities = Column(JSON)  # PTZ range, presets, speed settings
+    recording_capabilities = Column(JSON)  # Max resolution, frame rates, bitrate limits
+    
+    # Network & streaming
+    ip_address = Column(String(39))  # IPv6 compatible
+    mac_address = Column(String(17))
+    rtsp_url = Column(String(500))
+    http_url = Column(String(500))
+    
+    # Status
+    status = Column(SQLEnum(CameraStatus), default=CameraStatus.active)
+    installation_date = Column(Date)
+    last_maintenance = Column(Date)
+    maintenance_schedule = Column(String(100))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_cameras_type', 'camera_type'),
+        Index('idx_cameras_status', 'status'),
+        Index('idx_cameras_ip', 'ip_address'),
+        Index('idx_cameras_maintenance', 'last_maintenance'),
+    )
+
+class SiteCamera(Base):
+    __tablename__ = "site_cameras"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    zoneminder_monitor_id = Column(Integer, nullable=False)  # ZoneMinder integration
+    
+    # Positioning for 3D mapping
+    coordinates = Column(String(255))  # Simplified POINT
+    elevation = Column(Decimal(8,2))  # Meters above sea level
+    orientation_angle = Column(Decimal(5,2))  # 0-360 degrees
+    tilt_angle = Column(Decimal(5,2))  # -90 to +90 degrees
+    
+    # Zone coverage
+    primary_zone_id = Column(CHAR(36), ForeignKey('zones.id'))
+    coverage_zones = Column(JSON)  # Array of zone IDs this camera covers
+    
+    # Site-specific status
+    status = Column(SQLEnum(CameraStatus), default=CameraStatus.active)
+    last_online = Column(TIMESTAMP)
+    health_score = Column(Decimal(3,1))  # 0-10 camera health rating
+    
+    # Geospatial View Enhancements
+    region = Column(String(100))  # Geographic region grouping
+    zone_coverage = Column(JSON)  # Array of zone IDs this camera covers
+    detection_range = Column(Decimal(8,2))  # Detection range in meters
+    
+    # Live View Enhancements
+    current_zoom_level = Column(Decimal(5,2), default=1.0)  # Current PTZ zoom level
+    recording_active = Column(Boolean, default=False)  # Current recording status
+    stream_quality = Column(String(10), default='high')  # Current stream quality
+    
+    # Relationships
+    site = relationship("Site")
+    camera = relationship("Camera")
+    primary_zone = relationship("Zone")
+    
+    # Constraints and Indexes
+    __table_args__ = (
+        UniqueConstraint('site_id', 'camera_id', name='unique_site_camera'),
+        UniqueConstraint('zoneminder_monitor_id', name='unique_zm_monitor'),
+        Index('idx_site_cameras_site', 'site_id'),
+        Index('idx_site_cameras_status', 'status'),
+        Index('idx_site_cameras_zone', 'primary_zone_id'),
+        Index('idx_site_cameras_health', 'health_score'),
+        Index('idx_site_cameras_region', 'region'),
+        Index('idx_site_cameras_recording', 'recording_active'),
+        Index('idx_site_cameras_zoom', 'current_zoom_level'),
+    )
+
+# ALERTS & SAFETY
+class Alert(Base):
+    __tablename__ = "alerts"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'))
+    zone_id = Column(CHAR(36), ForeignKey('zones.id'))
+    
+    # Alert Information
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    priority = Column(SQLEnum(AlertPriority), nullable=False)
+    status = Column(SQLEnum(AlertStatus), default=AlertStatus.open)
+    alert_type = Column(String(100))  # 'ppe_violation', 'safety_breach', 'unauthorized_access'
+    
+    # AI Integration
+    detection_id = Column(CHAR(36))  # Link to AI detection that triggered this alert
+    confidence_score = Column(Decimal(5,2))
+    ai_model_used = Column(String(100))
+    detection_data = Column(JSON)  # Complete AI detection results
+    
+    # Evidence
+    primary_image_url = Column(String(500))
+    secondary_images = Column(JSON)  # Array of additional images
+    video_clip_url = Column(String(500))
+    annotated_evidence_url = Column(String(500))
+    
+    # Workflow
+    timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    acknowledged_at = Column(TIMESTAMP)
+    acknowledged_by = Column(CHAR(36), ForeignKey('users.id'))
+    acknowledged_notes = Column(Text)
+    investigating_started_at = Column(TIMESTAMP)
+    investigating_by = Column(CHAR(36), ForeignKey('users.id'))
+    resolved_at = Column(TIMESTAMP)
+    resolved_by = Column(CHAR(36), ForeignKey('users.id'))
+    resolution_notes = Column(Text)
+    resolution_type = Column(String(50))
+    
+    # Impact Assessment
+    severity_score = Column(Decimal(5,2))  # 0-10 impact rating
+    affected_personnel_count = Column(Integer, default=0)
+    estimated_risk_level = Column(String(20))
+    
+    # Escalation & Notifications
+    escalated = Column(Boolean, default=False)
+    escalated_at = Column(TIMESTAMP)
+    escalated_to = Column(CHAR(36), ForeignKey('users.id'))
+    notification_sent = Column(Boolean, default=False)
+    notification_channels = Column(JSON)  # ['email', 'sms', 'push', 'radio']
+    
+    # Relationships
+    site = relationship("Site")
+    camera = relationship("Camera")
+    zone = relationship("Zone")
+    acknowledged_by_user = relationship("User", foreign_keys=[acknowledged_by])
+    investigating_by_user = relationship("User", foreign_keys=[investigating_by])
+    resolved_by_user = relationship("User", foreign_keys=[resolved_by])
+    escalated_to_user = relationship("User", foreign_keys=[escalated_to])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_alerts_site_priority', 'site_id', 'priority', 'status'),
+        Index('idx_alerts_status_time', 'status', 'timestamp'),
+        Index('idx_alerts_camera', 'camera_id'),
+        Index('idx_alerts_escalated', 'escalated', 'escalated_at'),
     )
