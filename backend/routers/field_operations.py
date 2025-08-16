@@ -348,8 +348,13 @@ async def get_path_templates(template_type: Optional[str] = None, difficulty_lev
     return templates
 
 @router.post("/path-templates", response_model=PathTemplateResponse)
-async def create_path_template(template_data: PathTemplateCreateRequest, current_user_id: str = "system", db: Session = Depends(get_db)):
+async def create_path_template(template_data: PathTemplateCreateRequest, db: Session = Depends(get_db)):
     """Create a new path template"""
+    # Find any existing user to use as created_by
+    existing_user = db.query(User).first()
+    if not existing_user:
+        raise HTTPException(status_code=400, detail="No users found in system. Cannot create path template without a valid created_by user.")
+    
     new_template = PathTemplate(
         template_name=template_data.template_name,
         description=template_data.description,
@@ -361,7 +366,7 @@ async def create_path_template(template_data: PathTemplateCreateRequest, current
         recommended_zones=template_data.recommended_zones,
         required_equipment=template_data.required_equipment,
         is_public=template_data.is_public,
-        created_by=current_user_id  # TODO: Get from auth
+        created_by=existing_user.id
     )
     
     db.add(new_template)
