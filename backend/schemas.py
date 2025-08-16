@@ -711,3 +711,309 @@ class StreetViewCameraCreateRequest(BaseModel):
     orientation_degrees: Optional[float] = None
     route_coverage: Optional[list] = None
     waypoint_coverage: Optional[list] = None
+
+
+# COMPLETE ANALYTICS & REPORTING SCHEMAS
+
+class UserCertificationResponse(BaseModel):
+    id: str
+    user_id: str
+    certification_name: str
+    certification_type: str
+    certification_number: Optional[str] = None
+    issuing_authority: Optional[str] = None
+    issue_date: datetime
+    expiry_date: Optional[datetime] = None
+    status: str
+    verification_status: str
+    renewal_required: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserCertificationCreateRequest(BaseModel):
+    user_id: str
+    certification_name: str
+    certification_type: str
+    certification_number: Optional[str] = None
+    issuing_authority: Optional[str] = None
+    issue_date: str  # YYYY-MM-DD format
+    expiry_date: Optional[str] = None  # YYYY-MM-DD format
+    renewal_period_months: Optional[int] = None
+    required_for_roles: Optional[list] = None
+    certificate_file_path: Optional[str] = None
+
+class PerformanceMetricResponse(BaseModel):
+    id: str
+    site_id: str
+    metric_date: datetime
+    metric_hour: Optional[int] = None
+    metric_type: str
+    metric_value: float
+    target_value: Optional[float] = None
+    measurement_unit: Optional[str] = None
+    is_kpi: bool = False
+    trend_direction: Optional[str] = None
+    performance_grade: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PerformanceMetricCreateRequest(BaseModel):
+    site_id: str
+    metric_date: str  # YYYY-MM-DD format
+    metric_hour: Optional[int] = None
+    metric_type: str
+    metric_value: float
+    target_value: Optional[float] = None
+    measurement_unit: Optional[str] = None
+    data_source: Optional[str] = None
+    is_kpi: Optional[bool] = False
+    confidence_score: Optional[float] = None
+
+class TrendAnalysisResponse(BaseModel):
+    id: str
+    site_id: Optional[str] = None
+    analysis_name: str
+    analysis_type: str
+    start_date: datetime
+    end_date: datetime
+    trend_direction: Optional[str] = None
+    trend_strength: Optional[float] = None
+    starting_value: Optional[float] = None
+    ending_value: Optional[float] = None
+    change_percentage: Optional[float] = None
+    created_at: datetime
+    created_by: str
+
+    class Config:
+        from_attributes = True
+
+class TrendAnalysisCreateRequest(BaseModel):
+    site_id: Optional[str] = None
+    analysis_name: str
+    analysis_type: str
+    start_date: str  # YYYY-MM-DD format
+    end_date: str    # YYYY-MM-DD format
+    analysis_algorithm: Optional[str] = "linear_regression"
+    forecast_horizon_days: Optional[int] = 30
+
+class ReportTemplateResponse(BaseModel):
+    id: str
+    template_name: str
+    template_type: str
+    description: Optional[str] = None
+    template_structure: dict
+    is_public: bool = False
+    usage_count: int = 0
+    is_active: bool = True
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ReportTemplateCreateRequest(BaseModel):
+    template_name: str
+    template_type: str
+    description: Optional[str] = None
+    template_structure: dict
+    default_parameters: Optional[dict] = None
+    required_parameters: Optional[list] = None
+    supported_formats: Optional[list] = None
+    is_public: Optional[bool] = False
+
+class DashboardWidgetResponse(BaseModel):
+    id: str
+    user_id: str
+    widget_name: str
+    widget_type: str
+    widget_config: dict
+    data_source: str
+    dashboard_tab: str = "main"
+    position_x: int = 0
+    position_y: int = 0
+    width: int = 4
+    height: int = 3
+    is_visible: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class DashboardWidgetCreateRequest(BaseModel):
+    user_id: str
+    widget_name: str
+    widget_type: str
+    widget_config: dict
+    data_source: str
+    dashboard_tab: Optional[str] = "main"
+    position_x: Optional[int] = 0
+    position_y: Optional[int] = 0
+    width: Optional[int] = 4
+    height: Optional[int] = 3
+    refresh_interval_minutes: Optional[int] = 15
+
+# ADMIN DASHBOARD & SYSTEM MANAGEMENT SCHEMAS
+
+class AdminDashboardMetricResponse(BaseModel):
+    id: str
+    metric_date: datetime
+    metric_hour: Optional[int] = None
+    aggregation_level: str
+    total_users: int = 0
+    active_users_24h: int = 0
+    total_sites: int = 0
+    active_sites: int = 0
+    total_cameras: int = 0
+    online_cameras: int = 0
+    system_uptime_percentage: Optional[float] = None
+    avg_response_time_ms: int = 0
+    overall_safety_score: Optional[float] = None
+    ai_model_accuracy_avg: Optional[float] = None
+    created_at: datetime
+    calculated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AdminDashboardMetricCreateRequest(BaseModel):
+    metric_date: str  # YYYY-MM-DD format
+    metric_hour: Optional[int] = None
+    aggregation_level: str
+    total_users: Optional[int] = 0
+    active_users_24h: Optional[int] = 0
+    total_sites: Optional[int] = 0
+    active_sites: Optional[int] = 0
+    total_cameras: Optional[int] = 0
+    online_cameras: Optional[int] = 0
+
+class SitePerformanceSummaryResponse(BaseModel):
+    id: str
+    site_id: str
+    summary_date: datetime
+    summary_period: str
+    personnel_count: int = 0
+    active_personnel: int = 0
+    camera_count: int = 0
+    online_cameras: int = 0
+    site_uptime_percentage: Optional[float] = None
+    safety_score: Optional[float] = None
+    compliance_score: Optional[float] = None
+    alerts_generated: int = 0
+    alerts_resolved: int = 0
+    total_detections: int = 0
+    performance_trend: str
+    safety_trend: str
+    efficiency_score: Optional[float] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SitePerformanceSummaryCreateRequest(BaseModel):
+    site_id: str
+    summary_date: str  # YYYY-MM-DD format
+    summary_period: str
+    personnel_count: Optional[int] = 0
+    camera_count: Optional[int] = 0
+    online_cameras: Optional[int] = 0
+    safety_score: Optional[float] = None
+    notes: Optional[str] = None
+
+class SystemHealthLogResponse(BaseModel):
+    id: str
+    server_id: str
+    component_type: str
+    measurement_timestamp: datetime
+    cpu_usage_percentage: Optional[float] = None
+    memory_usage_percentage: Optional[float] = None
+    disk_usage_percentage: Optional[float] = None
+    response_time_ms: Optional[int] = None
+    service_status: str
+    error_count: int = 0
+    requires_attention: bool = False
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SystemHealthLogCreateRequest(BaseModel):
+    server_id: str
+    component_type: str
+    cpu_usage_percentage: Optional[float] = None
+    memory_usage_percentage: Optional[float] = None
+    disk_usage_percentage: Optional[float] = None
+    response_time_ms: Optional[int] = None
+    service_status: Optional[str] = "healthy"
+    monitoring_source: Optional[str] = None
+
+class AdminActivityLogResponse(BaseModel):
+    id: str
+    admin_user_id: str
+    activity_type: str
+    action: str
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    resource_name: Optional[str] = None
+    change_summary: Optional[str] = None
+    site_id: Optional[str] = None
+    ip_address: str
+    impact_level: str
+    action_status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AdminActivityLogCreateRequest(BaseModel):
+    admin_user_id: str
+    activity_type: str
+    action: str
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    resource_name: Optional[str] = None
+    old_values: Optional[dict] = None
+    new_values: Optional[dict] = None
+    change_summary: Optional[str] = None
+    ip_address: str
+    impact_level: Optional[str] = "medium"
+
+class ExecutiveReportResponse(BaseModel):
+    id: str
+    report_name: str
+    report_type: str
+    reporting_period_start: datetime
+    reporting_period_end: datetime
+    generated_by: str
+    generation_timestamp: datetime
+    report_status: str
+    executive_summary: Optional[str] = None
+    confidentiality_level: str
+    report_file_path: Optional[str] = None
+    report_file_format: str
+    version: str = "1.0"
+    is_automated: bool = False
+    view_count: int = 0
+    download_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ExecutiveReportCreateRequest(BaseModel):
+    report_name: str
+    report_type: str
+    reporting_period_start: str  # YYYY-MM-DD format
+    reporting_period_end: str    # YYYY-MM-DD format
+    generated_by: str
+    executive_summary: Optional[str] = None
+    included_sites: Optional[list] = None
+    confidentiality_level: Optional[str] = "internal"
+    report_file_format: Optional[str] = "pdf"
