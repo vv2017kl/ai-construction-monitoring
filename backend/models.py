@@ -427,6 +427,89 @@ class MilestoneStatus(enum.Enum):
     cancelled = "cancelled"
     on_hold = "on_hold"
 
+class PathType(enum.Enum):
+    inspection = "inspection"
+    maintenance = "maintenance"
+    emergency = "emergency"
+    quality = "quality"
+    tour = "tour"
+    custom = "custom"
+
+class PathStatus(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    draft = "draft"
+    archived = "archived"
+
+class PathPriority(enum.Enum):
+    critical = "critical"
+    high = "high"
+    medium = "medium"
+    low = "low"
+
+class ScheduleFrequency(enum.Enum):
+    daily = "daily"
+    weekly = "weekly"
+    monthly = "monthly"
+    on_demand = "on_demand"
+
+class WeatherDependency(enum.Enum):
+    any = "any"
+    clear_only = "clear_only"
+    daylight_only = "daylight_only"
+
+class SkillLevel(enum.Enum):
+    basic = "basic"
+    intermediate = "intermediate"
+    advanced = "advanced"
+    expert = "expert"
+
+class WaypointType(enum.Enum):
+    checkpoint = "checkpoint"
+    inspection = "inspection"
+    maintenance = "maintenance"
+    safety = "safety"
+    assembly = "assembly"
+    exit = "exit"
+    viewpoint = "viewpoint"
+    start = "start"
+    end = "end"
+    rest = "rest"
+
+class ExecutionType(enum.Enum):
+    scheduled = "scheduled"
+    on_demand = "on_demand"
+    emergency = "emergency"
+    training = "training"
+    audit = "audit"
+
+class ExecutionStatus(enum.Enum):
+    in_progress = "in_progress"
+    completed = "completed"
+    paused = "paused"
+    cancelled = "cancelled"
+    failed = "failed"
+
+class TemplateType(enum.Enum):
+    inspection = "inspection"
+    maintenance = "maintenance"
+    emergency = "emergency"
+    quality = "quality"
+    tour = "tour"
+    custom = "custom"
+
+class DifficultyLevel(enum.Enum):
+    basic = "basic"
+    intermediate = "intermediate"
+    advanced = "advanced"
+    expert = "expert"
+
+class InspectionSafetyLevel(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
 class AlertStatus(enum.Enum):
     open = "open"
     acknowledged = "acknowledged"
