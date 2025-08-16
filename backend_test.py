@@ -1489,9 +1489,18 @@ def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookma
     print("\n23. Cleaning up test data")
     
     try:
+        # Delete test video bookmark
+        if bookmark_id:
+            print("   23a. Deleting test video bookmark")
+            response = requests.delete(f"{API_BASE_URL}/video-bookmarks/{bookmark_id}", timeout=10)
+            if response.status_code == 200:
+                print("      ✅ Test video bookmark deleted successfully")
+            else:
+                print(f"      ⚠️ Could not delete test video bookmark: {response.status_code}")
+        
         # Delete test AI model
         if model_id:
-            print("   18a. Deleting test AI model")
+            print("   23b. Deleting test AI model")
             response = requests.delete(f"{API_BASE_URL}/ai-models/{model_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test AI model deleted successfully")
@@ -1500,16 +1509,16 @@ def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookma
         
         # Delete test site
         if site_id:
-            print("   18b. Deleting test site")
+            print("   23c. Deleting test site")
             response = requests.delete(f"{API_BASE_URL}/sites/{site_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test site deleted successfully")
             else:
                 print(f"      ⚠️ Could not delete test site: {response.status_code}")
         
-        # Note: We don't delete the user or AI detection as there are no DELETE endpoints implemented
+        # Note: We don't delete the user, AI detection, or video export as there are no DELETE endpoints implemented
         # This is acceptable for testing purposes
-        print("   18c. Test user and AI detection cleanup skipped (no DELETE endpoints)")
+        print("   23d. Test user, AI detection, and video export cleanup skipped (no DELETE endpoints)")
         
         return True
         
