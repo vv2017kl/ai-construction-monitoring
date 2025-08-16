@@ -422,9 +422,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Navigation & Street View Tables and APIs Implementation"
     - "Continue backend API expansion beyond current 40/110 tables"
     - "Identify and implement next table group for database coverage"
+    - "Consider implementing Resource Management, Equipment Tracking, or Compliance & Safety table groups"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
