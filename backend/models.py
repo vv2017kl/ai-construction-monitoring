@@ -4,7 +4,7 @@ Based on MASTER_DATABASE_SCHEMA.md - Phase 1: Core Tables
 """
 from sqlalchemy import (
     Column, String, Text, Integer, DateTime, Boolean, 
-    ForeignKey, Index, JSON, Enum as SQLEnum, Date, TIMESTAMP,
+    ForeignKey, Index, JSON, Enum as SQLEnum, Date, TIMESTAMP, Time,
     UniqueConstraint, DECIMAL as Decimal, BigInteger
 )
 from sqlalchemy.dialects.mysql import CHAR
