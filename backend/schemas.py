@@ -546,3 +546,168 @@ class PathTemplateCreateRequest(BaseModel):
     recommended_zones: Optional[list] = None
     required_equipment: Optional[list] = None
     is_public: Optional[bool] = True
+
+
+# NAVIGATION & STREET VIEW SCHEMAS
+
+class NavigationRouteResponse(BaseModel):
+    id: str
+    site_id: str
+    route_name: str
+    route_code: Optional[str] = None
+    description: Optional[str] = None
+    route_type: str
+    purpose: Optional[str] = None
+    priority_level: str
+    start_coordinates: dict
+    end_coordinates: dict
+    total_distance_meters: float
+    estimated_duration_minutes: int
+    safety_rating: str
+    accessibility_level: str
+    usage_count: int = 0
+    completion_rate: Optional[float] = None
+    route_condition: str
+    status: str
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class NavigationRouteCreateRequest(BaseModel):
+    site_id: str
+    route_name: str
+    route_code: Optional[str] = None
+    description: Optional[str] = None
+    route_type: str
+    purpose: Optional[str] = None
+    priority_level: Optional[str] = "medium"
+    start_coordinates: dict  # {lat: float, lng: float, elevation: float}
+    end_coordinates: dict
+    total_distance_meters: float
+    estimated_duration_minutes: int
+    elevation_change_meters: Optional[float] = 0
+    difficulty_level: Optional[str] = "easy"
+    safety_rating: Optional[str] = "safe"
+    accessibility_level: Optional[str] = "walking"
+    ppe_requirements: Optional[list] = None
+    hazard_warnings: Optional[list] = None
+
+class RouteWaypointResponse(BaseModel):
+    id: str
+    route_id: str
+    waypoint_name: str
+    waypoint_code: Optional[str] = None
+    sequence_order: int
+    latitude: float
+    longitude: float
+    elevation: Optional[float] = None
+    waypoint_type: str
+    action_required: str
+    approach_instructions: str
+    safety_level: str
+    monitoring_required: bool = False
+    photo_documentation_required: bool = False
+    completion_rate: Optional[float] = None
+    condition_status: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class RouteWaypointCreateRequest(BaseModel):
+    route_id: str
+    waypoint_name: str
+    waypoint_code: Optional[str] = None
+    sequence_order: int
+    latitude: float
+    longitude: float
+    elevation: Optional[float] = 0
+    waypoint_type: str
+    action_required: Optional[str] = "pass_through"
+    approach_instructions: str
+    departure_instructions: Optional[str] = None
+    safety_level: Optional[str] = "safe"
+    hazard_types: Optional[list] = None
+    associated_camera_ids: Optional[list] = None
+    monitoring_required: Optional[bool] = False
+    photo_documentation_required: Optional[bool] = False
+
+class NavigationSessionResponse(BaseModel):
+    id: str
+    user_id: str
+    route_id: str
+    session_name: Optional[str] = None
+    session_purpose: str
+    started_at: datetime
+    ended_at: Optional[datetime] = None
+    total_duration_minutes: Optional[float] = None
+    session_status: str
+    completion_percentage: Optional[float] = None
+    waypoints_completed: int = 0
+    waypoints_skipped: int = 0
+    total_waypoints: int
+    total_distance_traveled_meters: Optional[float] = None
+    safety_incidents: int = 0
+    navigation_accuracy_score: Optional[float] = None
+    overall_session_rating: Optional[float] = None
+    supervisor_review_required: bool = False
+    approved: bool = False
+    archived: bool = False
+
+    class Config:
+        from_attributes = True
+
+class NavigationSessionCreateRequest(BaseModel):
+    user_id: str
+    route_id: str
+    session_name: Optional[str] = None
+    session_purpose: str
+    planned_duration_minutes: Optional[int] = None
+    total_waypoints: int
+    device_type: Optional[str] = None
+    device_id: Optional[str] = None
+    weather_conditions: Optional[dict] = None
+
+class StreetViewCameraResponse(BaseModel):
+    id: str
+    camera_id: str
+    is_street_view_enabled: bool = False
+    street_view_priority: int = 1
+    field_of_view_degrees: int = 90
+    ptz_enabled: bool = False
+    streaming_resolution: str = "1080p"
+    streaming_fps: int = 30
+    ai_detection_enabled: bool = True
+    precise_latitude: Optional[float] = None
+    precise_longitude: Optional[float] = None
+    mounting_height_meters: Optional[float] = None
+    coverage_radius_meters: Optional[float] = None
+    health_status: str
+    uptime_percentage: Optional[float] = None
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class StreetViewCameraCreateRequest(BaseModel):
+    camera_id: str
+    is_street_view_enabled: Optional[bool] = False
+    street_view_priority: Optional[int] = 1
+    field_of_view_degrees: Optional[int] = 90
+    ptz_enabled: Optional[bool] = False
+    streaming_resolution: Optional[str] = "1080p"
+    streaming_fps: Optional[int] = 30
+    ai_detection_enabled: Optional[bool] = True
+    precise_latitude: Optional[float] = None
+    precise_longitude: Optional[float] = None
+    mounting_height_meters: Optional[float] = None
+    orientation_degrees: Optional[float] = None
+    route_coverage: Optional[list] = None
+    waypoint_coverage: Optional[list] = None
