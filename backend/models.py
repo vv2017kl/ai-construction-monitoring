@@ -200,7 +200,7 @@ class OutputFormat(enum.Enum):
     csv = "csv"
     json = "json"
 
-class GenerationStatus(enum.Enum):
+class ReportGenerationStatus(enum.Enum):
     pending = "pending"
     generating = "generating"
     completed = "completed"
