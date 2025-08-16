@@ -2362,7 +2362,7 @@ def test_admin_dashboard_metrics_api():
         test_metric_data = {
             "metric_date": "2024-01-15",
             "metric_hour": 14,
-            "aggregation_level": "system",
+            "aggregation_level": "daily",  # Fixed: using valid enum value
             "total_users": 150,
             "active_users_24h": 45,
             "total_sites": 12,
