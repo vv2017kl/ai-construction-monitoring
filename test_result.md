@@ -401,9 +401,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Time-Lapse & Progress Tracking Tables and APIs Implementation"
+    - "Field Operations & Assessment Tables and APIs Implementation"
     - "Backend API Comprehensive Endpoints Testing"
-    - "Database Table Expansion (31/110 tables completed - 28%)"
+    - "Database Table Expansion (36/110 tables completed - 33%)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
