@@ -58,7 +58,7 @@ class ZoneAccessLevel(enum.Enum):
     authorized = "authorized"
     management = "management"
 
-class ShareAccessLevel(enum.Enum):
+class AccessLevel(enum.Enum):
     view = "view"
     comment = "comment"
     bookmark = "bookmark"
