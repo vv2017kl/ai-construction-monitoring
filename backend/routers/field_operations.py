@@ -31,15 +31,27 @@ async def get_inspection_paths(site_id: Optional[str] = None, path_type: Optiona
     return paths
 
 @router.post("/inspection-paths", response_model=InspectionPathResponse)
-async def create_inspection_path(path_data: InspectionPathCreateRequest, current_user_id: str = "system", db: Session = Depends(get_db)):
+async def create_inspection_path(path_data: InspectionPathCreateRequest, db: Session = Depends(get_db)):
     """Create a new inspection path"""
+    # For now, use the assigned_to user as created_by if provided, otherwise use a default system user
+    created_by_id = path_data.assigned_to if path_data.assigned_to else None
+    
+    # If no assigned_to is provided, we need to find a valid user or create a system user
+    if not created_by_id:
+        # Try to find any existing user to use as created_by
+        existing_user = db.query(User).first()
+        if existing_user:
+            created_by_id = existing_user.id
+        else:
+            raise HTTPException(status_code=400, detail="No users found in system. Cannot create inspection path without a valid created_by user.")
+    
     new_path = InspectionPath(
         site_id=path_data.site_id,
         name=path_data.name,
         description=path_data.description,
         path_type=path_data.path_type,
         priority=path_data.priority,
-        created_by=current_user_id,  # TODO: Get from auth
+        created_by=created_by_id,
         assigned_to=path_data.assigned_to,
         estimated_duration_minutes=path_data.estimated_duration_minutes,
         zone_coverage=path_data.zone_coverage,
