@@ -255,10 +255,10 @@ def test_field_operations_path_executions(path_id, user_id):
             "equipment_used": ["tablet", "camera", "safety_meter", "checklist"]
         }
         
-        # Test POST create path execution
+        # Test POST create path execution (with user_id as query param)
         print("   3b. Testing POST /api/path-executions")
         response = requests.post(
-            f"{API_BASE_URL}/path-executions",
+            f"{API_BASE_URL}/path-executions?current_user_id={user_id}",
             json=test_execution_data,
             headers={"Content-Type": "application/json"},
             timeout=10
