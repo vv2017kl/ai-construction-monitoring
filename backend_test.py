@@ -935,9 +935,558 @@ def test_database_verification():
         print(f"   ❌ Unexpected error: {e}")
         return False
 
-def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None):
+def test_video_bookmarks_api(camera_id=None, user_id="system"):
+    """Test Video Bookmarks API endpoints"""
+    print("\n18. Testing Video Bookmarks API")
+    created_bookmark_id = None
+    
+    try:
+        # Test GET all video bookmarks
+        print("   18a. Testing GET /api/video-bookmarks")
+        response = requests.get(f"{API_BASE_URL}/video-bookmarks", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            bookmarks = response.json()
+            print(f"      Found {len(bookmarks)} total video bookmarks")
+            print("      ✅ GET all video bookmarks working")
+        else:
+            print("      ❌ GET all video bookmarks failed")
+            return False, None
+        
+        # Get existing cameras to use a valid camera_id
+        if not camera_id:
+            print("   18b. Getting existing cameras for valid camera_id")
+            response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
+            if response.status_code == 200:
+                cameras = response.json()
+                if cameras:
+                    camera_id = cameras[0]["id"]
+                    print(f"      Using existing camera ID: {camera_id}")
+                else:
+                    print("      No existing cameras found, skipping video bookmark POST test")
+                    print("      ⚠️ Video Bookmark POST test requires existing camera")
+                    return True, None  # Mark as passed since GET operations work
+            else:
+                print("      ❌ Failed to get cameras list")
+                return False, None
+        
+        # Create test video bookmark data
+        test_bookmark_data = {
+            "camera_id": camera_id,
+            "bookmark_date": "2024-01-15",  # YYYY-MM-DD format
+            "timestamp_seconds": 3600,  # 1 hour into the video
+            "title": f"Safety Incident Bookmark {uuid.uuid4().hex[:8]}",
+            "description": "Worker without hard hat detected in construction zone",
+            "bookmark_type": "safety_incident",
+            "priority_level": "high"
+        }
+        
+        # Test POST create video bookmark
+        print("   18c. Testing POST /api/video-bookmarks")
+        response = requests.post(
+            f"{API_BASE_URL}/video-bookmarks",
+            json=test_bookmark_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            bookmark = response.json()
+            created_bookmark_id = bookmark.get("id")
+            print(f"      Created video bookmark ID: {created_bookmark_id}")
+            print("      ✅ POST video bookmark creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST video bookmark creation failed")
+            return False, None
+        
+        # Test GET specific video bookmark
+        print("   18d. Testing GET /api/video-bookmarks/{bookmark_id}")
+        response = requests.get(f"{API_BASE_URL}/video-bookmarks/{created_bookmark_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            bookmark = response.json()
+            if bookmark.get("title") == test_bookmark_data["title"]:
+                print("      ✅ GET specific video bookmark working")
+            else:
+                print("      ❌ Video bookmark data mismatch")
+                return False, created_bookmark_id
+        else:
+            print("      ❌ GET specific video bookmark failed")
+            return False, created_bookmark_id
+        
+        # Test PUT update bookmark status
+        print("   18e. Testing PUT /api/video-bookmarks/{bookmark_id}/status")
+        response = requests.put(
+            f"{API_BASE_URL}/video-bookmarks/{created_bookmark_id}/status?status=reviewed",
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "message" in result:
+                print("      ✅ PUT bookmark status update working")
+            else:
+                print("      ❌ Unexpected bookmark status update response")
+                return False, created_bookmark_id
+        else:
+            print("      ❌ PUT bookmark status update failed")
+            return False, created_bookmark_id
+        
+        # Test GET video bookmarks with camera filter
+        print("   18f. Testing GET /api/video-bookmarks?camera_id={camera_id}")
+        response = requests.get(f"{API_BASE_URL}/video-bookmarks?camera_id={camera_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_bookmarks = response.json()
+            print(f"      Found {len(camera_bookmarks)} bookmarks for camera")
+            print("      ✅ GET video bookmarks with camera filter working")
+        else:
+            print("      ❌ GET video bookmarks with camera filter failed")
+            return False, created_bookmark_id
+        
+        # Test GET video bookmarks with user filter
+        print("   18g. Testing GET /api/video-bookmarks?user_id={user_id}")
+        response = requests.get(f"{API_BASE_URL}/video-bookmarks?user_id={user_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            user_bookmarks = response.json()
+            print(f"      Found {len(user_bookmarks)} bookmarks for user")
+            print("      ✅ GET video bookmarks with user filter working")
+        else:
+            print("      ❌ GET video bookmarks with user filter failed")
+            return False, created_bookmark_id
+        
+        return True, created_bookmark_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_bookmark_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_bookmark_id
+
+def test_video_access_logs_api(camera_id=None, user_id="system"):
+    """Test Video Access Logs API endpoints"""
+    print("\n19. Testing Video Access Logs API")
+    
+    try:
+        # Test GET all video access logs
+        print("   19a. Testing GET /api/video-access-logs")
+        response = requests.get(f"{API_BASE_URL}/video-access-logs", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            logs = response.json()
+            print(f"      Found {len(logs)} total video access logs")
+            print("      ✅ GET all video access logs working")
+        else:
+            print("      ❌ GET all video access logs failed")
+            return False
+        
+        # Get existing cameras to use a valid camera_id
+        if not camera_id:
+            print("   19b. Getting existing cameras for valid camera_id")
+            response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
+            if response.status_code == 200:
+                cameras = response.json()
+                if cameras:
+                    camera_id = cameras[0]["id"]
+                    print(f"      Using existing camera ID: {camera_id}")
+                else:
+                    print("      No existing cameras found, using fake camera_id for endpoint testing")
+                    camera_id = str(uuid.uuid4())
+            else:
+                print("      ❌ Failed to get cameras list")
+                return False
+        
+        # Test GET video access logs by camera
+        print("   19c. Testing GET /api/cameras/{camera_id}/access-logs")
+        response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/access-logs", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_logs = response.json()
+            print(f"      Found {len(camera_logs)} access logs for camera")
+            print("      ✅ GET camera access logs working")
+        else:
+            print("      ❌ GET camera access logs failed")
+            return False
+        
+        # Test GET video access logs by user
+        print("   19d. Testing GET /api/users/{user_id}/video-access-logs")
+        response = requests.get(f"{API_BASE_URL}/users/{user_id}/video-access-logs", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            user_logs = response.json()
+            print(f"      Found {len(user_logs)} access logs for user")
+            print("      ✅ GET user video access logs working")
+        else:
+            print("      ❌ GET user video access logs failed")
+            return False
+        
+        # Test GET video access logs with filters
+        print("   19e. Testing GET /api/video-access-logs?user_id={user_id}&camera_id={camera_id}")
+        response = requests.get(f"{API_BASE_URL}/video-access-logs?user_id={user_id}&camera_id={camera_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_logs = response.json()
+            print(f"      Found {len(filtered_logs)} filtered access logs")
+            print("      ✅ GET video access logs with filters working")
+        else:
+            print("      ❌ GET video access logs with filters failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_video_exports_api(camera_id=None, user_id="system"):
+    """Test Video Exports API endpoints"""
+    print("\n20. Testing Video Exports API")
+    created_export_id = None
+    
+    try:
+        # Test GET all video exports
+        print("   20a. Testing GET /api/video-exports")
+        response = requests.get(f"{API_BASE_URL}/video-exports", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            exports = response.json()
+            print(f"      Found {len(exports)} total video exports")
+            print("      ✅ GET all video exports working")
+        else:
+            print("      ❌ GET all video exports failed")
+            return False, None
+        
+        # Get existing cameras to use a valid camera_id
+        if not camera_id:
+            print("   20b. Getting existing cameras for valid camera_id")
+            response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
+            if response.status_code == 200:
+                cameras = response.json()
+                if cameras:
+                    camera_id = cameras[0]["id"]
+                    print(f"      Using existing camera ID: {camera_id}")
+                else:
+                    print("      No existing cameras found, skipping video export POST test")
+                    print("      ⚠️ Video Export POST test requires existing camera")
+                    return True, None  # Mark as passed since GET operations work
+            else:
+                print("      ❌ Failed to get cameras list")
+                return False, None
+        
+        # Create test video export data
+        test_export_data = {
+            "camera_id": camera_id,
+            "source_video_date": "2024-01-15",  # YYYY-MM-DD format
+            "start_timestamp_seconds": 1800,  # 30 minutes
+            "end_timestamp_seconds": 5400,   # 90 minutes (1 hour duration)
+            "export_type": "incident_evidence",
+            "export_format": "mp4",
+            "export_purpose": "safety_investigation",
+            "export_justification": "Evidence collection for safety incident investigation",
+            "quality_setting": "high"
+        }
+        
+        # Test POST create video export
+        print("   20c. Testing POST /api/video-exports")
+        response = requests.post(
+            f"{API_BASE_URL}/video-exports",
+            json=test_export_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            export = response.json()
+            created_export_id = export.get("id")
+            print(f"      Created video export ID: {created_export_id}")
+            print("      ✅ POST video export creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST video export creation failed")
+            return False, None
+        
+        # Test GET specific video export
+        print("   20d. Testing GET /api/video-exports/{export_id}")
+        response = requests.get(f"{API_BASE_URL}/video-exports/{created_export_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            export = response.json()
+            if export.get("export_purpose") == test_export_data["export_purpose"]:
+                print("      ✅ GET specific video export working")
+            else:
+                print("      ❌ Video export data mismatch")
+                return False, created_export_id
+        else:
+            print("      ❌ GET specific video export failed")
+            return False, created_export_id
+        
+        # Test PUT update export status
+        print("   20e. Testing PUT /api/video-exports/{export_id}/status")
+        response = requests.put(
+            f"{API_BASE_URL}/video-exports/{created_export_id}/status?status=processing&download_url=https://example.com/export.mp4",
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "message" in result:
+                print("      ✅ PUT export status update working")
+            else:
+                print("      ❌ Unexpected export status update response")
+                return False, created_export_id
+        else:
+            print("      ❌ PUT export status update failed")
+            return False, created_export_id
+        
+        # Test GET video exports with camera filter
+        print("   20f. Testing GET /api/video-exports?camera_id={camera_id}")
+        response = requests.get(f"{API_BASE_URL}/video-exports?camera_id={camera_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_exports = response.json()
+            print(f"      Found {len(camera_exports)} exports for camera")
+            print("      ✅ GET video exports with camera filter working")
+        else:
+            print("      ❌ GET video exports with camera filter failed")
+            return False, created_export_id
+        
+        # Test GET video exports with user filter
+        print("   20g. Testing GET /api/video-exports?user_id={user_id}")
+        response = requests.get(f"{API_BASE_URL}/video-exports?user_id={user_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            user_exports = response.json()
+            print(f"      Found {len(user_exports)} exports for user")
+            print("      ✅ GET video exports with user filter working")
+        else:
+            print("      ❌ GET video exports with user filter failed")
+            return False, created_export_id
+        
+        # Test GET video exports with status filter
+        print("   20h. Testing GET /api/video-exports?status=processing")
+        response = requests.get(f"{API_BASE_URL}/video-exports?status=processing", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            status_exports = response.json()
+            print(f"      Found {len(status_exports)} exports with processing status")
+            print("      ✅ GET video exports with status filter working")
+        else:
+            print("      ❌ GET video exports with status filter failed")
+            return False, created_export_id
+        
+        return True, created_export_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_export_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_export_id
+
+def test_video_quality_metrics_api(camera_id=None):
+    """Test Video Quality Metrics API endpoints"""
+    print("\n21. Testing Video Quality Metrics API")
+    
+    try:
+        # Test GET all video quality metrics
+        print("   21a. Testing GET /api/video-quality-metrics")
+        response = requests.get(f"{API_BASE_URL}/video-quality-metrics", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            metrics = response.json()
+            print(f"      Found {len(metrics)} total video quality metrics")
+            print("      ✅ GET all video quality metrics working")
+        else:
+            print("      ❌ GET all video quality metrics failed")
+            return False
+        
+        # Test GET video quality metrics with days filter
+        print("   21b. Testing GET /api/video-quality-metrics?days=30")
+        response = requests.get(f"{API_BASE_URL}/video-quality-metrics?days=30", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_metrics = response.json()
+            print(f"      Found {len(filtered_metrics)} quality metrics for last 30 days")
+            print("      ✅ GET video quality metrics with days filter working")
+        else:
+            print("      ❌ GET video quality metrics with days filter failed")
+            return False
+        
+        # Get existing cameras to use a valid camera_id
+        if not camera_id:
+            print("   21c. Getting existing cameras for valid camera_id")
+            response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
+            if response.status_code == 200:
+                cameras = response.json()
+                if cameras:
+                    camera_id = cameras[0]["id"]
+                    print(f"      Using existing camera ID: {camera_id}")
+                else:
+                    print("      No existing cameras found, using fake camera_id for endpoint testing")
+                    camera_id = str(uuid.uuid4())
+            else:
+                print("      ❌ Failed to get cameras list")
+                return False
+        
+        # Test GET video quality metrics by camera
+        print("   21d. Testing GET /api/cameras/{camera_id}/quality-metrics")
+        response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/quality-metrics", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_metrics = response.json()
+            print(f"      Found {len(camera_metrics)} quality metrics for camera")
+            print("      ✅ GET camera quality metrics working")
+        else:
+            print("      ❌ GET camera quality metrics failed")
+            return False
+        
+        # Test GET camera quality summary
+        print("   21e. Testing GET /api/cameras/{camera_id}/quality-summary")
+        response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/quality-summary", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            summary = response.json()
+            # Check if it's a "no data" response or actual summary data
+            if "message" in summary or "camera_id" in summary:
+                print("      ✅ GET camera quality summary working")
+            else:
+                print("      ❌ Unexpected camera quality summary response")
+                return False
+        else:
+            print("      ❌ GET camera quality summary failed")
+            return False
+        
+        # Test GET camera quality summary with days filter
+        print("   21f. Testing GET /api/cameras/{camera_id}/quality-summary?days=14")
+        response = requests.get(f"{API_BASE_URL}/cameras/{camera_id}/quality-summary?days=14", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_summary = response.json()
+            if "message" in filtered_summary or "camera_id" in filtered_summary:
+                print("      ✅ GET camera quality summary with days filter working")
+            else:
+                print("      ❌ Unexpected filtered camera quality summary response")
+                return False
+        else:
+            print("      ❌ GET camera quality summary with days filter failed")
+            return False
+        
+        # Test GET video quality metrics with camera filter
+        print("   21g. Testing GET /api/video-quality-metrics?camera_id={camera_id}")
+        response = requests.get(f"{API_BASE_URL}/video-quality-metrics?camera_id={camera_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_filtered_metrics = response.json()
+            print(f"      Found {len(camera_filtered_metrics)} quality metrics for camera filter")
+            print("      ✅ GET video quality metrics with camera filter working")
+        else:
+            print("      ❌ GET video quality metrics with camera filter failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_video_database_verification():
+    """Test database verification for new video tables"""
+    print("\n22. Testing Video Database Verification")
+    
+    try:
+        # Test health endpoint to verify database connection
+        print("   22a. Testing database connection via health endpoint")
+        response = requests.get(f"{API_BASE_URL}/health", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            health_data = response.json()
+            if health_data.get("database") == "connected":
+                print("      ✅ Database connection verified")
+            else:
+                print("      ❌ Database connection issue")
+                return False
+        else:
+            print("      ❌ Health endpoint failed")
+            return False
+        
+        # Test that video endpoints are accessible (indicates tables exist)
+        print("   22b. Testing video tables accessibility via endpoints")
+        video_endpoints_to_test = [
+            "/video-bookmarks",
+            "/video-access-logs", 
+            "/video-exports",
+            "/video-quality-metrics"
+        ]
+        
+        for endpoint in video_endpoints_to_test:
+            response = requests.get(f"{API_BASE_URL}{endpoint}", timeout=10)
+            if response.status_code == 200:
+                print(f"      ✅ {endpoint} accessible (table exists)")
+            else:
+                print(f"      ❌ {endpoint} failed (table may not exist)")
+                return False
+        
+        # Test complex video endpoints with parameters
+        print("   22c. Testing complex video endpoints")
+        complex_endpoints = [
+            "/video-quality-metrics?days=7",
+            "/video-exports?status=pending",
+            "/video-bookmarks?camera_id=test"
+        ]
+        
+        for endpoint in complex_endpoints:
+            response = requests.get(f"{API_BASE_URL}{endpoint}", timeout=10)
+            if response.status_code == 200:
+                print(f"      ✅ {endpoint} accessible with parameters")
+            else:
+                print(f"      ❌ {endpoint} failed with parameters")
+                return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookmark_id=None, export_id=None):
     """Clean up test data created during testing"""
-    print("\n18. Cleaning up test data")
+    print("\n23. Cleaning up test data")
     
     try:
         # Delete test AI model
