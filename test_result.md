@@ -385,7 +385,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Video & Evidence Management Tables and APIs Implementation"
+    - "Analytics, Reports & System Configuration Tables and APIs"
     - "Backend API Comprehensive Endpoints Testing"
     - "Database Table Expansion (26/110 tables completed)"
   stuck_tasks: []
