@@ -170,7 +170,7 @@ backend:
     file: "/app/backend/models.py, /app/backend/routers/field_operations.py, /app/backend/schemas.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
