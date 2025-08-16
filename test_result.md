@@ -382,8 +382,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "MySQL Database Setup and Core Tables Creation"
+    - "Video & Evidence Management Tables and APIs Implementation"
     - "Backend API Comprehensive Endpoints Testing"
+    - "Database Table Expansion (26/110 tables completed)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
