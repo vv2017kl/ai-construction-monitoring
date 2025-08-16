@@ -2321,7 +2321,7 @@ def test_route_waypoints_api(route_id):
             "longitude": -74.0000,
             "elevation": 12.5,
             "waypoint_type": "checkpoint",
-            "action_required": "safety_check",
+            "action_required": "inspect",  # Valid enum: pass_through, pause, inspect, report, confirm, emergency_check
             "approach_instructions": "Approach from the north entrance, maintain 15 mph speed limit",
             "departure_instructions": "Continue south towards main construction area",
             "safety_level": "caution",
