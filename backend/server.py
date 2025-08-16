@@ -140,6 +140,70 @@ class AlertResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class AIDetectionResponse(BaseModel):
+    id: str
+    camera_id: str
+    site_id: str
+    zone_id: Optional[str] = None
+    detection_type: Optional[str] = None
+    person_count: int = 0
+    confidence_score: Optional[float] = None
+    activity_level: Optional[str] = None
+    safety_score: Optional[float] = None
+    timestamp: datetime
+    processed: bool = False
+    alert_generated: bool = False
+
+    class Config:
+        from_attributes = True
+
+class AIModelResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    model_type: Optional[str] = None
+    provider: Optional[str] = None
+    status: str
+    accuracy_score: Optional[float] = None
+    avg_processing_time_ms: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class RecordingSessionResponse(BaseModel):
+    id: str
+    camera_id: str
+    site_id: str
+    session_type: str
+    trigger_type: str
+    status: str
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    recording_quality: Optional[str] = None
+    file_size_mb: Optional[float] = None
+
+    class Config:
+        from_attributes = True
+
+class AIDetectionCreateRequest(BaseModel):
+    camera_id: str
+    site_id: str
+    zone_id: Optional[str] = None
+    detection_type: Optional[str] = None
+    person_count: int = 0
+    confidence_score: Optional[float] = None
+    detection_results: Optional[dict] = None
+    safety_score: Optional[float] = None
+
+class AIModelCreateRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+    model_type: Optional[str] = None
+    provider: Optional[str] = None
+    endpoint_url: Optional[str] = None
+    confidence_threshold: Optional[float] = 0.50
+
 # Basic API routes
 @api_router.get("/")
 async def root():
