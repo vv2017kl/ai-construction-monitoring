@@ -5028,3 +5028,1079 @@ class ModelEvaluationResult(Base):
         Index('idx_evaluation_review', 'review_status', 'approval_for_production'),
         Index('idx_evaluation_business', 'business_accuracy_score', 'roi_projection'),
     )
+
+
+# SITE CONFIGURATION & INFRASTRUCTURE TABLES
+
+# Site configuration enums
+class SafetyLevel(enum.Enum):
+    standard = "standard"
+    high = "high"
+    critical = "critical"
+
+class AISensitivityLevel(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+class RecordingQuality(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    ultra = "ultra"
+
+class AccessControlType(enum.Enum):
+    manual = "manual"
+    keycard = "keycard"
+    biometric = "biometric"
+    mobile = "mobile"
+
+class AuditFrequency(enum.Enum):
+    weekly = "weekly"
+    monthly = "monthly"
+    quarterly = "quarterly"
+    annually = "annually"
+
+class NetworkStatus(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    offline = "offline"
+
+class PowerStatus(enum.Enum):
+    stable = "stable"
+    unstable = "unstable"
+    backup_active = "backup_active"
+    critical = "critical"
+    offline = "offline"
+
+class CellularCoverage(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    none = "none"
+
+class MonitoringLevel(enum.Enum):
+    basic = "basic"
+    standard = "standard"
+    enhanced = "enhanced"
+    maximum = "maximum"
+
+class ZoneStatus(enum.Enum):
+    active = "active"
+    maintenance = "maintenance"
+    restricted = "restricted"
+    inactive = "inactive"
+
+class DetectionSensitivity(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+class TrackingPeriod(enum.Enum):
+    hourly = "hourly"
+    daily = "daily"
+    weekly = "weekly"
+    monthly = "monthly"
+
+class PerformanceTrend(enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+    volatile = "volatile"
+
+class HealthTrend(enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+
+class EfficiencyTrend(enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+
+class ComplianceStatus(enum.Enum):
+    compliant = "compliant"
+    minor_issues = "minor_issues"
+    major_issues = "major_issues"
+    non_compliant = "non_compliant"
+
+class AuditType(enum.Enum):
+    internal = "internal"
+    external = "external"
+    regulatory = "regulatory"
+    third_party = "third_party"
+
+class ComplianceTrend(enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+
+
+class SiteConfiguration(Base):
+    __tablename__ = 'site_configurations'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), unique=True, nullable=False)
+    
+    # Basic configuration
+    timezone = Column(String(100), default='America/New_York')
+    working_hours_start = Column(Time, default='06:00')
+    working_hours_end = Column(Time, default='18:00')
+    max_occupancy = Column(Integer, default=100)
+    safety_level = Column(SQLEnum(SafetyLevel), default=SafetyLevel.standard)
+    
+    # AI and detection settings
+    ai_detection_enabled = Column(Boolean, default=True)
+    ai_sensitivity_level = Column(SQLEnum(AISensitivityLevel), default=AISensitivityLevel.medium)
+    detection_zones = Column(JSON)
+    detection_models = Column(JSON)
+    real_time_analysis = Column(Boolean, default=True)
+    
+    # Recording and storage
+    recording_retention_days = Column(Integer, default=30)
+    recording_quality = Column(SQLEnum(RecordingQuality), default=RecordingQuality.high)
+    recording_schedule = Column(JSON)
+    storage_location = Column(String(255))
+    backup_retention_days = Column(Integer, default=90)
+    
+    # Alert and notification settings
+    alert_notifications_enabled = Column(Boolean, default=True)
+    notification_methods = Column(JSON)
+    alert_escalation_rules = Column(JSON)
+    notification_recipients = Column(JSON)
+    
+    # Emergency contacts and procedures
+    emergency_contacts = Column(JSON)
+    emergency_procedures = Column(JSON)
+    evacuation_plan_url = Column(String(500))
+    safety_protocols = Column(JSON)
+    
+    # Access control settings
+    access_control_type = Column(SQLEnum(AccessControlType), default=AccessControlType.keycard)
+    visitor_management = Column(Boolean, default=True)
+    contractor_access_rules = Column(JSON)
+    multi_factor_auth_required = Column(Boolean, default=False)
+    
+    # Integration settings
+    weather_monitoring = Column(Boolean, default=False)
+    environmental_sensors = Column(JSON)
+    third_party_integrations = Column(JSON)
+    api_access_tokens = Column(JSON)
+    
+    # Performance and maintenance
+    system_health_threshold = Column(Integer, default=85)
+    maintenance_schedule = Column(JSON)
+    performance_monitoring = Column(Boolean, default=True)
+    automated_diagnostics = Column(Boolean, default=True)
+    
+    # Compliance and regulations
+    compliance_frameworks = Column(JSON)
+    audit_frequency = Column(SQLEnum(AuditFrequency), default=AuditFrequency.monthly)
+    documentation_requirements = Column(JSON)
+    regulatory_contacts = Column(JSON)
+    
+    # Custom configurations
+    custom_fields = Column(JSON)
+    feature_flags = Column(JSON)
+    integration_endpoints = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    configured_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    last_modified_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    configured_by_user = relationship("User", foreign_keys=[configured_by])
+    last_modified_by_user = relationship("User", foreign_keys=[last_modified_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_site_configs_safety', 'safety_level', 'ai_detection_enabled'),
+        Index('idx_site_configs_compliance', 'compliance_frameworks', 'audit_frequency'),
+        Index('idx_site_configs_performance', 'system_health_threshold', 'performance_monitoring'),
+    )
+
+
+class SiteInfrastructure(Base):
+    __tablename__ = 'site_infrastructure'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), unique=True, nullable=False)
+    
+    # Network infrastructure
+    network_status = Column(SQLEnum(NetworkStatus), default=NetworkStatus.fair)
+    internet_speed_mbps = Column(Integer)
+    network_provider = Column(String(255))
+    ip_range = Column(String(50))
+    wifi_networks = Column(JSON)
+    network_monitoring = Column(Boolean, default=True)
+    
+    # Power infrastructure
+    power_status = Column(SQLEnum(PowerStatus), default=PowerStatus.stable)
+    main_power_source = Column(String(255))
+    backup_power_available = Column(Boolean, default=False)
+    backup_power_capacity_hours = Column(Integer)
+    ups_systems = Column(JSON)
+    power_consumption_kw = Column(Decimal(8,2))
+    
+    # Environmental systems
+    weather_station_installed = Column(Boolean, default=False)
+    environmental_sensors = Column(JSON)
+    hvac_systems = Column(JSON)
+    lighting_systems = Column(JSON)
+    security_systems = Column(JSON)
+    
+    # Communication systems
+    radio_communication = Column(Boolean, default=False)
+    intercom_systems = Column(JSON)
+    emergency_communication = Column(JSON)
+    cellular_coverage = Column(SQLEnum(CellularCoverage), default=CellularCoverage.good)
+    
+    # Storage and computing
+    local_servers = Column(JSON)
+    storage_capacity_tb = Column(Decimal(8,2))
+    cloud_storage_enabled = Column(Boolean, default=True)
+    computing_resources = Column(JSON)
+    data_backup_systems = Column(JSON)
+    
+    # Maintenance tracking
+    last_infrastructure_audit = Column(Date)
+    next_infrastructure_audit = Column(Date)
+    maintenance_contracts = Column(JSON)
+    equipment_warranties = Column(JSON)
+    upgrade_schedule = Column(JSON)
+    
+    # Performance metrics
+    uptime_percentage = Column(Decimal(5,2), default=100.00)
+    average_response_time_ms = Column(Integer)
+    network_utilization_percentage = Column(Decimal(5,2))
+    storage_utilization_percentage = Column(Decimal(5,2))
+    system_temperature_celsius = Column(Decimal(4,1))
+    
+    # Compliance and certifications
+    infrastructure_certifications = Column(JSON)
+    inspection_records = Column(JSON)
+    regulatory_compliance = Column(JSON)
+    insurance_information = Column(JSON)
+    
+    # Integration points
+    camera_network_config = Column(JSON)
+    sensor_network_config = Column(JSON)
+    third_party_connections = Column(JSON)
+    api_endpoints = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    last_audit_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Relationships
+    site = relationship("Site")
+    last_audit_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_site_infrastructure_status', 'network_status', 'power_status'),
+        Index('idx_site_infrastructure_performance', 'uptime_percentage', 'average_response_time_ms'),
+        Index('idx_site_infrastructure_audit', 'next_infrastructure_audit', 'last_audit_by'),
+    )
+
+
+class SiteZoneConfiguration(Base):
+    __tablename__ = 'site_zone_configurations'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    zone_id = Column(CHAR(36), ForeignKey('zones.id'), nullable=False)
+    
+    # Zone-specific settings
+    zone_configuration = Column(JSON)
+    access_restrictions = Column(JSON)
+    safety_requirements = Column(JSON)
+    monitoring_level = Column(SQLEnum(MonitoringLevel), default=MonitoringLevel.standard)
+    
+    # Camera assignments
+    assigned_cameras = Column(JSON)
+    camera_coverage_percentage = Column(Decimal(5,2), default=0.00)
+    blind_spots = Column(JSON)
+    camera_positioning_optimal = Column(Boolean, default=False)
+    
+    # Personnel settings
+    max_personnel = Column(Integer)
+    authorized_roles = Column(JSON)
+    restricted_hours = Column(JSON)
+    ppe_requirements = Column(JSON)
+    
+    # Environmental settings
+    environmental_hazards = Column(JSON)
+    weather_restrictions = Column(JSON)
+    emergency_procedures = Column(JSON)
+    evacuation_routes = Column(JSON)
+    
+    # AI and detection settings
+    ai_detection_rules = Column(JSON)
+    alert_thresholds = Column(JSON)
+    detection_sensitivity = Column(SQLEnum(DetectionSensitivity), default=DetectionSensitivity.medium)
+    notification_overrides = Column(JSON)
+    
+    # Performance tracking
+    zone_utilization_percentage = Column(Decimal(5,2), default=0.00)
+    incident_frequency = Column(Decimal(8,2), default=0.00)
+    safety_score = Column(Decimal(5,2), default=100.00)
+    compliance_score = Column(Decimal(5,2), default=100.00)
+    
+    # Status and maintenance
+    zone_status = Column(SQLEnum(ZoneStatus), default=ZoneStatus.active)
+    last_inspection = Column(Date)
+    next_inspection = Column(Date)
+    maintenance_notes = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    configured_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    zone = relationship("Zone")
+    configured_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_zone_configs_site', 'site_id', 'zone_status'),
+        Index('idx_zone_configs_performance', 'safety_score', 'compliance_score'),
+        Index('idx_zone_configs_monitoring', 'monitoring_level', 'camera_coverage_percentage'),
+        UniqueConstraint('site_id', 'zone_id', name='unique_site_zone_config'),
+    )
+
+
+class SitePerformanceTracking(Base):
+    __tablename__ = 'site_performance_tracking'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    tracking_date = Column(Date, nullable=False)
+    tracking_period = Column(SQLEnum(TrackingPeriod), nullable=False)
+    
+    # System performance metrics
+    system_health_score = Column(Decimal(5,2), default=100.00)
+    uptime_percentage = Column(Decimal(5,2), default=100.00)
+    response_time_avg_ms = Column(Integer, default=0)
+    error_rate_percentage = Column(Decimal(5,2), default=0.00)
+    throughput_operations_per_hour = Column(Integer, default=0)
+    
+    # Infrastructure performance
+    network_performance_score = Column(Decimal(5,2), default=100.00)
+    power_stability_score = Column(Decimal(5,2), default=100.00)
+    storage_performance_score = Column(Decimal(5,2), default=100.00)
+    camera_system_score = Column(Decimal(5,2), default=100.00)
+    
+    # Operational metrics
+    personnel_capacity_utilization = Column(Decimal(5,2), default=0.00)
+    zone_utilization_average = Column(Decimal(5,2), default=0.00)
+    safety_incident_count = Column(Integer, default=0)
+    compliance_violation_count = Column(Integer, default=0)
+    
+    # Alert and response metrics
+    alerts_generated = Column(Integer, default=0)
+    alerts_resolved = Column(Integer, default=0)
+    average_response_time_minutes = Column(Integer, default=0)
+    escalated_incidents = Column(Integer, default=0)
+    
+    # AI and detection performance
+    detection_accuracy_rate = Column(Decimal(5,2), default=0.00)
+    false_positive_rate = Column(Decimal(5,2), default=0.00)
+    ai_processing_time_avg_ms = Column(Integer, default=0)
+    detection_coverage_percentage = Column(Decimal(5,2), default=0.00)
+    
+    # Resource utilization
+    cpu_utilization_avg = Column(Decimal(5,2), default=0.00)
+    memory_utilization_avg = Column(Decimal(5,2), default=0.00)
+    storage_utilization_percentage = Column(Decimal(5,2), default=0.00)
+    bandwidth_utilization_percentage = Column(Decimal(5,2), default=0.00)
+    
+    # Compliance and quality metrics
+    compliance_score = Column(Decimal(5,2), default=100.00)
+    audit_findings = Column(Integer, default=0)
+    documentation_completeness = Column(Decimal(5,2), default=100.00)
+    training_compliance_rate = Column(Decimal(5,2), default=100.00)
+    
+    # Trend indicators
+    performance_trend = Column(SQLEnum(PerformanceTrend), default=PerformanceTrend.stable)
+    health_trend = Column(SQLEnum(HealthTrend), default=HealthTrend.stable)
+    efficiency_trend = Column(SQLEnum(EfficiencyTrend), default=EfficiencyTrend.stable)
+    
+    # Comparison metrics
+    site_ranking = Column(Integer)
+    industry_benchmark_comparison = Column(Decimal(6,2))
+    historical_performance_change = Column(Decimal(6,2))
+    
+    # Notes and analysis
+    performance_notes = Column(Text)
+    improvement_recommendations = Column(JSON)
+    issues_identified = Column(JSON)
+    action_items = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    calculated_at = Column(TIMESTAMP, default=func.current_timestamp())
+    analyst_id = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Relationships
+    site = relationship("Site")
+    analyst = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_site_performance_date', 'site_id', 'tracking_date', 'tracking_period'),
+        Index('idx_site_performance_scores', 'system_health_score', 'compliance_score'),
+        Index('idx_site_performance_trends', 'performance_trend', 'health_trend'),
+        UniqueConstraint('site_id', 'tracking_date', 'tracking_period', name='unique_site_tracking_period'),
+    )
+
+
+class SiteComplianceTracking(Base):
+    __tablename__ = 'site_compliance_tracking'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    compliance_framework = Column(String(255), nullable=False)
+    compliance_date = Column(Date, nullable=False)
+    
+    # Compliance status
+    overall_compliance_score = Column(Decimal(5,2), nullable=False)
+    compliance_status = Column(SQLEnum(ComplianceStatus), default=ComplianceStatus.compliant)
+    certification_valid = Column(Boolean, default=True)
+    certification_expiry_date = Column(Date)
+    
+    # Audit information
+    audit_type = Column(SQLEnum(AuditType), nullable=False)
+    auditor_name = Column(String(255))
+    auditor_organization = Column(String(255))
+    audit_date = Column(Date, nullable=False)
+    next_audit_date = Column(Date)
+    
+    # Findings and issues
+    total_findings = Column(Integer, default=0)
+    critical_findings = Column(Integer, default=0)
+    major_findings = Column(Integer, default=0)
+    minor_findings = Column(Integer, default=0)
+    observations = Column(Integer, default=0)
+    
+    # Compliance areas
+    safety_compliance_score = Column(Decimal(5,2), default=100.00)
+    environmental_compliance_score = Column(Decimal(5,2), default=100.00)
+    quality_compliance_score = Column(Decimal(5,2), default=100.00)
+    security_compliance_score = Column(Decimal(5,2), default=100.00)
+    
+    # Documentation compliance
+    documentation_completeness = Column(Decimal(5,2), default=100.00)
+    training_records_current = Column(Boolean, default=True)
+    procedure_documentation_current = Column(Boolean, default=True)
+    incident_reporting_compliant = Column(Boolean, default=True)
+    
+    # Corrective actions
+    corrective_actions_required = Column(Integer, default=0)
+    corrective_actions_completed = Column(Integer, default=0)
+    corrective_actions_overdue = Column(Integer, default=0)
+    preventive_actions_implemented = Column(Integer, default=0)
+    
+    # Timeline tracking
+    findings_resolved_days = Column(Integer)
+    compliance_maintenance_effort_hours = Column(Integer)
+    cost_of_compliance_usd = Column(Decimal(12,2))
+    
+    # Regulatory requirements
+    regulatory_updates_applied = Column(Integer, default=0)
+    regulatory_notifications_pending = Column(Integer, default=0)
+    license_renewals_due = Column(JSON)
+    permit_status = Column(JSON)
+    
+    # Risk assessment
+    compliance_risk_score = Column(Decimal(5,2), default=0.00)
+    risk_mitigation_plans = Column(JSON)
+    insurance_compliance = Column(Boolean, default=True)
+    legal_exposure_assessment = Column(Text)
+    
+    # Performance tracking
+    compliance_trend = Column(SQLEnum(ComplianceTrend), default=ComplianceTrend.stable)
+    benchmark_comparison = Column(Decimal(6,2))
+    historical_compliance_change = Column(Decimal(6,2))
+    
+    # Stakeholder information
+    compliance_officer_id = Column(CHAR(36), ForeignKey('users.id'))
+    regulatory_contact_info = Column(JSON)
+    consultant_information = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    reported_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Relationships
+    site = relationship("Site")
+    compliance_officer = relationship("User", foreign_keys=[compliance_officer_id])
+    reported_by_user = relationship("User", foreign_keys=[reported_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_compliance_site_framework', 'site_id', 'compliance_framework', 'compliance_date'),
+        Index('idx_compliance_status', 'compliance_status', 'certification_valid'),
+        Index('idx_compliance_audit', 'audit_type', 'next_audit_date'),
+        Index('idx_compliance_scores', 'overall_compliance_score', 'safety_compliance_score'),
+    )
+
+
+# SYSTEM MONITORING & INFRASTRUCTURE HEALTH TABLES
+
+# System monitoring enums
+class SystemStatus(enum.Enum):
+    healthy = "healthy"
+    warning = "warning"
+    critical = "critical"
+    maintenance = "maintenance"
+
+class SystemHealthTrend(enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+    volatile = "volatile"
+
+class SystemPerformanceTrend(enum.Enum):
+    improving = "improving"
+    stable = "stable"
+    declining = "declining"
+
+class CapacityTrend(enum.Enum):
+    increasing = "increasing"
+    stable = "stable"
+    decreasing = "decreasing"
+
+class ServiceType(enum.Enum):
+    ai_detection = "ai_detection"
+    video_streaming = "video_streaming"
+    database = "database"
+    api_gateway = "api_gateway"
+    notification = "notification"
+    file_storage = "file_storage"
+    authentication = "authentication"
+    monitoring = "monitoring"
+    backup = "backup"
+
+class ComponentType(enum.Enum):
+    load_balancer = "load_balancer"
+    cdn = "cdn"
+    cache = "cache"
+    message_queue = "message_queue"
+    dns = "dns"
+    firewall = "firewall"
+    proxy = "proxy"
+    storage = "storage"
+    network = "network"
+
+class ComponentStatus(enum.Enum):
+    healthy = "healthy"
+    warning = "warning"
+    critical = "critical"
+    offline = "offline"
+    maintenance = "maintenance"
+
+class AlertLevel(enum.Enum):
+    info = "info"
+    warning = "warning"
+    critical = "critical"
+    emergency = "emergency"
+
+class AlertCategory(enum.Enum):
+    performance = "performance"
+    availability = "availability"
+    security = "security"
+    capacity = "capacity"
+    configuration = "configuration"
+    compliance = "compliance"
+
+class BusinessImpact(enum.Enum):
+    none = "none"
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+class AlertStatus(enum.Enum):
+    active = "active"
+    investigating = "investigating"
+    acknowledged = "acknowledged"
+    resolved = "resolved"
+    suppressed = "suppressed"
+    expired = "expired"
+
+class DashboardType(enum.Enum):
+    system_overview = "system_overview"
+    service_monitoring = "service_monitoring"
+    infrastructure = "infrastructure"
+    site_monitoring = "site_monitoring"
+    custom = "custom"
+
+class ViewPermissions(enum.Enum):
+    read = "read"
+    read_write = "read_write"
+    admin = "admin"
+
+
+class SystemHealthMonitoring(Base):
+    __tablename__ = 'system_health_monitoring'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    monitoring_interval_minutes = Column(Integer, default=5)
+    
+    # Overall system health
+    overall_health_score = Column(Decimal(5,2), nullable=False)
+    system_status = Column(SQLEnum(SystemStatus), default=SystemStatus.healthy)
+    availability_percentage = Column(Decimal(5,2), default=100.00)
+    response_time_avg_ms = Column(Integer)
+    throughput_requests_per_second = Column(Decimal(10,2))
+    
+    # Resource utilization aggregates
+    total_cpu_utilization = Column(Decimal(5,2))
+    total_memory_utilization = Column(Decimal(5,2))
+    total_storage_utilization = Column(Decimal(5,2))
+    total_network_utilization = Column(Decimal(5,2))
+    
+    # Service and infrastructure health summary
+    healthy_services_count = Column(Integer, default=0)
+    warning_services_count = Column(Integer, default=0)
+    critical_services_count = Column(Integer, default=0)
+    total_services_count = Column(Integer, default=0)
+    
+    healthy_sites_count = Column(Integer, default=0)
+    warning_sites_count = Column(Integer, default=0)
+    critical_sites_count = Column(Integer, default=0)
+    total_sites_count = Column(Integer, default=0)
+    
+    # Performance indicators
+    error_rate_percentage = Column(Decimal(5,2), default=0.00)
+    alert_rate_per_hour = Column(Decimal(8,2), default=0.00)
+    incident_resolution_time_avg_minutes = Column(Integer)
+    sla_compliance_percentage = Column(Decimal(5,2), default=100.00)
+    
+    # Trend indicators
+    health_trend = Column(SQLEnum(SystemHealthTrend), default=SystemHealthTrend.stable)
+    performance_trend = Column(SQLEnum(SystemPerformanceTrend), default=SystemPerformanceTrend.stable)
+    capacity_trend = Column(SQLEnum(CapacityTrend), default=CapacityTrend.stable)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_system_health_timestamp', 'timestamp'),
+        Index('idx_system_health_status', 'system_status', 'overall_health_score'),
+        Index('idx_system_health_trends', 'health_trend', 'performance_trend'),
+    )
+
+
+class ServiceHealthMetric(Base):
+    __tablename__ = 'service_health_metrics'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    service_name = Column(String(255), nullable=False)
+    service_type = Column(SQLEnum(ServiceType), nullable=False)
+    timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Service status
+    service_status = Column(SQLEnum(ComponentStatus), default=ComponentStatus.healthy)
+    uptime_percentage = Column(Decimal(5,2), default=100.00)
+    last_restart = Column(TIMESTAMP)
+    restart_count_24h = Column(Integer, default=0)
+    
+    # Performance metrics
+    response_time_avg_ms = Column(Decimal(8,3))
+    response_time_p95_ms = Column(Decimal(8,3))
+    response_time_p99_ms = Column(Decimal(8,3))
+    throughput_requests_per_second = Column(Decimal(8,2))
+    success_rate_percentage = Column(Decimal(5,2), default=100.00)
+    
+    # Resource utilization
+    cpu_utilization_percentage = Column(Decimal(5,2))
+    memory_utilization_percentage = Column(Decimal(5,2))
+    memory_usage_gb = Column(Decimal(8,2))
+    disk_utilization_percentage = Column(Decimal(5,2))
+    network_io_mbps = Column(Decimal(8,2))
+    
+    # Error tracking
+    total_errors_24h = Column(Integer, default=0)
+    error_rate_percentage = Column(Decimal(5,2), default=0.00)
+    timeout_errors = Column(Integer, default=0)
+    connection_errors = Column(Integer, default=0)
+    processing_errors = Column(Integer, default=0)
+    
+    # Service-specific metrics
+    active_connections = Column(Integer)
+    queue_length = Column(Integer, default=0)
+    cache_hit_ratio = Column(Decimal(5,2))
+    database_connections = Column(Integer)
+    concurrent_requests = Column(Integer)
+    
+    # Health check results
+    health_check_status = Column(Boolean, default=True)
+    health_check_response_time_ms = Column(Integer)
+    dependency_status = Column(JSON)
+    external_service_status = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_service_health_name_time', 'service_name', 'timestamp'),
+        Index('idx_service_health_status', 'service_status', 'uptime_percentage'),
+        Index('idx_service_health_performance', 'response_time_avg_ms', 'error_rate_percentage'),
+    )
+
+
+class InfrastructureMonitoring(Base):
+    __tablename__ = 'infrastructure_monitoring'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    component_name = Column(String(255), nullable=False)
+    component_type = Column(SQLEnum(ComponentType), nullable=False)
+    timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Component status
+    component_status = Column(SQLEnum(ComponentStatus), default=ComponentStatus.healthy)
+    availability_percentage = Column(Decimal(5,2), default=100.00)
+    capacity_utilization_percentage = Column(Decimal(5,2))
+    
+    # Performance metrics
+    throughput_mbps = Column(Decimal(10,2))
+    latency_avg_ms = Column(Decimal(8,3))
+    latency_p95_ms = Column(Decimal(8,3))
+    
+    # Component-specific metrics
+    active_connections = Column(Integer)
+    hit_ratio_percentage = Column(Decimal(5,2))
+    cache_size_gb = Column(Decimal(10,2))
+    queue_size = Column(Integer)
+    message_processing_rate = Column(Decimal(8,2))
+    
+    # Resource utilization
+    cpu_utilization_percentage = Column(Decimal(5,2))
+    memory_utilization_percentage = Column(Decimal(5,2))
+    disk_utilization_percentage = Column(Decimal(5,2))
+    network_utilization_percentage = Column(Decimal(5,2))
+    
+    # Error tracking
+    error_count_24h = Column(Integer, default=0)
+    error_rate_percentage = Column(Decimal(5,2), default=0.00)
+    timeout_count = Column(Integer, default=0)
+    connection_failures = Column(Integer, default=0)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_infrastructure_component_time', 'component_name', 'timestamp'),
+        Index('idx_infrastructure_status', 'component_status', 'availability_percentage'),
+        Index('idx_infrastructure_utilization', 'capacity_utilization_percentage', 'cpu_utilization_percentage'),
+    )
+
+
+class SystemAlert(Base):
+    __tablename__ = 'system_alerts'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    alert_id = Column(String(255), unique=True, nullable=False)
+    
+    # Alert classification
+    alert_level = Column(SQLEnum(AlertLevel), nullable=False)
+    alert_category = Column(SQLEnum(AlertCategory), nullable=False)
+    alert_type = Column(String(255), nullable=False)
+    alert_source = Column(String(255), nullable=False)
+    
+    # Alert content
+    title = Column(String(500), nullable=False)
+    message = Column(Text, nullable=False)
+    detailed_description = Column(Text)
+    recommended_actions = Column(JSON)
+    
+    # Scope and impact
+    affected_services = Column(JSON)
+    affected_sites = Column(JSON)
+    affected_users_count = Column(Integer, default=0)
+    business_impact = Column(SQLEnum(BusinessImpact), default=BusinessImpact.none)
+    
+    # Alert lifecycle
+    triggered_at = Column(TIMESTAMP, nullable=False)
+    status = Column(SQLEnum(AlertStatus), default=AlertStatus.active)
+    assigned_to = Column(CHAR(36), ForeignKey('users.id'))
+    acknowledged_by = Column(CHAR(36), ForeignKey('users.id'))
+    acknowledged_at = Column(TIMESTAMP)
+    resolved_by = Column(CHAR(36), ForeignKey('users.id'))
+    resolved_at = Column(TIMESTAMP)
+    resolution_notes = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    assigned_to_user = relationship("User", foreign_keys=[assigned_to])
+    acknowledged_by_user = relationship("User", foreign_keys=[acknowledged_by])
+    resolved_by_user = relationship("User", foreign_keys=[resolved_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_alerts_level_status', 'alert_level', 'status', 'triggered_at'),
+        Index('idx_alerts_category', 'alert_category', 'alert_type'),
+        Index('idx_alerts_assigned', 'assigned_to', 'status'),
+    )
+
+
+class MonitoringDashboard(Base):
+    __tablename__ = 'monitoring_dashboards'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    dashboard_name = Column(String(255), nullable=False)
+    dashboard_type = Column(SQLEnum(DashboardType), nullable=False)
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Dashboard configuration
+    layout_config = Column(JSON)
+    refresh_interval_seconds = Column(Integer, default=30)
+    auto_refresh_enabled = Column(Boolean, default=True)
+    time_range_default = Column(String(50), default='24h')
+    
+    # Widget configuration
+    widgets = Column(JSON)
+    widget_count = Column(Integer, default=0)
+    custom_metrics = Column(JSON)
+    filter_presets = Column(JSON)
+    
+    # Access control
+    is_public = Column(Boolean, default=False)
+    shared_with_users = Column(JSON)
+    shared_with_roles = Column(JSON)
+    view_permissions = Column(SQLEnum(ViewPermissions), default=ViewPermissions.read)
+    
+    # Usage tracking
+    view_count = Column(Integer, default=0)
+    last_viewed = Column(TIMESTAMP)
+    favorite_count = Column(Integer, default=0)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_dashboards_type', 'dashboard_type', 'is_public'),
+        Index('idx_dashboards_creator', 'created_by', 'created_at'),
+    )
+
+
+# INTEGRATION & USER EXPERIENCE TABLES
+
+# Integration enums
+class IntegrationType(enum.Enum):
+    communication = "communication"
+    storage = "storage"
+    analytics = "analytics"
+    ai_ml = "ai_ml"
+    monitoring = "monitoring"
+    payment = "payment"
+    identity = "identity"
+
+class IntegrationStatus(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    error = "error"
+    testing = "testing"
+    pending = "pending"
+
+class TimeFormat(enum.Enum):
+    twelve_hour = "12h"
+    twenty_four_hour = "24h"
+
+class Theme(enum.Enum):
+    light = "light"
+    dark = "dark"
+    auto = "auto"
+
+class FontSize(enum.Enum):
+    small = "small"
+    medium = "medium"
+    large = "large"
+
+class FeedbackType(enum.Enum):
+    bug_report = "bug_report"
+    feature_request = "feature_request"
+    documentation = "documentation"
+    general = "general"
+
+class FeedbackStatus(enum.Enum):
+    submitted = "submitted"
+    reviewing = "reviewing"
+    in_progress = "in_progress"
+    resolved = "resolved"
+    closed = "closed"
+
+
+class ThirdPartyIntegration(Base):
+    __tablename__ = 'third_party_integrations'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    integration_name = Column(String(255), nullable=False)
+    integration_type = Column(SQLEnum(IntegrationType), nullable=False)
+    provider_name = Column(String(255), nullable=False)
+    description = Column(Text)
+    
+    # Status and health
+    status = Column(SQLEnum(IntegrationStatus), default=IntegrationStatus.pending)
+    health_score = Column(Decimal(5,2), default=0.00)
+    last_health_check = Column(TIMESTAMP)
+    next_health_check = Column(TIMESTAMP)
+    
+    # Configuration
+    configuration = Column(JSON, nullable=False)
+    credentials = Column(JSON)  # Encrypted
+    endpoints = Column(JSON)
+    rate_limits = Column(JSON)
+    
+    # Usage tracking
+    monthly_usage = Column(BigInteger, default=0)
+    monthly_limit = Column(BigInteger)
+    error_rate = Column(Decimal(5,2), default=0.00)
+    avg_response_time_ms = Column(Decimal(8,2))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_integrations_type_status', 'integration_type', 'status'),
+        Index('idx_integrations_health', 'health_score', 'last_health_check'),
+    )
+
+
+class UserProfileSetting(Base):
+    __tablename__ = 'user_profile_settings'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), unique=True, nullable=False)
+    profile_picture_url = Column(String(500))
+    bio = Column(Text)
+    preferences = Column(JSON)
+    notification_settings = Column(JSON)
+    dashboard_config = Column(JSON)
+    theme_settings = Column(JSON)
+    privacy_settings = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_profile_settings_user', 'user_id'),
+    )
+
+
+class UserApplicationSetting(Base):
+    __tablename__ = 'user_application_settings'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), unique=True, nullable=False)
+    language = Column(String(10), default='en')
+    timezone = Column(String(100))
+    date_format = Column(String(50))
+    time_format = Column(SQLEnum(TimeFormat), default=TimeFormat.twelve_hour)
+    theme = Column(SQLEnum(Theme), default=Theme.light)
+    font_size = Column(SQLEnum(FontSize), default=FontSize.medium)
+    notifications_enabled = Column(Boolean, default=True)
+    email_notifications = Column(Boolean, default=True)
+    quiet_hours_enabled = Column(Boolean, default=False)
+    quiet_hours_start = Column(Time)
+    quiet_hours_end = Column(Time)
+    data_sharing_enabled = Column(Boolean, default=True)
+    analytics_enabled = Column(Boolean, default=True)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_app_settings_user', 'user_id'),
+    )
+
+
+class HelpArticle(Base):
+    __tablename__ = 'help_articles'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    title = Column(String(500), nullable=False)
+    content = Column(Text, nullable=False)
+    category = Column(String(100), nullable=False)
+    subcategory = Column(String(100))
+    tags = Column(JSON)
+    author_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    is_published = Column(Boolean, default=False)
+    view_count = Column(Integer, default=0)
+    helpful_count = Column(Integer, default=0)
+    unhelpful_count = Column(Integer, default=0)
+    search_keywords = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    author = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_help_articles_category', 'category', 'subcategory', 'is_published'),
+        Index('idx_help_articles_popularity', 'view_count', 'helpful_count'),
+        Index('idx_help_articles_search', 'title', 'search_keywords'),
+    )
+
+
+class UserFeedback(Base):
+    __tablename__ = 'user_feedback'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    feedback_type = Column(SQLEnum(FeedbackType), nullable=False)
+    title = Column(String(500), nullable=False)
+    description = Column(Text, nullable=False)
+    priority = Column(SQLEnum(PriorityLevel), default=PriorityLevel.medium)
+    status = Column(SQLEnum(FeedbackStatus), default=FeedbackStatus.submitted)
+    category = Column(String(100))
+    attachments = Column(JSON)
+    upvote_count = Column(Integer, default=0)
+    admin_response = Column(Text)
+    responded_by = Column(CHAR(36), ForeignKey('users.id'))
+    responded_at = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    responded_by_user = relationship("User", foreign_keys=[responded_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_feedback_type_status', 'feedback_type', 'status', 'created_at'),
+        Index('idx_feedback_user', 'user_id', 'created_at'),
+        Index('idx_feedback_priority', 'priority', 'status'),
+    )
