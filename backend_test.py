@@ -3179,6 +3179,732 @@ def test_navigation_analytics_api(site_id, route_id):
         print(f"   ❌ Unexpected error: {e}")
         return False
 
+def test_user_management_apis():
+    """Test User Management & Administration APIs"""
+    print("\n19. Testing User Management & Administration APIs")
+    created_profile_id = None
+    created_role_assignment_id = None
+    created_session_id = None
+    created_activity_id = None
+    
+    try:
+        # Get existing user for testing
+        print("   19a. Getting existing user for User Management tests")
+        response = requests.get(f"{API_BASE_URL}/users", timeout=10)
+        if response.status_code == 200:
+            users = response.json()
+            if users:
+                test_user_id = users[0]["id"]
+                print(f"      Using existing user ID: {test_user_id}")
+            else:
+                print("      No existing users found, skipping User Management tests")
+                return True, None, None, None, None
+        else:
+            print("      Failed to get users list")
+            return False, None, None, None, None
+        
+        # Test User Management Profiles API
+        print("   19b. Testing User Management Profiles API")
+        profile_data = {
+            "user_id": test_user_id,
+            "employee_number": f"EMP{uuid.uuid4().hex[:8].upper()}",
+            "badge_number": f"BADGE{uuid.uuid4().hex[:6].upper()}",
+            "position_title": "Senior Construction Manager",
+            "position_level": "senior",
+            "employment_type": "full_time",
+            "employment_status": "active",
+            "start_date": "2024-01-15",
+            "skills": ["project_management", "safety_compliance", "team_leadership"]
+        }
+        
+        # POST create profile
+        response = requests.post(
+            f"{API_BASE_URL}/user-management/profiles",
+            json=profile_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Profile Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            profile = response.json()
+            created_profile_id = profile.get("id")
+            print(f"      Created profile ID: {created_profile_id}")
+            print("      ✅ User Management Profile creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ User Management Profile creation failed")
+            return False, None, None, None, None
+        
+        # GET all profiles
+        response = requests.get(f"{API_BASE_URL}/user-management/profiles", timeout=10)
+        print(f"      GET Profiles Status: {response.status_code}")
+        if response.status_code == 200:
+            profiles = response.json()
+            print(f"      Found {len(profiles)} user profiles")
+            print("      ✅ GET User Management Profiles working")
+        else:
+            print("      ❌ GET User Management Profiles failed")
+            return False, created_profile_id, None, None, None
+        
+        # Test User Role Assignments API
+        print("   19c. Testing User Role Assignments API")
+        role_assignment_data = {
+            "user_id": test_user_id,
+            "role_type": "operational",
+            "role_name": "Site Manager",
+            "role_description": "Manages daily site operations and safety compliance",
+            "access_level": "write",
+            "effective_from": "2024-01-15",
+            "permissions": ["site_access", "personnel_management", "safety_reporting"],
+            "is_primary_role": True
+        }
+        
+        # POST create role assignment
+        response = requests.post(
+            f"{API_BASE_URL}/user-management/role-assignments",
+            json=role_assignment_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Role Assignment Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            role_assignment = response.json()
+            created_role_assignment_id = role_assignment.get("id")
+            print(f"      Created role assignment ID: {created_role_assignment_id}")
+            print("      ✅ User Role Assignment creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ User Role Assignment creation failed")
+            return False, created_profile_id, None, None, None
+        
+        # GET all role assignments
+        response = requests.get(f"{API_BASE_URL}/user-management/role-assignments", timeout=10)
+        print(f"      GET Role Assignments Status: {response.status_code}")
+        if response.status_code == 200:
+            assignments = response.json()
+            print(f"      Found {len(assignments)} role assignments")
+            print("      ✅ GET User Role Assignments working")
+        else:
+            print("      ❌ GET User Role Assignments failed")
+            return False, created_profile_id, created_role_assignment_id, None, None
+        
+        # Test User Session Management API
+        print("   19d. Testing User Session Management API")
+        session_data = {
+            "user_id": test_user_id,
+            "session_id": f"sess_{uuid.uuid4().hex[:16]}",
+            "session_token": f"token_{uuid.uuid4().hex}",
+            "ip_address": "192.168.1.100",
+            "access_method": "web",
+            "authentication_method": "password",
+            "device_info": {"browser": "Chrome", "os": "Windows 10"},
+            "browser_info": {"user_agent": "Mozilla/5.0 Chrome/120.0"}
+        }
+        
+        # POST create session
+        response = requests.post(
+            f"{API_BASE_URL}/user-management/sessions",
+            json=session_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Session Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            session = response.json()
+            created_session_id = session.get("id")
+            print(f"      Created session ID: {created_session_id}")
+            print("      ✅ User Session Management creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ User Session Management creation failed")
+            return False, created_profile_id, created_role_assignment_id, None, None
+        
+        # GET all sessions
+        response = requests.get(f"{API_BASE_URL}/user-management/sessions", timeout=10)
+        print(f"      GET Sessions Status: {response.status_code}")
+        if response.status_code == 200:
+            sessions = response.json()
+            print(f"      Found {len(sessions)} user sessions")
+            print("      ✅ GET User Sessions working")
+        else:
+            print("      ❌ GET User Sessions failed")
+            return False, created_profile_id, created_role_assignment_id, created_session_id, None
+        
+        # Test User Activity Tracking API
+        print("   19e. Testing User Activity Tracking API")
+        activity_data = {
+            "user_id": test_user_id,
+            "session_id": session_data["session_id"],
+            "activity_type": "page_view",
+            "activity_description": "Viewed site dashboard",
+            "activity_category": "navigation",
+            "resource_type": "dashboard",
+            "resource_id": "main_dashboard",
+            "request_method": "GET",
+            "security_level": "internal"
+        }
+        
+        # POST create activity
+        response = requests.post(
+            f"{API_BASE_URL}/user-management/activity",
+            json=activity_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Activity Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            activity = response.json()
+            created_activity_id = activity.get("id")
+            print(f"      Created activity ID: {created_activity_id}")
+            print("      ✅ User Activity Tracking creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ User Activity Tracking creation failed")
+            return False, created_profile_id, created_role_assignment_id, created_session_id, None
+        
+        # GET all activities
+        response = requests.get(f"{API_BASE_URL}/user-management/activity", timeout=10)
+        print(f"      GET Activities Status: {response.status_code}")
+        if response.status_code == 200:
+            activities = response.json()
+            print(f"      Found {len(activities)} user activities")
+            print("      ✅ GET User Activities working")
+        else:
+            print("      ❌ GET User Activities failed")
+            return False, created_profile_id, created_role_assignment_id, created_session_id, created_activity_id
+        
+        # Test User Management Analytics API
+        print("   19f. Testing User Management Analytics API")
+        response = requests.get(f"{API_BASE_URL}/user-management/analytics/active-users", timeout=10)
+        print(f"      GET Active Users Analytics Status: {response.status_code}")
+        if response.status_code == 200:
+            analytics = response.json()
+            required_fields = ["active_users_24h", "total_registered_users", "user_activity_summary"]
+            if all(field in analytics for field in required_fields):
+                print("      ✅ User Management Analytics working")
+            else:
+                print("      ❌ Missing required fields in analytics")
+                return False, created_profile_id, created_role_assignment_id, created_session_id, created_activity_id
+        else:
+            print("      ❌ User Management Analytics failed")
+            return False, created_profile_id, created_role_assignment_id, created_session_id, created_activity_id
+        
+        return True, created_profile_id, created_role_assignment_id, created_session_id, created_activity_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_profile_id, created_role_assignment_id, created_session_id, created_activity_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_profile_id, created_role_assignment_id, created_session_id, created_activity_id
+
+def test_access_control_apis():
+    """Test Access Control & Security Management APIs"""
+    print("\n20. Testing Access Control & Security Management APIs")
+    created_role_id = None
+    created_permission_id = None
+    created_policy_id = None
+    created_audit_log_id = None
+    
+    try:
+        # Get existing user for testing
+        print("   20a. Getting existing user for Access Control tests")
+        response = requests.get(f"{API_BASE_URL}/users", timeout=10)
+        if response.status_code == 200:
+            users = response.json()
+            if users:
+                test_user_id = users[0]["id"]
+                print(f"      Using existing user ID: {test_user_id}")
+            else:
+                print("      No existing users found, skipping Access Control tests")
+                return True, None, None, None, None
+        else:
+            print("      Failed to get users list")
+            return False, None, None, None, None
+        
+        # Test Access Control Roles API
+        print("   20b. Testing Access Control Roles API")
+        role_data = {
+            "role_name": f"Site Supervisor {uuid.uuid4().hex[:8]}",
+            "role_code": f"SUPER_{uuid.uuid4().hex[:6].upper()}",
+            "description": "Supervises construction site operations and safety protocols",
+            "role_level": "supervisor",
+            "risk_level": "medium",
+            "color_code": "#3B82F6",
+            "site_access_type": "assigned_sites",
+            "default_site_assignments": [],
+            "is_assignable": True
+        }
+        
+        # POST create role
+        response = requests.post(
+            f"{API_BASE_URL}/access-control/roles",
+            json=role_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Role Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            role = response.json()
+            created_role_id = role.get("id")
+            print(f"      Created role ID: {created_role_id}")
+            print("      ✅ Access Control Role creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Access Control Role creation failed")
+            return False, None, None, None, None
+        
+        # GET all roles
+        response = requests.get(f"{API_BASE_URL}/access-control/roles", timeout=10)
+        print(f"      GET Roles Status: {response.status_code}")
+        if response.status_code == 200:
+            roles = response.json()
+            print(f"      Found {len(roles)} access control roles")
+            print("      ✅ GET Access Control Roles working")
+        else:
+            print("      ❌ GET Access Control Roles failed")
+            return False, created_role_id, None, None, None
+        
+        # Test System Permissions API
+        print("   20c. Testing System Permissions API")
+        permission_data = {
+            "permission_name": f"Site Access Permission {uuid.uuid4().hex[:8]}",
+            "permission_code": f"SITE_ACCESS_{uuid.uuid4().hex[:6].upper()}",
+            "description": "Allows access to construction site areas and resources",
+            "category": "site_access",
+            "subcategory": "physical_access",
+            "risk_level": "medium",
+            "resource_scope": "site_specific",
+            "operation_type": "read_write",
+            "is_assignable": True,
+            "requires_mfa": False
+        }
+        
+        # POST create permission
+        response = requests.post(
+            f"{API_BASE_URL}/access-control/permissions",
+            json=permission_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Permission Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            permission = response.json()
+            created_permission_id = permission.get("id")
+            print(f"      Created permission ID: {created_permission_id}")
+            print("      ✅ System Permission creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ System Permission creation failed")
+            return False, created_role_id, None, None, None
+        
+        # GET all permissions
+        response = requests.get(f"{API_BASE_URL}/access-control/permissions", timeout=10)
+        print(f"      GET Permissions Status: {response.status_code}")
+        if response.status_code == 200:
+            permissions = response.json()
+            print(f"      Found {len(permissions)} system permissions")
+            print("      ✅ GET System Permissions working")
+        else:
+            print("      ❌ GET System Permissions failed")
+            return False, created_role_id, created_permission_id, None, None
+        
+        # Test Role Permission Assignment
+        print("   20d. Testing Role Permission Assignment")
+        response = requests.post(
+            f"{API_BASE_URL}/access-control/roles/{created_role_id}/permissions/{created_permission_id}",
+            params={"assignment_type": "direct"},
+            timeout=10
+        )
+        print(f"      POST Role Permission Assignment Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            assignment_result = response.json()
+            print(f"      Assignment result: {assignment_result.get('message')}")
+            print("      ✅ Role Permission Assignment working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Role Permission Assignment failed")
+            return False, created_role_id, created_permission_id, None, None
+        
+        # Test Security Policies API
+        print("   20e. Testing Security Policies API")
+        policy_data = {
+            "policy_name": f"Site Safety Policy {uuid.uuid4().hex[:8]}",
+            "policy_code": f"SAFETY_{uuid.uuid4().hex[:6].upper()}",
+            "description": "Mandatory safety protocols for construction site access",
+            "category": "safety",
+            "policy_type": "access_control",
+            "policy_rules": {
+                "ppe_required": True,
+                "safety_training_required": True,
+                "max_consecutive_hours": 12,
+                "break_intervals": 2
+            },
+            "enforcement_level": "blocking",
+            "is_mandatory": True,
+            "applies_to_roles": ["worker", "supervisor", "manager"]
+        }
+        
+        # POST create policy
+        response = requests.post(
+            f"{API_BASE_URL}/access-control/policies",
+            json=policy_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Policy Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            policy = response.json()
+            created_policy_id = policy.get("id")
+            print(f"      Created policy ID: {created_policy_id}")
+            print("      ✅ Security Policy creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Security Policy creation failed")
+            return False, created_role_id, created_permission_id, None, None
+        
+        # GET all policies
+        response = requests.get(f"{API_BASE_URL}/access-control/policies", timeout=10)
+        print(f"      GET Policies Status: {response.status_code}")
+        if response.status_code == 200:
+            policies = response.json()
+            print(f"      Found {len(policies)} security policies")
+            print("      ✅ GET Security Policies working")
+        else:
+            print("      ❌ GET Security Policies failed")
+            return False, created_role_id, created_permission_id, created_policy_id, None
+        
+        # Test Access Control Audit Log API
+        print("   20f. Testing Access Control Audit Log API")
+        audit_log_data = {
+            "event_type": "access_attempt",
+            "event_category": "authentication",
+            "user_id": test_user_id,
+            "action_performed": "login_attempt",
+            "resource_type": "system",
+            "access_granted": True,
+            "ip_address": "192.168.1.100"
+        }
+        
+        # POST create audit log
+        response = requests.post(
+            f"{API_BASE_URL}/access-control/audit-logs",
+            json=audit_log_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Audit Log Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            audit_log = response.json()
+            created_audit_log_id = audit_log.get("id")
+            print(f"      Created audit log ID: {created_audit_log_id}")
+            print("      ✅ Access Control Audit Log creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Access Control Audit Log creation failed")
+            return False, created_role_id, created_permission_id, created_policy_id, None
+        
+        # GET all audit logs
+        response = requests.get(f"{API_BASE_URL}/access-control/audit-logs", timeout=10)
+        print(f"      GET Audit Logs Status: {response.status_code}")
+        if response.status_code == 200:
+            audit_logs = response.json()
+            print(f"      Found {len(audit_logs)} audit log entries")
+            print("      ✅ GET Access Control Audit Logs working")
+        else:
+            print("      ❌ GET Access Control Audit Logs failed")
+            return False, created_role_id, created_permission_id, created_policy_id, created_audit_log_id
+        
+        # Test Access Control Analytics API
+        print("   20g. Testing Access Control Analytics API")
+        response = requests.get(f"{API_BASE_URL}/access-control/analytics/security-overview", timeout=10)
+        print(f"      GET Security Overview Status: {response.status_code}")
+        if response.status_code == 200:
+            analytics = response.json()
+            required_fields = ["security_metrics", "access_control_summary", "event_distribution"]
+            if all(field in analytics for field in required_fields):
+                print("      ✅ Access Control Analytics working")
+            else:
+                print("      ❌ Missing required fields in analytics")
+                return False, created_role_id, created_permission_id, created_policy_id, created_audit_log_id
+        else:
+            print("      ❌ Access Control Analytics failed")
+            return False, created_role_id, created_permission_id, created_policy_id, created_audit_log_id
+        
+        return True, created_role_id, created_permission_id, created_policy_id, created_audit_log_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_role_id, created_permission_id, created_policy_id, created_audit_log_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_role_id, created_permission_id, created_policy_id, created_audit_log_id
+
+def test_ai_model_management_apis():
+    """Test AI Model Management & Deployment APIs"""
+    print("\n21. Testing AI Model Management & Deployment APIs")
+    created_ai_model_id = None
+    created_deployment_id = None
+    created_training_job_id = None
+    created_evaluation_id = None
+    
+    try:
+        # Get existing site and user for testing
+        print("   21a. Getting existing site and user for AI Model tests")
+        response = requests.get(f"{API_BASE_URL}/sites", timeout=10)
+        if response.status_code == 200:
+            sites = response.json()
+            if sites:
+                test_site_id = sites[0]["id"]
+                print(f"      Using existing site ID: {test_site_id}")
+            else:
+                print("      No existing sites found, skipping AI Model tests")
+                return True, None, None, None, None
+        else:
+            print("      Failed to get sites list")
+            return False, None, None, None, None
+        
+        # Test AI Models API
+        print("   21b. Testing AI Models API")
+        ai_model_data = {
+            "name": f"Advanced Safety Detection Model {uuid.uuid4().hex[:8]}",
+            "model_type": "person_detection",
+            "category": "safety",
+            "version": "2.1.0",
+            "description": "Advanced AI model for construction site safety detection and compliance monitoring",
+            "framework": "PyTorch",
+            "model_file_path": f"/models/safety_detection_v2.1.0_{uuid.uuid4().hex[:8]}.pth",
+            "training_dataset_info": {
+                "dataset_name": "Construction Safety Dataset v2",
+                "samples_count": 50000,
+                "classes": ["person", "helmet", "vest", "equipment"]
+            },
+            "baseline_accuracy": 0.94,
+            "license_type": "proprietary"
+        }
+        
+        # POST create AI model
+        response = requests.post(
+            f"{API_BASE_URL}/ai-models",
+            json=ai_model_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST AI Model Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            ai_model = response.json()
+            created_ai_model_id = ai_model.get("id")
+            print(f"      Created AI model ID: {created_ai_model_id}")
+            print("      ✅ AI Model creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ AI Model creation failed")
+            return False, None, None, None, None
+        
+        # GET all AI models
+        response = requests.get(f"{API_BASE_URL}/ai-models", timeout=10)
+        print(f"      GET AI Models Status: {response.status_code}")
+        if response.status_code == 200:
+            models = response.json()
+            print(f"      Found {len(models)} AI models")
+            print("      ✅ GET AI Models working")
+        else:
+            print("      ❌ GET AI Models failed")
+            return False, created_ai_model_id, None, None, None
+        
+        # PUT approve AI model
+        response = requests.put(f"{API_BASE_URL}/ai-models/{created_ai_model_id}/approve", timeout=10)
+        print(f"      PUT Approve AI Model Status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ AI Model approval working")
+        else:
+            print("      ❌ AI Model approval failed")
+            return False, created_ai_model_id, None, None, None
+        
+        # Test Model Deployments API
+        print("   21c. Testing Model Deployments API")
+        deployment_data = {
+            "model_id": created_ai_model_id,
+            "site_id": test_site_id,
+            "deployment_name": f"Safety Detection Deployment {uuid.uuid4().hex[:8]}",
+            "deployment_type": "production",
+            "confidence_threshold": 0.85,
+            "batch_size": 16,
+            "processing_interval_seconds": 2,
+            "auto_scaling_enabled": True,
+            "monitoring_enabled": True
+        }
+        
+        # POST create deployment
+        response = requests.post(
+            f"{API_BASE_URL}/ai-models/deployments",
+            json=deployment_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Deployment Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            deployment = response.json()
+            created_deployment_id = deployment.get("id")
+            print(f"      Created deployment ID: {created_deployment_id}")
+            print("      ✅ Model Deployment creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Model Deployment creation failed")
+            return False, created_ai_model_id, None, None, None
+        
+        # GET all deployments
+        response = requests.get(f"{API_BASE_URL}/ai-models/deployments", timeout=10)
+        print(f"      GET Deployments Status: {response.status_code}")
+        if response.status_code == 200:
+            deployments = response.json()
+            print(f"      Found {len(deployments)} model deployments")
+            print("      ✅ GET Model Deployments working")
+        else:
+            print("      ❌ GET Model Deployments failed")
+            return False, created_ai_model_id, created_deployment_id, None, None
+        
+        # PUT start deployment
+        response = requests.put(f"{API_BASE_URL}/ai-models/deployments/{created_deployment_id}/start", timeout=10)
+        print(f"      PUT Start Deployment Status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ Deployment start working")
+        else:
+            print("      ❌ Deployment start failed")
+            return False, created_ai_model_id, created_deployment_id, None, None
+        
+        # Test Model Training Jobs API
+        print("   21d. Testing Model Training Jobs API")
+        training_job_data = {
+            "model_id": created_ai_model_id,
+            "job_name": f"Safety Model Training Job {uuid.uuid4().hex[:8]}",
+            "training_type": "fine_tuning",
+            "job_description": "Fine-tuning safety detection model with latest construction site data",
+            "epochs": 50,
+            "batch_size": 32,
+            "learning_rate": 0.0001,
+            "cost_budget_limit": 500.0
+        }
+        
+        # POST create training job
+        response = requests.post(
+            f"{API_BASE_URL}/ai-models/training-jobs",
+            json=training_job_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Training Job Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            training_job = response.json()
+            created_training_job_id = training_job.get("id")
+            print(f"      Created training job ID: {created_training_job_id}")
+            print("      ✅ Model Training Job creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Model Training Job creation failed")
+            return False, created_ai_model_id, created_deployment_id, None, None
+        
+        # GET all training jobs
+        response = requests.get(f"{API_BASE_URL}/ai-models/training-jobs", timeout=10)
+        print(f"      GET Training Jobs Status: {response.status_code}")
+        if response.status_code == 200:
+            jobs = response.json()
+            print(f"      Found {len(jobs)} training jobs")
+            print("      ✅ GET Model Training Jobs working")
+        else:
+            print("      ❌ GET Model Training Jobs failed")
+            return False, created_ai_model_id, created_deployment_id, created_training_job_id, None
+        
+        # Test Model Evaluation Results API
+        print("   21e. Testing Model Evaluation Results API")
+        evaluation_data = {
+            "model_id": created_ai_model_id,
+            "evaluation_name": f"Safety Model Evaluation {uuid.uuid4().hex[:8]}",
+            "evaluation_type": "production_readiness",
+            "dataset_size": 5000,
+            "overall_accuracy": 0.96,
+            "overall_precision": 0.94,
+            "overall_recall": 0.92,
+            "overall_f1_score": 0.93,
+            "business_accuracy_score": 0.95
+        }
+        
+        # POST create evaluation
+        response = requests.post(
+            f"{API_BASE_URL}/ai-models/evaluations",
+            json=evaluation_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST Evaluation Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            evaluation = response.json()
+            created_evaluation_id = evaluation.get("id")
+            print(f"      Created evaluation ID: {created_evaluation_id}")
+            print("      ✅ Model Evaluation creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Model Evaluation creation failed")
+            return False, created_ai_model_id, created_deployment_id, created_training_job_id, None
+        
+        # GET all evaluations
+        response = requests.get(f"{API_BASE_URL}/ai-models/evaluations", timeout=10)
+        print(f"      GET Evaluations Status: {response.status_code}")
+        if response.status_code == 200:
+            evaluations = response.json()
+            print(f"      Found {len(evaluations)} model evaluations")
+            print("      ✅ GET Model Evaluations working")
+        else:
+            print("      ❌ GET Model Evaluations failed")
+            return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+        
+        # PUT approve evaluation
+        response = requests.put(f"{API_BASE_URL}/ai-models/evaluations/{created_evaluation_id}/approve", timeout=10)
+        print(f"      PUT Approve Evaluation Status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ Evaluation approval working")
+        else:
+            print("      ❌ Evaluation approval failed")
+            return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+        
+        # Test AI Model Analytics API
+        print("   21f. Testing AI Model Analytics API")
+        response = requests.get(f"{API_BASE_URL}/ai-models/analytics/model-overview", timeout=10)
+        print(f"      GET Model Overview Status: {response.status_code}")
+        if response.status_code == 200:
+            analytics = response.json()
+            required_fields = ["model_inventory", "deployment_metrics", "training_metrics", "evaluation_metrics"]
+            if all(field in analytics for field in required_fields):
+                print("      ✅ AI Model Analytics working")
+            else:
+                print("      ❌ Missing required fields in analytics")
+                return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+        else:
+            print("      ❌ AI Model Analytics failed")
+            return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+        
+        return True, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
+
 def main():
     """Run all backend tests"""
     print("Starting AI Construction Management Backend API Tests...")
