@@ -225,6 +225,121 @@ class NotificationPriority(enum.Enum):
     high = "high"
     urgent = "urgent"
 
+class BookmarkType(enum.Enum):
+    safety_incident = "safety_incident"
+    ppe_violation = "ppe_violation"
+    equipment_issue = "equipment_issue"
+    person_activity = "person_activity"
+    vehicle_activity = "vehicle_activity"
+    custom = "custom"
+    alert_related = "alert_related"
+    compliance_check = "compliance_check"
+
+class PriorityLevel(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+class Severity(enum.Enum):
+    info = "info"
+    warning = "warning"
+    error = "error"
+    critical = "critical"
+
+class EvidenceQuality(enum.Enum):
+    poor = "poor"
+    fair = "fair"
+    good = "good"
+    excellent = "excellent"
+
+class LightingCondition(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    poor = "poor"
+    very_poor = "very_poor"
+
+class BookmarkStatus(enum.Enum):
+    active = "active"
+    reviewed = "reviewed"
+    resolved = "resolved"
+    archived = "archived"
+
+class AccessMethod(enum.Enum):
+    web_browser = "web_browser"
+    mobile_app = "mobile_app"
+    api = "api"
+    export = "export"
+
+class AccessReason(enum.Enum):
+    routine_review = "routine_review"
+    incident_investigation = "incident_investigation"
+    compliance_audit = "compliance_audit"
+    training = "training"
+    maintenance = "maintenance"
+    legal_request = "legal_request"
+
+class TerminationReason(enum.Enum):
+    user_logout = "user_logout"
+    session_timeout = "session_timeout"
+    technical_error = "technical_error"
+    policy_violation = "policy_violation"
+    system_maintenance = "system_maintenance"
+
+class ExportType(enum.Enum):
+    video_clip = "video_clip"
+    screenshot = "screenshot"
+    evidence_package = "evidence_package"
+    compliance_report = "compliance_report"
+    share_link = "share_link"
+
+class QualitySetting(enum.Enum):
+    high = "high"
+    medium = "medium"
+    low = "low"
+
+class ExportPurpose(enum.Enum):
+    evidence = "evidence"
+    training = "training"
+    analysis = "analysis"
+    compliance = "compliance"
+    documentation = "documentation"
+    legal_proceeding = "legal_proceeding"
+
+class ExportStatus(enum.Enum):
+    requested = "requested"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+    expired = "expired"
+
+class WeatherImpact(enum.Enum):
+    none = "none"
+    minimal = "minimal"
+    moderate = "moderate"
+    significant = "significant"
+    severe = "severe"
+
+class ForensicQuality(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    acceptable = "acceptable"
+    poor = "poor"
+    unusable = "unusable"
+
+class IdentificationViability(enum.Enum):
+    clear = "clear"
+    good = "good"
+    limited = "limited"
+    poor = "poor"
+    impossible = "impossible"
+
+class AnalysisMethod(enum.Enum):
+    automated = "automated"
+    manual = "manual"
+    hybrid = "hybrid"
+
 class AlertStatus(enum.Enum):
     open = "open"
     acknowledged = "acknowledged"
