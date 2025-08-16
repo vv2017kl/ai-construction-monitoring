@@ -3748,3 +3748,1030 @@ class ExecutiveReport(Base):
         Index('idx_executive_reports_status', 'report_status', 'is_latest_version'),
         Index('idx_executive_reports_automation', 'is_automated', 'next_generation_date'),
     )
+
+
+# USER MANAGEMENT & ADMINISTRATION TABLES
+
+# User management enums
+class Gender(enum.Enum):
+    male = "male"
+    female = "female"
+    other = "other"
+    prefer_not_to_say = "prefer_not_to_say"
+
+class PositionLevel(enum.Enum):
+    entry = "entry"
+    junior = "junior"
+    mid = "mid"
+    senior = "senior"
+    lead = "lead"
+    supervisor = "supervisor"
+    manager = "manager"
+    director = "director"
+    executive = "executive"
+
+class EmploymentType(enum.Enum):
+    full_time = "full_time"
+    part_time = "part_time"
+    contract = "contract"
+    temporary = "temporary"
+    consultant = "consultant"
+    intern = "intern"
+
+class EmploymentStatus(enum.Enum):
+    active = "active"
+    on_leave = "on_leave"
+    terminated = "terminated"
+    retired = "retired"
+    suspended = "suspended"
+
+class RoleType(enum.Enum):
+    system_role = "system_role"
+    site_role = "site_role"
+    department_role = "department_role"
+    project_role = "project_role"
+    temporary_role = "temporary_role"
+
+class AccessLevel(enum.Enum):
+    read = "read"
+    write = "write"
+    admin = "admin"
+    super_admin = "super_admin"
+
+class AssignmentStatus(enum.Enum):
+    pending = "pending"
+    active = "active"
+    suspended = "suspended"
+    expired = "expired"
+    revoked = "revoked"
+
+class AccessMethod(enum.Enum):
+    web = "web"
+    mobile_app = "mobile_app"
+    api = "api"
+    sso = "sso"
+    ldap = "ldap"
+
+class AuthenticationMethod(enum.Enum):
+    password = "password"
+    sso = "sso"
+    mfa = "mfa"
+    biometric = "biometric"
+    certificate = "certificate"
+
+class ActivityType(enum.Enum):
+    login = "login"
+    logout = "logout"
+    page_view = "page_view"
+    api_call = "api_call"
+    data_access = "data_access"
+    configuration_change = "configuration_change"
+    user_management = "user_management"
+    report_generation = "report_generation"
+    alert_action = "alert_action"
+
+class SecurityLevel(enum.Enum):
+    public = "public"
+    internal = "internal"
+    confidential = "confidential"
+    restricted = "restricted"
+
+class PermissionAccessLevel(enum.Enum):
+    none = "none"
+    read = "read"
+    write = "write"
+    admin = "admin"
+    owner = "owner"
+
+class ScopeType(enum.Enum):
+    global_scope = "global"
+    site = "site"
+    department = "department"
+    project = "project"
+    resource = "resource"
+
+class PermissionStatus(enum.Enum):
+    pending = "pending"
+    active = "active"
+    suspended = "suspended"
+    expired = "expired"
+    revoked = "revoked"
+
+
+class UserManagementProfile(Base):
+    __tablename__ = 'user_management_profiles'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), unique=True, nullable=False)
+    
+    # Extended profile information
+    employee_number = Column(String(50), unique=True)
+    badge_number = Column(String(50), unique=True)
+    social_security_number = Column(String(20))  # Encrypted
+    date_of_birth = Column(Date)
+    gender = Column(SQLEnum(Gender))
+    nationality = Column(String(100))
+    
+    # Address and contact
+    home_address = Column(Text)
+    home_city = Column(String(100))
+    home_state = Column(String(100))
+    home_zip_code = Column(String(20))
+    home_country = Column(String(100))
+    emergency_contact_name = Column(String(255))
+    emergency_contact_phone = Column(String(20))
+    emergency_contact_relationship = Column(String(100))
+    
+    # Professional details
+    position_title = Column(String(255))
+    position_level = Column(SQLEnum(PositionLevel))
+    pay_grade = Column(String(50))
+    reports_to_user_id = Column(CHAR(36), ForeignKey('users.id'))
+    direct_reports_count = Column(Integer, default=0)
+    
+    # Employment information
+    employment_type = Column(SQLEnum(EmploymentType))
+    employment_status = Column(SQLEnum(EmploymentStatus))
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date)
+    probation_end_date = Column(Date)
+    performance_review_due = Column(Date)
+    
+    # Skills and qualifications
+    skills = Column(JSON)
+    qualifications = Column(JSON)
+    languages = Column(JSON)
+    special_certifications = Column(JSON)
+    
+    # Preferences and settings
+    notification_preferences = Column(JSON)
+    ui_theme = Column(String(50), default='default')
+    timezone = Column(String(100))
+    language_preference = Column(String(10), default='en')
+    
+    # Privacy and compliance
+    privacy_settings = Column(JSON)
+    gdpr_consent = Column(Boolean, default=False)
+    marketing_consent = Column(Boolean, default=False)
+    data_retention_consent = Column(Boolean, default=True)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    reports_to_user = relationship("User", foreign_keys=[reports_to_user_id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_user_profiles_employee', 'employee_number', 'badge_number'),
+        Index('idx_user_profiles_position', 'position_level', 'employment_status'),
+        Index('idx_user_profiles_dates', 'start_date', 'end_date'),
+    )
+
+
+class UserRoleAssignment(Base):
+    __tablename__ = 'user_role_assignments'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    role_type = Column(SQLEnum(RoleType), nullable=False)
+    role_name = Column(String(255), nullable=False)
+    role_description = Column(Text)
+    
+    # Assignment scope
+    site_id = Column(CHAR(36), ForeignKey('sites.id'))
+    department_id = Column(CHAR(36))
+    project_id = Column(CHAR(36))
+    
+    # Permission details
+    permissions = Column(JSON)
+    access_level = Column(SQLEnum(AccessLevel), default=AccessLevel.read)
+    resource_restrictions = Column(JSON)
+    time_restrictions = Column(JSON)
+    
+    # Assignment metadata
+    assigned_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    assigned_at = Column(TIMESTAMP, default=func.current_timestamp())
+    effective_from = Column(Date, nullable=False)
+    effective_until = Column(Date)
+    is_primary_role = Column(Boolean, default=False)
+    
+    # Approval workflow
+    requires_approval = Column(Boolean, default=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approved_at = Column(TIMESTAMP)
+    approval_notes = Column(Text)
+    
+    # Status and monitoring
+    assignment_status = Column(SQLEnum(AssignmentStatus), default=AssignmentStatus.pending)
+    last_used = Column(TIMESTAMP)
+    usage_count = Column(Integer, default=0)
+    
+    # Audit trail
+    revoked_by = Column(CHAR(36), ForeignKey('users.id'))
+    revoked_at = Column(TIMESTAMP)
+    revocation_reason = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    site = relationship("Site")
+    assigned_by_user = relationship("User", foreign_keys=[assigned_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    revoked_by_user = relationship("User", foreign_keys=[revoked_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_role_assignments_user', 'user_id', 'assignment_status'),
+        Index('idx_role_assignments_role', 'role_type', 'role_name'),
+        Index('idx_role_assignments_scope', 'site_id', 'department_id'),
+        Index('idx_role_assignments_effective', 'effective_from', 'effective_until'),
+    )
+
+
+class UserSessionManagement(Base):
+    __tablename__ = 'user_session_management'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    session_id = Column(String(255), unique=True, nullable=False)
+    session_token = Column(String(512), unique=True, nullable=False)
+    
+    # Session details
+    login_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    logout_timestamp = Column(TIMESTAMP)
+    last_activity = Column(TIMESTAMP, default=func.current_timestamp())
+    session_duration_seconds = Column(Integer)
+    is_active = Column(Boolean, default=True)
+    
+    # Client information
+    ip_address = Column(String(45), nullable=False)  # Support IPv6
+    user_agent = Column(Text)
+    browser_info = Column(JSON)
+    device_info = Column(JSON)
+    operating_system = Column(String(100))
+    
+    # Location and access
+    login_location = Column(String(255))  # Simplified from POINT
+    access_method = Column(SQLEnum(AccessMethod), default=AccessMethod.web)
+    authentication_method = Column(SQLEnum(AuthenticationMethod), default=AuthenticationMethod.password)
+    
+    # Security context
+    mfa_verified = Column(Boolean, default=False)
+    risk_score = Column(Decimal(3,1))
+    suspicious_activity = Column(Boolean, default=False)
+    concurrent_sessions = Column(Integer, default=1)
+    
+    # Session management
+    force_logout = Column(Boolean, default=False)
+    session_timeout_minutes = Column(Integer, default=480)
+    remember_me = Column(Boolean, default=False)
+    auto_logout_at = Column(TIMESTAMP)
+    
+    # Activity tracking
+    page_views = Column(Integer, default=0)
+    api_calls = Column(Integer, default=0)
+    downloads = Column(Integer, default=0)
+    uploads = Column(Integer, default=0)
+    
+    # Compliance and audit
+    compliance_acknowledgment = Column(Boolean, default=False)
+    terms_accepted_version = Column(String(20))
+    privacy_policy_accepted = Column(Boolean, default=False)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_sessions_user_active', 'user_id', 'is_active', 'last_activity'),
+        Index('idx_sessions_token', 'session_token', 'is_active'),
+        Index('idx_sessions_security', 'risk_score', 'suspicious_activity'),
+        Index('idx_sessions_cleanup', 'is_active', 'auto_logout_at'),
+    )
+
+
+class UserActivityTracking(Base):
+    __tablename__ = 'user_activity_tracking'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    session_id = Column(CHAR(36), ForeignKey('user_session_management.id'), nullable=False)
+    
+    # Activity details
+    activity_type = Column(SQLEnum(ActivityType), nullable=False)
+    activity_description = Column(Text, nullable=False)
+    activity_category = Column(String(100))
+    
+    # Context information
+    resource_type = Column(String(100))
+    resource_id = Column(CHAR(36))
+    resource_name = Column(String(255))
+    site_id = Column(CHAR(36), ForeignKey('sites.id'))
+    
+    # Request details
+    request_method = Column(String(10))
+    request_url = Column(Text)
+    request_payload = Column(JSON)
+    response_status = Column(Integer)
+    response_time_ms = Column(Integer)
+    
+    # Geolocation and timing
+    activity_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    location_coordinates = Column(String(255))  # Simplified from POINT
+    location_accuracy = Column(Decimal(8,2))
+    timezone_offset = Column(Integer)
+    
+    # Security and compliance
+    security_level = Column(SQLEnum(SecurityLevel), default=SecurityLevel.internal)
+    data_classification = Column(String(100))
+    requires_audit = Column(Boolean, default=True)
+    compliance_tags = Column(JSON)
+    
+    # Performance metrics
+    processing_time_ms = Column(Integer)
+    database_queries = Column(Integer, default=0)
+    cache_hits = Column(Integer, default=0)
+    errors_count = Column(Integer, default=0)
+    
+    # User behavior analysis
+    is_automated = Column(Boolean, default=False)
+    pattern_anomaly = Column(Boolean, default=False)
+    risk_indicator = Column(Decimal(3,1))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User")
+    session = relationship("UserSessionManagement")
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_activity_user_time', 'user_id', 'activity_timestamp'),
+        Index('idx_activity_type', 'activity_type', 'activity_category'),
+        Index('idx_activity_security', 'security_level', 'requires_audit'),
+        Index('idx_activity_performance', 'response_time_ms', 'processing_time_ms'),
+    )
+
+
+class UserPermissionsMatrix(Base):
+    __tablename__ = 'user_permissions_matrix'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    permission_category = Column(String(100), nullable=False)
+    permission_name = Column(String(255), nullable=False)
+    
+    # Permission scope
+    scope_type = Column(SQLEnum(ScopeType), nullable=False)
+    scope_id = Column(CHAR(36))
+    scope_name = Column(String(255))
+    
+    # Access details
+    access_level = Column(SQLEnum(PermissionAccessLevel), nullable=False)
+    can_delegate = Column(Boolean, default=False)
+    can_revoke = Column(Boolean, default=False)
+    
+    # Conditions and restrictions
+    conditions = Column(JSON)
+    time_restrictions = Column(JSON)
+    location_restrictions = Column(JSON)
+    device_restrictions = Column(JSON)
+    
+    # Grant information
+    granted_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    granted_at = Column(TIMESTAMP, default=func.current_timestamp())
+    granted_reason = Column(Text)
+    approval_required = Column(Boolean, default=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Status and lifecycle
+    status = Column(SQLEnum(PermissionStatus), default=PermissionStatus.pending)
+    effective_from = Column(TIMESTAMP, default=func.current_timestamp())
+    effective_until = Column(TIMESTAMP)
+    auto_renewal = Column(Boolean, default=False)
+    renewal_period_days = Column(Integer)
+    
+    # Usage tracking
+    first_used = Column(TIMESTAMP)
+    last_used = Column(TIMESTAMP)
+    usage_count = Column(Integer, default=0)
+    abuse_reports = Column(Integer, default=0)
+    
+    # Audit and compliance
+    audit_required = Column(Boolean, default=True)
+    compliance_notes = Column(Text)
+    last_reviewed = Column(Date)
+    next_review_due = Column(Date)
+    reviewer_user_id = Column(CHAR(36), ForeignKey('users.id'))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    granted_by_user = relationship("User", foreign_keys=[granted_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    reviewer_user = relationship("User", foreign_keys=[reviewer_user_id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_permissions_user_category', 'user_id', 'permission_category'),
+        Index('idx_permissions_scope', 'scope_type', 'scope_id'),
+        Index('idx_permissions_status', 'status', 'effective_until'),
+        Index('idx_permissions_review', 'next_review_due', 'audit_required'),
+        UniqueConstraint('user_id', 'permission_category', 'permission_name', 'scope_type', 'scope_id', name='unique_user_permission_scope'),
+    )
+
+
+# ACCESS CONTROL & SECURITY MANAGEMENT TABLES
+
+# Access control enums
+class RoleLevel(enum.Enum):
+    system = "system"
+    site = "site"
+    management = "management"
+    operations = "operations"
+    specialized = "specialized"
+    worker = "worker"
+
+class RiskLevel(enum.Enum):
+    critical = "critical"
+    high = "high"
+    medium = "medium"
+    low = "low"
+
+class SiteAccessType(enum.Enum):
+    all_sites = "all_sites"
+    assigned_sites = "assigned_sites"
+    multi_site = "multi_site"
+    single_site = "single_site"
+    none = "none"
+
+class ResourceScope(enum.Enum):
+    global_scope = "global"
+    site = "site"
+    zone = "zone"
+    equipment = "equipment"
+    personnel = "personnel"
+    data = "data"
+
+class OperationType(enum.Enum):
+    create = "create"
+    read = "read"
+    update = "update"
+    delete = "delete"
+    execute = "execute"
+    admin = "admin"
+    full = "full"
+
+class AssignmentType(enum.Enum):
+    direct = "direct"
+    inherited = "inherited"
+    conditional = "conditional"
+    temporary = "temporary"
+
+class PolicyCategory(enum.Enum):
+    authentication = "authentication"
+    authorization = "authorization"
+    session = "session"
+    password = "password"
+    mfa = "mfa"
+    data_access = "data_access"
+    network = "network"
+    compliance = "compliance"
+
+class PolicyType(enum.Enum):
+    system = "system"
+    site = "site"
+    role = "role"
+    user = "user"
+
+class EnforcementLevel(enum.Enum):
+    advisory = "advisory"
+    warning = "warning"
+    blocking = "blocking"
+    strict = "strict"
+
+class ViolationHandling(enum.Enum):
+    log_only = "log_only"
+    warn_user = "warn_user"
+    block_action = "block_action"
+    escalate = "escalate"
+
+class EventType(enum.Enum):
+    role_assignment = "role_assignment"
+    permission_grant = "permission_grant"
+    permission_revoke = "permission_revoke"
+    policy_change = "policy_change"
+    access_attempt = "access_attempt"
+    violation = "violation"
+    escalation = "escalation"
+
+class EventCategory(enum.Enum):
+    authentication = "authentication"
+    authorization = "authorization"
+    administration = "administration"
+    compliance = "compliance"
+    security = "security"
+
+class ViolationSeverity(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+
+class AccessControlRole(Base):
+    __tablename__ = 'access_control_roles'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    role_name = Column(String(255), nullable=False, unique=True)
+    role_code = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    role_level = Column(SQLEnum(RoleLevel), nullable=False)
+    risk_level = Column(SQLEnum(RiskLevel), nullable=False)
+    color_code = Column(String(7), default='#6B7280')
+    
+    # Role hierarchy and inheritance
+    parent_role_id = Column(CHAR(36), ForeignKey('access_control_roles.id'))
+    inherits_permissions = Column(Boolean, default=True)
+    inheritance_level = Column(Integer, default=0)
+    role_path = Column(String(1000))
+    
+    # Site access configuration
+    site_access_type = Column(SQLEnum(SiteAccessType), default=SiteAccessType.assigned_sites)
+    default_site_assignments = Column(JSON)
+    site_restrictions = Column(JSON)
+    
+    # Role metadata
+    is_system_role = Column(Boolean, default=False)
+    is_default_role = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    is_assignable = Column(Boolean, default=True)
+    requires_approval = Column(Boolean, default=False)
+    auto_expire_days = Column(Integer)
+    
+    # Usage tracking
+    user_count = Column(Integer, default=0)
+    assignment_count = Column(Integer, default=0)
+    last_assigned = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    updated_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Relationships
+    parent_role = relationship("AccessControlRole", remote_side=[id])
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    updated_by_user = relationship("User", foreign_keys=[updated_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_roles_level_risk', 'role_level', 'risk_level'),
+        Index('idx_roles_hierarchy', 'parent_role_id', 'inheritance_level'),
+        Index('idx_roles_usage', 'user_count', 'assignment_count'),
+    )
+
+
+class SystemPermission(Base):
+    __tablename__ = 'system_permissions'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    permission_name = Column(String(255), nullable=False, unique=True)
+    permission_code = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    category = Column(String(100), nullable=False)
+    subcategory = Column(String(100))
+    risk_level = Column(SQLEnum(RiskLevel), nullable=False)
+    
+    # Permission scope and context
+    resource_type = Column(String(100))
+    resource_scope = Column(SQLEnum(ResourceScope), nullable=False)
+    operation_type = Column(SQLEnum(OperationType), nullable=False)
+    
+    # Permission attributes
+    is_system_permission = Column(Boolean, default=False)
+    is_assignable = Column(Boolean, default=True)
+    requires_mfa = Column(Boolean, default=False)
+    requires_approval = Column(Boolean, default=False)
+    is_delegatable = Column(Boolean, default=False)
+    
+    # Dependencies and relationships
+    prerequisite_permissions = Column(JSON)
+    conflicting_permissions = Column(JSON)
+    implies_permissions = Column(JSON)
+    
+    # Usage tracking
+    usage_count = Column(Integer, default=0)
+    assignment_count = Column(Integer, default=0)
+    last_used = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_permissions_category', 'category', 'subcategory', 'risk_level'),
+        Index('idx_permissions_scope', 'resource_scope', 'operation_type'),
+        Index('idx_permissions_usage', 'usage_count', 'assignment_count'),
+    )
+
+
+class RolePermissionAssignment(Base):
+    __tablename__ = 'role_permission_assignments'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    role_id = Column(CHAR(36), ForeignKey('access_control_roles.id'), nullable=False)
+    permission_id = Column(CHAR(36), ForeignKey('system_permissions.id'), nullable=False)
+    
+    # Assignment configuration
+    assignment_type = Column(SQLEnum(AssignmentType), default=AssignmentType.direct)
+    granted_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    granted_at = Column(TIMESTAMP, default=func.current_timestamp())
+    effective_from = Column(TIMESTAMP, default=func.current_timestamp())
+    effective_until = Column(TIMESTAMP)
+    is_active = Column(Boolean, default=True)
+    
+    # Conditional access
+    conditions = Column(JSON)
+    restrictions = Column(JSON)
+    scope_limitations = Column(JSON)
+    
+    # Usage tracking
+    usage_count = Column(Integer, default=0)
+    last_used = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    role = relationship("AccessControlRole")
+    permission = relationship("SystemPermission")
+    granted_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_role_permissions', 'role_id', 'permission_id', 'is_active'),
+        Index('idx_permission_roles', 'permission_id', 'role_id'),
+        UniqueConstraint('role_id', 'permission_id', 'assignment_type', name='unique_role_permission'),
+    )
+
+
+class SecurityPolicy(Base):
+    __tablename__ = 'security_policies'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    policy_name = Column(String(255), nullable=False, unique=True)
+    policy_code = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    category = Column(SQLEnum(PolicyCategory), nullable=False)
+    policy_type = Column(SQLEnum(PolicyType), nullable=False)
+    
+    # Policy configuration
+    policy_rules = Column(JSON, nullable=False)
+    enforcement_level = Column(SQLEnum(EnforcementLevel), default=EnforcementLevel.blocking)
+    is_mandatory = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True)
+    
+    # Scope and application
+    applies_to_roles = Column(JSON)
+    applies_to_users = Column(JSON)
+    applies_to_sites = Column(JSON)
+    exclusions = Column(JSON)
+    
+    # Monitoring and enforcement
+    violation_handling = Column(SQLEnum(ViolationHandling), default=ViolationHandling.block_action)
+    violation_count = Column(Integer, default=0)
+    last_violation = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_policies_category', 'category', 'policy_type', 'is_active'),
+        Index('idx_policies_enforcement', 'enforcement_level', 'violation_count'),
+    )
+
+
+class AccessControlAuditLog(Base):
+    __tablename__ = 'access_control_audit_log'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    event_type = Column(SQLEnum(EventType), nullable=False)
+    event_category = Column(SQLEnum(EventCategory), nullable=False)
+    
+    # Event participants
+    user_id = Column(CHAR(36), ForeignKey('users.id'))
+    target_user_id = Column(CHAR(36), ForeignKey('users.id'))
+    role_id = Column(CHAR(36), ForeignKey('access_control_roles.id'))
+    permission_id = Column(CHAR(36), ForeignKey('system_permissions.id'))
+    policy_id = Column(CHAR(36), ForeignKey('security_policies.id'))
+    
+    # Event details
+    action_performed = Column(String(255), nullable=False)
+    resource_type = Column(String(100))
+    resource_id = Column(CHAR(36))
+    site_id = Column(CHAR(36), ForeignKey('sites.id'))
+    
+    # Access attempt details
+    access_granted = Column(Boolean)
+    denial_reason = Column(Text)
+    risk_score = Column(Decimal(3,1))
+    violation_type = Column(String(100))
+    violation_severity = Column(SQLEnum(ViolationSeverity))
+    
+    # Session and client information
+    session_id = Column(CHAR(36))
+    ip_address = Column(String(45))
+    user_agent = Column(Text)
+    client_application = Column(String(100))
+    
+    # State tracking
+    previous_state = Column(JSON)
+    new_state = Column(JSON)
+    change_summary = Column(Text)
+    
+    event_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    target_user = relationship("User", foreign_keys=[target_user_id])
+    role = relationship("AccessControlRole")
+    permission = relationship("SystemPermission")
+    policy = relationship("SecurityPolicy")
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_audit_log_event', 'event_type', 'event_category', 'event_timestamp'),
+        Index('idx_audit_log_user', 'user_id', 'event_timestamp'),
+        Index('idx_audit_log_violations', 'violation_severity', 'access_granted', 'event_timestamp'),
+    )
+
+
+# AI MODEL MANAGEMENT & DEPLOYMENT TABLES
+
+# AI model enums
+class ModelType(enum.Enum):
+    object_detection = "object_detection"
+    object_tracking = "object_tracking"
+    person_detection = "person_detection"
+    behavior_analysis = "behavior_analysis"
+    defect_detection = "defect_detection"
+    classification = "classification"
+    segmentation = "segmentation"
+    custom = "custom"
+
+class ModelStatus(enum.Enum):
+    development = "development"
+    training = "training"
+    testing = "testing"
+    validation = "validation"
+    approved = "approved"
+    deprecated = "deprecated"
+    archived = "archived"
+
+class LifecycleStage(enum.Enum):
+    experimental = "experimental"
+    beta = "beta"
+    stable = "stable"
+    mature = "mature"
+    legacy = "legacy"
+
+class ApprovalStatus(enum.Enum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+    requires_review = "requires_review"
+
+class DeploymentStatus(enum.Enum):
+    pending = "pending"
+    deploying = "deploying"
+    active = "active"
+    paused = "paused"
+    failed = "failed"
+    terminated = "terminated"
+
+class DeploymentType(enum.Enum):
+    production = "production"
+    staging = "staging"
+    testing = "testing"
+    canary = "canary"
+    blue_green = "blue_green"
+
+class DeploymentStrategy(enum.Enum):
+    immediate = "immediate"
+    gradual = "gradual"
+    scheduled = "scheduled"
+    on_demand = "on_demand"
+
+class PriorityLevel(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+
+class AIModel(Base):
+    __tablename__ = 'ai_models'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    name = Column(String(255), nullable=False)
+    model_type = Column(SQLEnum(ModelType), nullable=False)
+    category = Column(String(255), nullable=False)
+    
+    # Version and metadata
+    version = Column(String(50), nullable=False)
+    description = Column(Text)
+    framework = Column(String(100))
+    architecture = Column(String(255))
+    author = Column(String(255))
+    organization = Column(String(255))
+    
+    # Model files and storage
+    model_file_path = Column(String(500), nullable=False)
+    model_file_size_mb = Column(Decimal(10,2))
+    config_file_path = Column(String(500))
+    weights_file_path = Column(String(500))
+    labels_file_path = Column(String(500))
+    documentation_url = Column(String(500))
+    
+    # Training information
+    training_dataset_info = Column(JSON)
+    training_images_count = Column(Integer)
+    validation_images_count = Column(Integer)
+    test_images_count = Column(Integer)
+    training_duration_hours = Column(Decimal(8,2))
+    training_completed_date = Column(TIMESTAMP)
+    training_compute_cost = Column(Decimal(10,2))
+    
+    # Model specifications
+    input_resolution_width = Column(Integer)
+    input_resolution_height = Column(Integer)
+    input_channels = Column(Integer, default=3)
+    output_classes = Column(JSON)
+    batch_size_optimal = Column(Integer)
+    batch_size_max = Column(Integer)
+    memory_requirement_gb = Column(Decimal(8,2))
+    
+    # Performance characteristics
+    baseline_accuracy = Column(Decimal(5,2))
+    baseline_precision = Column(Decimal(5,2))
+    baseline_recall = Column(Decimal(5,2))
+    baseline_f1_score = Column(Decimal(5,2))
+    inference_time_ms = Column(Decimal(8,3))
+    throughput_fps = Column(Decimal(8,2))
+    confidence_threshold_default = Column(Decimal(3,2), default=0.50)
+    
+    # Deployment requirements
+    min_gpu_memory_gb = Column(Decimal(6,2))
+    recommended_gpu_models = Column(JSON)
+    cpu_cores_required = Column(Integer)
+    ram_requirement_gb = Column(Decimal(6,2))
+    storage_requirement_gb = Column(Decimal(8,2))
+    network_bandwidth_mbps = Column(Integer)
+    
+    # Status and lifecycle
+    status = Column(SQLEnum(ModelStatus), default=ModelStatus.development)
+    lifecycle_stage = Column(SQLEnum(LifecycleStage), default=LifecycleStage.experimental)
+    approval_status = Column(SQLEnum(ApprovalStatus), default=ApprovalStatus.pending)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approved_at = Column(TIMESTAMP)
+    
+    # Licensing and compliance
+    license_type = Column(String(100))
+    license_restrictions = Column(Text)
+    compliance_certifications = Column(JSON)
+    regulatory_approvals = Column(JSON)
+    export_restrictions = Column(Text)
+    intellectual_property_notes = Column(Text)
+    
+    # Dependencies and compatibility
+    dependency_requirements = Column(JSON)
+    framework_version = Column(String(50))
+    python_version_min = Column(String(20))
+    cuda_version_required = Column(String(20))
+    compatibility_notes = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    last_modified_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    last_modified_by_user = relationship("User", foreign_keys=[last_modified_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_ai_models_type', 'model_type', 'category'),
+        Index('idx_ai_models_status', 'status', 'lifecycle_stage'),
+        Index('idx_ai_models_performance', 'baseline_accuracy', 'inference_time_ms'),
+        Index('idx_ai_models_approval', 'approval_status', 'approved_at'),
+    )
+
+
+class ModelDeployment(Base):
+    __tablename__ = 'model_deployments'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    model_id = Column(CHAR(36), ForeignKey('ai_models.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    deployment_name = Column(String(255), nullable=False)
+    
+    # Deployment configuration
+    deployment_status = Column(SQLEnum(DeploymentStatus), default=DeploymentStatus.pending)
+    deployment_type = Column(SQLEnum(DeploymentType), default=DeploymentType.production)
+    deployment_strategy = Column(SQLEnum(DeploymentStrategy), default=DeploymentStrategy.immediate)
+    
+    # Configuration parameters
+    confidence_threshold = Column(Decimal(3,2), nullable=False)
+    batch_size = Column(Integer, nullable=False)
+    processing_interval_seconds = Column(Integer, default=1)
+    max_concurrent_requests = Column(Integer, default=10)
+    timeout_seconds = Column(Integer, default=30)
+    
+    # Resource allocation
+    allocated_gpu_memory_gb = Column(Decimal(6,2))
+    allocated_cpu_cores = Column(Integer)
+    allocated_ram_gb = Column(Decimal(6,2))
+    priority_level = Column(SQLEnum(PriorityLevel), default=PriorityLevel.medium)
+    resource_limits = Column(JSON)
+    
+    # Deployment timing
+    scheduled_start_time = Column(TIMESTAMP)
+    scheduled_end_time = Column(TIMESTAMP)
+    deployed_at = Column(TIMESTAMP)
+    last_health_check = Column(TIMESTAMP)
+    next_maintenance_window = Column(TIMESTAMP)
+    
+    # Performance settings
+    auto_scaling_enabled = Column(Boolean, default=False)
+    min_instances = Column(Integer, default=1)
+    max_instances = Column(Integer, default=3)
+    scale_up_threshold = Column(Decimal(5,2), default=80.00)
+    scale_down_threshold = Column(Decimal(5,2), default=30.00)
+    
+    # Monitoring and alerting
+    monitoring_enabled = Column(Boolean, default=True)
+    alert_on_errors = Column(Boolean, default=True)
+    alert_on_performance_degradation = Column(Boolean, default=True)
+    performance_alert_threshold = Column(Decimal(5,2), default=10.00)
+    error_rate_alert_threshold = Column(Decimal(5,2), default=5.00)
+    
+    # Integration settings
+    input_sources = Column(JSON)
+    output_destinations = Column(JSON)
+    preprocessing_pipeline = Column(JSON)
+    postprocessing_pipeline = Column(JSON)
+    
+    # Rollback and versioning
+    rollback_model_id = Column(CHAR(36), ForeignKey('ai_models.id'))
+    rollback_enabled = Column(Boolean, default=True)
+    previous_deployment_id = Column(CHAR(36), ForeignKey('model_deployments.id'))
+    deployment_notes = Column(Text)
+    rollback_trigger_conditions = Column(JSON)
+    
+    # Access control
+    authorized_users = Column(JSON)
+    api_access_enabled = Column(Boolean, default=False)
+    api_key = Column(String(255))
+    rate_limit_requests_per_minute = Column(Integer, default=100)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    deployed_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    model = relationship("AIModel", foreign_keys=[model_id])
+    site = relationship("Site")
+    rollback_model = relationship("AIModel", foreign_keys=[rollback_model_id])
+    previous_deployment = relationship("ModelDeployment", remote_side=[id])
+    deployed_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_deployments_model_site', 'model_id', 'site_id', 'deployment_status'),
+        Index('idx_deployments_status', 'deployment_status', 'deployed_at'),
+        Index('idx_deployments_type', 'deployment_type', 'deployment_strategy'),
+        Index('idx_deployments_performance', 'performance_alert_threshold', 'error_rate_alert_threshold'),
+    )
