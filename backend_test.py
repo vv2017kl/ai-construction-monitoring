@@ -2908,6 +2908,7 @@ def main():
     core_tests_passed = 0
     ai_tests_passed = 0
     video_tests_passed = 0
+    navigation_tests_passed = 0
     
     for test_name, passed in results:
         status = "✅ PASS" if passed else "❌ FAIL"
@@ -2916,7 +2917,10 @@ def main():
             all_passed = False
         
         # Count test categories
-        if any(video_keyword in test_name for video_keyword in ["Video", "video"]):
+        if any(nav_keyword in test_name for nav_keyword in ["Navigation", "Route", "Street View"]):
+            if passed:
+                navigation_tests_passed += 1
+        elif any(video_keyword in test_name for video_keyword in ["Video", "video"]):
             if passed:
                 video_tests_passed += 1
         elif any(ai_keyword in test_name for ai_keyword in ["AI", "Recording", "Analytics", "Database Verification"]):
@@ -2930,6 +2934,7 @@ def main():
     print(f"Core Backend Tests: {core_tests_passed} passed")
     print(f"AI & Detection Tests: {ai_tests_passed} passed")
     print(f"Video & Evidence Tests: {video_tests_passed} passed")
+    print(f"Navigation & Street View Tests: {navigation_tests_passed} passed")
     
     if all_passed:
         print("🎉 ALL BACKEND TESTS PASSED!")
@@ -2937,6 +2942,7 @@ def main():
         print("✅ All core API endpoints functioning correctly")
         print("✅ All AI & Detection endpoints functioning correctly")
         print("✅ All Video & Evidence Management endpoints functioning correctly")
+        print("✅ All Navigation & Street View endpoints functioning correctly")
         print("✅ CRUD operations working")
         print("✅ Error handling implemented")
         print("✅ Database tables verified")
