@@ -2826,8 +2826,47 @@ def main():
     video_db_verification_ok = test_video_database_verification()
     results.append(("Video Database Verification", video_db_verification_ok))
     
+    # NAVIGATION & STREET VIEW TESTS
+    print("\n" + "=" * 80)
+    print("STARTING NAVIGATION & STREET VIEW API TESTS")
+    print("=" * 80)
+    
+    # Test Navigation Routes API (full CRUD)
+    navigation_routes_ok, created_route_id = test_navigation_routes_api(created_site_id, created_user_id)
+    results.append(("Navigation Routes API", navigation_routes_ok))
+    
+    # Test Route Waypoints API (full CRUD)
+    if created_route_id:
+        route_waypoints_ok, created_waypoint_id = test_route_waypoints_api(created_route_id)
+        results.append(("Route Waypoints API", route_waypoints_ok))
+    else:
+        print("   ⚠️ Skipping Route Waypoints tests - no route created")
+        results.append(("Route Waypoints API", False))
+    
+    # Test Navigation Sessions API
+    if created_route_id and created_user_id:
+        navigation_sessions_ok, created_session_id = test_navigation_sessions_api(created_user_id, created_route_id)
+        results.append(("Navigation Sessions API", navigation_sessions_ok))
+    else:
+        print("   ⚠️ Skipping Navigation Sessions tests - missing route or user")
+        results.append(("Navigation Sessions API", False))
+    
+    # Test Street View Cameras API (full CRUD)
+    street_view_cameras_ok, created_camera_config_id = test_street_view_cameras_api()
+    results.append(("Street View Cameras API", street_view_cameras_ok))
+    
+    # Test Navigation Analytics API
+    if created_site_id and created_route_id:
+        navigation_analytics_ok = test_navigation_analytics_api(created_site_id, created_route_id)
+        results.append(("Navigation Analytics API", navigation_analytics_ok))
+    else:
+        print("   ⚠️ Skipping Navigation Analytics tests - missing site or route")
+        results.append(("Navigation Analytics API", False))
+    
     # Cleanup test data
-    cleanup_ok = cleanup_test_data(created_site_id, created_user_id, created_detection_id, created_model_id, created_bookmark_id, created_export_id)
+    cleanup_ok = cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
+                                 created_bookmark_id, created_export_id, created_route_id, created_waypoint_id, 
+                                 created_session_id, created_camera_config_id)
     results.append(("Test Data Cleanup", cleanup_ok))
     
     # Summary
