@@ -2149,3 +2149,319 @@ class ConstructionMilestone(Base):
         Index('idx_construction_milestones_delays', 'delay_days', 'status'),
         Index('idx_construction_milestones_creator', 'created_by', 'created_at'),
     )
+
+# FIELD OPERATIONS & ASSESSMENT TABLES
+class InspectionPath(Base):
+    __tablename__ = "inspection_paths"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    
+    # Path classification
+    path_type = Column(SQLEnum(PathType), nullable=False)
+    status = Column(SQLEnum(PathStatus), default=PathStatus.draft)
+    priority = Column(SQLEnum(PathPriority), default=PathPriority.medium)
+    
+    # Assignment and ownership
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    assigned_to = Column(String(255))  # Team or individual assignment
+    assigned_user_ids = Column(JSON)  # Array of specific user IDs
+    
+    # Path characteristics
+    estimated_duration_minutes = Column(Integer)
+    total_distance_meters = Column(Decimal(10,2))
+    waypoint_count = Column(Integer, default=0)
+    zone_coverage = Column(JSON)  # Array of zone IDs covered
+    
+    # Performance metrics
+    usage_count = Column(Integer, default=0)
+    completion_rate = Column(Decimal(5,2), default=0.00)
+    average_completion_time_minutes = Column(Integer)
+    success_rate = Column(Decimal(5,2), default=0.00)
+    
+    # Path configuration
+    path_coordinates = Column(JSON)  # Array of waypoint coordinates
+    zone_sequence = Column(JSON)  # Ordered zone visit sequence
+    required_equipment = Column(JSON)  # Required tools/equipment
+    safety_requirements = Column(JSON)  # Safety protocols
+    
+    # Schedule and timing
+    is_scheduled = Column(Boolean, default=False)
+    schedule_frequency = Column(SQLEnum(ScheduleFrequency))
+    schedule_days = Column(JSON)  # Days of week if recurring
+    preferred_time_slots = Column(JSON)  # Time ranges for execution
+    
+    # Metadata
+    weather_dependency = Column(SQLEnum(WeatherDependency))
+    skill_level_required = Column(SQLEnum(SkillLevel))
+    certification_required = Column(JSON)  # Required certifications
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    last_used = Column(TIMESTAMP)
+    archived_at = Column(TIMESTAMP)
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    waypoints = relationship("PathWaypoint", back_populates="path")
+    executions = relationship("PathExecution", back_populates="path")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_inspection_paths_site_type', 'site_id', 'path_type', 'status'),
+        Index('idx_inspection_paths_priority', 'priority', 'status'),
+        Index('idx_inspection_paths_usage', 'usage_count', 'completion_rate'),
+        Index('idx_inspection_paths_schedule', 'is_scheduled', 'schedule_frequency'),
+    )
+
+class PathWaypoint(Base):
+    __tablename__ = "path_waypoints"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    path_id = Column(CHAR(36), ForeignKey('inspection_paths.id'), nullable=False)
+    waypoint_order = Column(Integer, nullable=False)
+    waypoint_name = Column(String(255), nullable=False)
+    description = Column(Text)
+    
+    # Location details
+    coordinates_x = Column(Decimal(10,6), nullable=False)
+    coordinates_y = Column(Decimal(10,6), nullable=False)
+    elevation = Column(Decimal(8,2))
+    zone_id = Column(CHAR(36), ForeignKey('zones.id'))
+    
+    # Waypoint configuration
+    waypoint_type = Column(SQLEnum(WaypointType), nullable=False)
+    is_mandatory = Column(Boolean, default=True)
+    estimated_time_minutes = Column(Integer, default=5)
+    inspection_checklist = Column(JSON)  # Inspection items at this waypoint
+    
+    # Camera and monitoring
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'))
+    monitoring_required = Column(Boolean, default=False)
+    photo_required = Column(Boolean, default=False)
+    notes_required = Column(Boolean, default=False)
+    
+    # Safety and access
+    safety_level = Column(SQLEnum(SafetyLevel), default=SafetyLevel.safe)
+    required_ppe = Column(JSON)  # PPE required at this waypoint
+    access_restrictions = Column(JSON)  # Access level requirements
+    weather_restrictions = Column(JSON)  # Weather limitations
+    
+    # Performance tracking
+    visit_count = Column(Integer, default=0)
+    average_time_spent_minutes = Column(Decimal(5,2), default=0.00)
+    issue_frequency = Column(Decimal(5,2), default=0.00)
+    last_visited = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    path = relationship("InspectionPath", back_populates="waypoints")
+    zone = relationship("Zone")
+    camera = relationship("Camera")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('path_id', 'waypoint_order', name='unique_path_waypoint_order'),
+        Index('idx_path_waypoints_path_order', 'path_id', 'waypoint_order'),
+        Index('idx_path_waypoints_zone', 'zone_id', 'waypoint_type'),
+        Index('idx_path_waypoints_camera', 'camera_id', 'monitoring_required'),
+        Index('idx_path_waypoints_performance', 'visit_count', 'issue_frequency'),
+    )
+
+class PathExecution(Base):
+    __tablename__ = "path_executions"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    path_id = Column(CHAR(36), ForeignKey('inspection_paths.id'), nullable=False)
+    executor_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    session_id = Column(CHAR(36), unique=True)  # Unique session identifier
+    
+    # Execution timing
+    started_at = Column(TIMESTAMP, default=func.current_timestamp())
+    completed_at = Column(TIMESTAMP)
+    planned_duration_minutes = Column(Integer)
+    actual_duration_minutes = Column(Integer)
+    is_completed = Column(Boolean, default=False)
+    
+    # Execution details
+    execution_type = Column(SQLEnum(ExecutionType), nullable=False)
+    execution_reason = Column(Text)
+    weather_conditions = Column(Text)
+    equipment_used = Column(JSON)  # Equipment/tools used during execution
+    
+    # Progress tracking
+    waypoints_visited = Column(Integer, default=0)
+    waypoints_total = Column(Integer)
+    completion_percentage = Column(Decimal(5,2), default=0.00)
+    current_waypoint_id = Column(CHAR(36), ForeignKey('path_waypoints.id'))
+    
+    # Quality metrics
+    quality_score = Column(Decimal(5,2), default=0.00)
+    issues_found = Column(Integer, default=0)
+    photos_taken = Column(Integer, default=0)
+    notes_count = Column(Integer, default=0)
+    
+    # Performance indicators
+    deviation_from_path = Column(Decimal(8,2), default=0.00)  # Meters off path
+    pause_time_minutes = Column(Integer, default=0)
+    break_count = Column(Integer, default=0)
+    interruption_count = Column(Integer, default=0)
+    
+    # Status and outcome
+    execution_status = Column(SQLEnum(ExecutionStatus), default=ExecutionStatus.in_progress)
+    cancellation_reason = Column(Text)
+    supervisor_reviewed = Column(Boolean, default=False)
+    reviewed_by = Column(CHAR(36), ForeignKey('users.id'))
+    review_score = Column(Decimal(3,1))  # 1-10 supervisor rating
+    
+    # Safety and compliance
+    safety_incidents = Column(Integer, default=0)
+    ppe_violations = Column(Integer, default=0)
+    compliance_score = Column(Decimal(5,2), default=100.00)
+    safety_notes = Column(Text)
+    
+    # GPS and tracking
+    gps_tracking_enabled = Column(Boolean, default=True)
+    gps_accuracy_avg = Column(Decimal(8,2))  # Average GPS accuracy in meters
+    distance_traveled = Column(Decimal(10,2))  # Actual distance traveled
+    route_deviation_score = Column(Decimal(5,2))  # How closely route was followed
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    path = relationship("InspectionPath", back_populates="executions")
+    executor = relationship("User", foreign_keys=[executor_id])
+    current_waypoint = relationship("PathWaypoint")
+    reviewed_by_user = relationship("User", foreign_keys=[reviewed_by])
+    waypoint_visits = relationship("PathExecutionWaypoint", back_populates="execution")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_path_executions_path_time', 'path_id', 'started_at'),
+        Index('idx_path_executions_executor', 'executor_id', 'execution_status', 'started_at'),
+        Index('idx_path_executions_status', 'execution_status', 'started_at'),
+        Index('idx_path_executions_quality', 'quality_score', 'compliance_score'),
+        Index('idx_path_executions_session', 'session_id', 'execution_status'),
+    )
+
+class PathExecutionWaypoint(Base):
+    __tablename__ = "path_execution_waypoints"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    execution_id = Column(CHAR(36), ForeignKey('path_executions.id'), nullable=False)
+    waypoint_id = Column(CHAR(36), ForeignKey('path_waypoints.id'), nullable=False)
+    
+    # Visit details
+    visited_at = Column(TIMESTAMP)
+    departure_at = Column(TIMESTAMP)
+    time_spent_minutes = Column(Decimal(5,2))
+    is_skipped = Column(Boolean, default=False)
+    skip_reason = Column(Text)
+    
+    # Location verification
+    actual_coordinates_x = Column(Decimal(10,6))
+    actual_coordinates_y = Column(Decimal(10,6))
+    gps_accuracy = Column(Decimal(8,2))
+    location_verified = Column(Boolean, default=False)
+    distance_from_waypoint = Column(Decimal(8,2))  # Distance from intended waypoint
+    
+    # Inspection results
+    inspection_completed = Column(Boolean, default=False)
+    inspection_score = Column(Decimal(5,2))
+    issues_found = Column(Integer, default=0)
+    photos_taken = Column(Integer, default=0)
+    notes = Column(Text)
+    
+    # Compliance and safety
+    ppe_compliance = Column(Boolean, default=True)
+    safety_protocol_followed = Column(Boolean, default=True)
+    environmental_conditions = Column(Text)
+    
+    # Media evidence
+    photo_urls = Column(JSON)  # Array of photo URLs
+    video_urls = Column(JSON)  # Array of video URLs
+    document_urls = Column(JSON)  # Array of document URLs
+    
+    # Quality metrics
+    inspector_confidence = Column(Decimal(5,2))  # Confidence in inspection quality
+    requires_follow_up = Column(Boolean, default=False)
+    follow_up_notes = Column(Text)
+    priority_level = Column(SQLEnum(PathPriority))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    execution = relationship("PathExecution", back_populates="waypoint_visits")
+    waypoint = relationship("PathWaypoint")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('execution_id', 'waypoint_id', name='unique_execution_waypoint'),
+        Index('idx_execution_waypoints_execution', 'execution_id', 'visited_at'),
+        Index('idx_execution_waypoints_waypoint', 'waypoint_id', 'visited_at'),
+        Index('idx_execution_waypoints_issues', 'issues_found', 'requires_follow_up'),
+        Index('idx_execution_waypoints_compliance', 'ppe_compliance', 'safety_protocol_followed'),
+    )
+
+class PathTemplate(Base):
+    __tablename__ = "path_templates"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    template_name = Column(String(255), nullable=False)
+    description = Column(Text)
+    template_type = Column(SQLEnum(TemplateType), nullable=False)
+    
+    # Template configuration
+    base_waypoint_count = Column(Integer)
+    estimated_duration_minutes = Column(Integer)
+    recommended_zones = Column(JSON)  # Suggested zone types
+    required_equipment = Column(JSON)  # Standard equipment list
+    
+    # Template characteristics
+    difficulty_level = Column(SQLEnum(DifficultyLevel), default=DifficultyLevel.basic)
+    skill_requirements = Column(JSON)  # Required skills/certifications
+    safety_level = Column(SQLEnum(InspectionSafetyLevel), default=InspectionSafetyLevel.medium)
+    
+    # Usage and popularity
+    usage_count = Column(Integer, default=0)
+    success_rate = Column(Decimal(5,2), default=0.00)
+    user_rating = Column(Decimal(3,1), default=0.0)
+    rating_count = Column(Integer, default=0)
+    
+    # Template structure
+    waypoint_template = Column(JSON)  # Default waypoint configuration
+    inspection_checklist = Column(JSON)  # Standard checklist items
+    customizable_fields = Column(JSON)  # Fields that can be modified
+    
+    # Access and permissions
+    is_public = Column(Boolean, default=True)
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    organization_specific = Column(Boolean, default=False)
+    industry_category = Column(String(100))
+    
+    # Versioning
+    version = Column(String(20), default='1.0')
+    parent_template_id = Column(CHAR(36), ForeignKey('path_templates.id'))
+    is_active = Column(Boolean, default=True)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    created_by_user = relationship("User")
+    parent_template = relationship("PathTemplate", remote_side=[id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_path_templates_type', 'template_type', 'is_active'),
+        Index('idx_path_templates_difficulty', 'difficulty_level', 'safety_level'),
+        Index('idx_path_templates_popularity', 'usage_count', 'user_rating'),
+        Index('idx_path_templates_creator', 'created_by', 'created_at'),
+    )
