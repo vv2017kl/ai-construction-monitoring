@@ -81,6 +81,9 @@ api_router.include_router(field_operations.router, tags=["Field Operations & Ass
 api_router.include_router(navigation.router, tags=["Navigation & Street View"])
 api_router.include_router(analytics.router, tags=["Complete Analytics & Reporting"])
 api_router.include_router(admin.router, tags=["Admin Dashboard & System Management"])
+api_router.include_router(user_management.router, tags=["User Management & Administration"])
+api_router.include_router(access_control.router, tags=["Access Control & Security Management"])
+api_router.include_router(ai_models.router, tags=["AI Model Management & Deployment"])
 
 # Include the main router in the app
 app.include_router(api_router)
