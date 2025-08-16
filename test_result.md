@@ -334,9 +334,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "My Profile interactive enhancements (FINAL SCREEN)"
-    - "Personnel Management bug fix (runtime issue)"
-    - "Final testing and validation"
+    - "MySQL Database Setup and Core Tables Creation"
+    - "Backend API Comprehensive Endpoints (Sites, Users, Zones, Cameras, Alerts)"
+    - "API Testing and Validation"
   stuck_tasks:
     - "Personnel Management runtime issue - page renders blank"
   test_all: false
