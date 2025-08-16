@@ -19,8 +19,10 @@ MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
-# Create MySQL connection URL
-DATABASE_URL = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
+# Create MySQL connection URL with URL encoding for special characters
+from urllib.parse import quote_plus
+password_encoded = quote_plus(MYSQL_PASSWORD)
+DATABASE_URL = f"mysql+mysqlconnector://{MYSQL_USER}:{password_encoded}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
 
 # SQLAlchemy setup
 engine = create_engine(
