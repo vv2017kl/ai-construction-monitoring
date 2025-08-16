@@ -103,9 +103,9 @@ def test_video_bookmarks_comprehensive(camera_id, user_id):
                 "camera_id": camera_id,
                 "bookmark_date": "2024-01-16",
                 "timestamp_seconds": 1800,
-                "title": "Quality Check Point",
-                "description": "Concrete pour quality verification needed",
-                "bookmark_type": "quality_check",
+                "title": "Compliance Check Point",
+                "description": "PPE compliance verification needed",
+                "bookmark_type": "compliance_check",
                 "priority_level": "low"
             }
         ]
