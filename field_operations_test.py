@@ -320,7 +320,7 @@ def test_field_operations_path_templates():
         test_template_data = {
             "template_name": f"Standard Safety Inspection Template {uuid.uuid4().hex[:8]}",
             "description": "Comprehensive template for daily safety inspections",
-            "template_type": "safety_inspection",
+            "template_type": "inspection",  # Fixed: using valid enum value
             "difficulty_level": "intermediate",
             "safety_level": "high",
             "base_waypoint_count": 5,
