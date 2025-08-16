@@ -2194,8 +2194,8 @@ def test_navigation_routes_api(site_id, user_id):
             "route_name": f"Construction Site Route Alpha {uuid.uuid4().hex[:8]}",
             "route_code": f"CSR-{uuid.uuid4().hex[:8].upper()}",
             "description": "Primary navigation route for construction site access",
-            "route_type": "construction_access",
-            "purpose": "site_access",
+            "route_type": "inspection",  # Valid enum: patrol, inspection, emergency_evacuation, material_transport, visitor_tour, maintenance, custom
+            "purpose": "safety_inspection",
             "priority_level": "high",
             "start_coordinates": {"lat": 40.7128, "lng": -74.0060, "elevation": 10.0},
             "end_coordinates": {"lat": 40.7589, "lng": -73.9851, "elevation": 15.0},
@@ -2204,7 +2204,7 @@ def test_navigation_routes_api(site_id, user_id):
             "elevation_change_meters": 5.0,
             "difficulty_level": "moderate",
             "safety_rating": "caution",
-            "accessibility_level": "vehicle",
+            "accessibility_level": "walking",  # Valid enum: walking, vehicle, wheelchair, restricted
             "ppe_requirements": ["hard_hat", "safety_vest", "steel_toe_boots"],
             "hazard_warnings": ["heavy_machinery", "uneven_terrain"]
         }
