@@ -181,6 +181,50 @@ class PerformanceTier(enum.Enum):
     poor = "poor"
     critical = "critical"
 
+class ReportType(enum.Enum):
+    safety = "safety"
+    compliance = "compliance"
+    activity = "activity"
+    performance = "performance"
+    custom = "custom"
+
+class OutputFormat(enum.Enum):
+    pdf = "pdf"
+    excel = "excel"
+    csv = "csv"
+    json = "json"
+
+class GenerationStatus(enum.Enum):
+    pending = "pending"
+    generating = "generating"
+    completed = "completed"
+    failed = "failed"
+
+class ReportVisibility(enum.Enum):
+    private = "private"
+    site = "site"
+    company = "company"
+    public = "public"
+
+class ConfigType(enum.Enum):
+    string = "string"
+    number = "number"
+    boolean = "boolean"
+    json = "json"
+    array = "array"
+
+class NotificationType(enum.Enum):
+    alert = "alert"
+    system = "system"
+    report = "report"
+    reminder = "reminder"
+
+class NotificationPriority(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    urgent = "urgent"
+
 class AlertStatus(enum.Enum):
     open = "open"
     acknowledged = "acknowledged"
