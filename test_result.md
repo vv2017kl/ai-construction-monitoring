@@ -355,9 +355,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "MySQL Database Setup and Core Tables Creation"
-    - "Backend API Comprehensive Endpoints (Sites, Users, Zones, Cameras, Alerts)"
-    - "API Testing and Validation"
+    - "Personnel Management runtime issue - page renders blank"
   stuck_tasks:
     - "Personnel Management runtime issue - page renders blank"
   test_all: false
