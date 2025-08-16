@@ -419,9 +419,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Field Operations & Assessment Tables and APIs Implementation"
-    - "Identify and implement remaining table groups for complete database coverage"
-    - "Continue backend API expansion beyond current 36/110 tables"
+    - "Navigation & Street View Tables and APIs Implementation"
+    - "Continue backend API expansion beyond current 40/110 tables"
+    - "Identify and implement next table group for database coverage"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
