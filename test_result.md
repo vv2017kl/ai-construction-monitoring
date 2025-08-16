@@ -156,9 +156,17 @@ backend:
     priority: "high"
     needs_retesting: false
     status_history:
+  - task: "Time-Lapse & Progress Tracking Tables and APIs Implementation"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/models.py, /app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
       - working: "NA"
         agent: "main"
-        comment: "Successfully implemented Video & Evidence Management table group (4 tables): video_bookmarks, video_access_logs, video_exports, video_quality_metrics. Added comprehensive CRUD API endpoints for video bookmarking, access logging, export management, and quality analysis. Backend running with expanded 26 total tables and 70+ API endpoints. Database recreation successful."
+        comment: "Successfully implemented Time-Lapse & Progress Tracking table group (5 tables): timelapse_sequences, timelapse_bookmarks, timelapse_events, timelapse_shares, construction_milestones. Added comprehensive CRUD API endpoints for timelapse management, bookmark creation, event tracking, sharing functionality, and construction milestone management. Backend running with expanded 31 total tables and 90+ API endpoints. Database recreation successful with proper enum conflict resolution."
       - working: true
         agent: "testing"
         comment: "✅ Backend API server fully operational with MySQL integration. All 13 comprehensive test categories passed including: API connectivity, root endpoint, health check, dashboard stats, Users CRUD, Sites CRUD, Zones API, Cameras API, Alerts API, Personnel API, error handling, and legacy endpoints. Fixed SQLAlchemy relationship issues and PUT endpoint validation. Server stable and responsive."
