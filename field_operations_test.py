@@ -83,7 +83,7 @@ def test_field_operations_inspection_paths():
             "site_id": site_id,
             "name": f"Safety Inspection Route {uuid.uuid4().hex[:8]}",
             "description": "Comprehensive safety inspection path for construction site",
-            "path_type": "safety_inspection",
+            "path_type": "inspection",  # Fixed: using valid enum value
             "priority": "high",
             "assigned_to": user_id,
             "estimated_duration_minutes": 45,
