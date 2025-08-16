@@ -3,17 +3,16 @@ from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from database import get_db, test_connection
 from models import *
+from schemas import StatusCheck, StatusCheckCreate
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List, Optional
-import uuid
 from datetime import datetime
 
+# Import modular routers
+from routers import core, ai_detection, video_evidence, system_reports, timelapse
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
