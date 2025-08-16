@@ -1554,7 +1554,7 @@ def test_field_operations_inspection_paths(site_id, user_id):
             return False, created_path_id
         
         # Test PUT update inspection path
-        print("   23d. Testing PUT /api/inspection-paths/{path_id}")
+        print("   23d. Testing PUT /api/field-operations/inspection-paths/{path_id}")
         update_data = {
             "site_id": site_id,
             "name": test_path_data["name"],
@@ -1564,7 +1564,7 @@ def test_field_operations_inspection_paths(site_id, user_id):
             "estimated_duration_minutes": 60
         }
         response = requests.put(
-            f"{API_BASE_URL}/inspection-paths/{created_path_id}",
+            f"{API_BASE_URL}/field-operations/inspection-paths/{created_path_id}",
             json=update_data,
             headers={"Content-Type": "application/json"},
             timeout=10
