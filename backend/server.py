@@ -204,6 +204,71 @@ class AIModelCreateRequest(BaseModel):
     endpoint_url: Optional[str] = None
     confidence_threshold: Optional[float] = 0.50
 
+class ReportResponse(BaseModel):
+    id: str
+    site_id: str
+    name: str
+    description: Optional[str] = None
+    report_type: str
+    generation_status: str
+    created_by: str
+    file_url: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ReportCreateRequest(BaseModel):
+    site_id: str
+    name: str
+    description: Optional[str] = None
+    report_type: str
+    parameters: Optional[dict] = None
+    output_format: Optional[str] = "pdf"
+
+class SystemConfigResponse(BaseModel):
+    id: str
+    config_key: str
+    config_value: dict
+    config_type: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+    is_sensitive: bool = False
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SystemConfigCreateRequest(BaseModel):
+    config_key: str
+    config_value: dict
+    config_type: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+    is_sensitive: bool = False
+
+class NotificationResponse(BaseModel):
+    id: str
+    user_id: str
+    title: str
+    message: Optional[str] = None
+    notification_type: str
+    priority: str
+    read_at: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class NotificationCreateRequest(BaseModel):
+    user_id: str
+    title: str
+    message: Optional[str] = None
+    notification_type: str
+    priority: Optional[str] = "medium"
+    related_id: Optional[str] = None
+    related_type: Optional[str] = None
+
 # Basic API routes
 @api_router.get("/")
 async def root():
