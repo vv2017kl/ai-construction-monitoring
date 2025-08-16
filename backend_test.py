@@ -1518,9 +1518,9 @@ def test_field_operations_inspection_paths(site_id, user_id):
         }
         
         # Test POST create inspection path
-        print("   23b. Testing POST /api/inspection-paths")
+        print("   23b. Testing POST /api/field-operations/inspection-paths")
         response = requests.post(
-            f"{API_BASE_URL}/inspection-paths",
+            f"{API_BASE_URL}/field-operations/inspection-paths",
             json=test_path_data,
             headers={"Content-Type": "application/json"},
             timeout=10
