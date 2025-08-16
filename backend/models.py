@@ -1242,7 +1242,7 @@ class Report(Base):
     # Generation tracking
     created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
     last_generated = Column(TIMESTAMP)
-    generation_status = Column(SQLEnum(GenerationStatus), default=GenerationStatus.pending)
+    generation_status = Column(SQLEnum(ReportGenerationStatus), default=ReportGenerationStatus.pending)
     file_url = Column(String(500))
     file_size_bytes = Column(BigInteger)
     
