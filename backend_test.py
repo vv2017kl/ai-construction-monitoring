@@ -3712,7 +3712,7 @@ def test_ai_model_management_apis():
             return False, None, None, None, None
         
         # GET all AI models
-        response = requests.get(f"{API_BASE_URL}/ai-models", timeout=10)
+        response = requests.get(f"{API_BASE_URL}/ai-models/", timeout=10)
         print(f"      GET AI Models Status: {response.status_code}")
         if response.status_code == 200:
             models = response.json()
