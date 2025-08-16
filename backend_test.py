@@ -635,7 +635,7 @@ def test_ai_models_api():
         test_model_data = {
             "name": f"YOLOv8 Construction Safety Model {uuid.uuid4().hex[:8]}",
             "description": "Advanced AI model for construction site safety detection",
-            "model_type": "object_detection",
+            "model_type": "person_detection",  # Fixed: using valid enum value
             "provider": "Ultralytics",
             "endpoint_url": "https://api.ultralytics.com/v1/predict",
             "confidence_threshold": 0.75
