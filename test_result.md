@@ -451,10 +451,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Complete Analytics & Reporting Tables and APIs Implementation"
-    - "Admin Dashboard & System Management Tables and APIs Implementation"
-    - "Test both new table groups and validate functionality"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
