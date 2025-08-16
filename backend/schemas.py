@@ -1017,3 +1017,372 @@ class ExecutiveReportCreateRequest(BaseModel):
     included_sites: Optional[list] = None
     confidentiality_level: Optional[str] = "internal"
     report_file_format: Optional[str] = "pdf"
+
+
+# USER MANAGEMENT & ADMINISTRATION SCHEMAS
+
+class UserManagementProfileResponse(BaseModel):
+    id: str
+    user_id: str
+    employee_number: Optional[str] = None
+    badge_number: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    gender: Optional[str] = None
+    position_title: Optional[str] = None
+    position_level: Optional[str] = None
+    employment_type: Optional[str] = None
+    employment_status: Optional[str] = None
+    start_date: datetime
+    skills: Optional[list] = None
+    ui_theme: str = "default"
+    language_preference: str = "en"
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserManagementProfileCreateRequest(BaseModel):
+    user_id: str
+    employee_number: Optional[str] = None
+    badge_number: Optional[str] = None
+    position_title: Optional[str] = None
+    position_level: Optional[str] = None
+    employment_type: Optional[str] = None
+    employment_status: Optional[str] = "active"
+    start_date: str  # YYYY-MM-DD
+    skills: Optional[list] = None
+    notification_preferences: Optional[dict] = None
+
+class UserRoleAssignmentResponse(BaseModel):
+    id: str
+    user_id: str
+    role_type: str
+    role_name: str
+    role_description: Optional[str] = None
+    site_id: Optional[str] = None
+    access_level: str
+    assignment_status: str
+    effective_from: datetime
+    effective_until: Optional[datetime] = None
+    is_primary_role: bool = False
+    assigned_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserRoleAssignmentCreateRequest(BaseModel):
+    user_id: str
+    role_type: str
+    role_name: str
+    role_description: Optional[str] = None
+    site_id: Optional[str] = None
+    access_level: Optional[str] = "read"
+    effective_from: str  # YYYY-MM-DD
+    effective_until: Optional[str] = None
+    permissions: Optional[list] = None
+    is_primary_role: Optional[bool] = False
+
+class UserSessionManagementResponse(BaseModel):
+    id: str
+    user_id: str
+    session_id: str
+    login_timestamp: datetime
+    logout_timestamp: Optional[datetime] = None
+    last_activity: datetime
+    is_active: bool = True
+    ip_address: str
+    access_method: str
+    authentication_method: str
+    mfa_verified: bool = False
+    page_views: int = 0
+    api_calls: int = 0
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserSessionManagementCreateRequest(BaseModel):
+    user_id: str
+    session_id: str
+    session_token: str
+    ip_address: str
+    access_method: Optional[str] = "web"
+    authentication_method: Optional[str] = "password"
+    device_info: Optional[dict] = None
+    browser_info: Optional[dict] = None
+
+class UserActivityTrackingResponse(BaseModel):
+    id: str
+    user_id: str
+    session_id: str
+    activity_type: str
+    activity_description: str
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    site_id: Optional[str] = None
+    activity_timestamp: datetime
+    security_level: str
+    requires_audit: bool = True
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserActivityTrackingCreateRequest(BaseModel):
+    user_id: str
+    session_id: str
+    activity_type: str
+    activity_description: str
+    activity_category: Optional[str] = None
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    site_id: Optional[str] = None
+    request_method: Optional[str] = None
+    security_level: Optional[str] = "internal"
+
+# ACCESS CONTROL & SECURITY MANAGEMENT SCHEMAS
+
+class AccessControlRoleResponse(BaseModel):
+    id: str
+    role_name: str
+    role_code: str
+    description: str
+    role_level: str
+    risk_level: str
+    color_code: str = "#6B7280"
+    parent_role_id: Optional[str] = None
+    site_access_type: str = "assigned_sites"
+    is_active: bool = True
+    user_count: int = 0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AccessControlRoleCreateRequest(BaseModel):
+    role_name: str
+    role_code: str
+    description: str
+    role_level: str
+    risk_level: str
+    color_code: Optional[str] = "#6B7280"
+    parent_role_id: Optional[str] = None
+    site_access_type: Optional[str] = "assigned_sites"
+    default_site_assignments: Optional[list] = None
+    is_assignable: Optional[bool] = True
+
+class SystemPermissionResponse(BaseModel):
+    id: str
+    permission_name: str
+    permission_code: str
+    description: str
+    category: str
+    subcategory: Optional[str] = None
+    risk_level: str
+    resource_scope: str
+    operation_type: str
+    is_assignable: bool = True
+    requires_mfa: bool = False
+    usage_count: int = 0
+    created_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SystemPermissionCreateRequest(BaseModel):
+    permission_name: str
+    permission_code: str
+    description: str
+    category: str
+    subcategory: Optional[str] = None
+    risk_level: str
+    resource_scope: str
+    operation_type: str
+    is_assignable: Optional[bool] = True
+    requires_mfa: Optional[bool] = False
+
+class SecurityPolicyResponse(BaseModel):
+    id: str
+    policy_name: str
+    policy_code: str
+    description: str
+    category: str
+    policy_type: str
+    policy_rules: dict
+    enforcement_level: str = "blocking"
+    is_mandatory: bool = True
+    is_active: bool = True
+    violation_count: int = 0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SecurityPolicyCreateRequest(BaseModel):
+    policy_name: str
+    policy_code: str
+    description: str
+    category: str
+    policy_type: str
+    policy_rules: dict
+    enforcement_level: Optional[str] = "blocking"
+    is_mandatory: Optional[bool] = True
+    applies_to_roles: Optional[list] = None
+
+class AccessControlAuditLogResponse(BaseModel):
+    id: str
+    event_type: str
+    event_category: str
+    user_id: Optional[str] = None
+    target_user_id: Optional[str] = None
+    action_performed: str
+    resource_type: Optional[str] = None
+    site_id: Optional[str] = None
+    access_granted: Optional[bool] = None
+    denial_reason: Optional[str] = None
+    violation_severity: Optional[str] = None
+    ip_address: Optional[str] = None
+    event_timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+class AccessControlAuditLogCreateRequest(BaseModel):
+    event_type: str
+    event_category: str
+    user_id: Optional[str] = None
+    target_user_id: Optional[str] = None
+    action_performed: str
+    resource_type: Optional[str] = None
+    site_id: Optional[str] = None
+    access_granted: Optional[bool] = None
+    denial_reason: Optional[str] = None
+    ip_address: Optional[str] = None
+
+# AI MODEL MANAGEMENT & DEPLOYMENT SCHEMAS
+
+class AIModelResponse(BaseModel):
+    id: str
+    name: str
+    model_type: str
+    category: str
+    version: str
+    description: Optional[str] = None
+    framework: Optional[str] = None
+    model_file_path: str
+    model_file_size_mb: Optional[float] = None
+    baseline_accuracy: Optional[float] = None
+    inference_time_ms: Optional[float] = None
+    status: str = "development"
+    lifecycle_stage: str = "experimental"
+    approval_status: str = "pending"
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AIModelCreateRequest(BaseModel):
+    name: str
+    model_type: str
+    category: str
+    version: str
+    description: Optional[str] = None
+    framework: Optional[str] = None
+    model_file_path: str
+    training_dataset_info: Optional[dict] = None
+    baseline_accuracy: Optional[float] = None
+    license_type: Optional[str] = None
+
+class ModelDeploymentResponse(BaseModel):
+    id: str
+    model_id: str
+    site_id: str
+    deployment_name: str
+    deployment_status: str = "pending"
+    deployment_type: str = "production"
+    confidence_threshold: float
+    batch_size: int
+    auto_scaling_enabled: bool = False
+    monitoring_enabled: bool = True
+    deployed_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ModelDeploymentCreateRequest(BaseModel):
+    model_id: str
+    site_id: str
+    deployment_name: str
+    deployment_type: Optional[str] = "production"
+    confidence_threshold: float
+    batch_size: int
+    processing_interval_seconds: Optional[int] = 1
+    auto_scaling_enabled: Optional[bool] = False
+    monitoring_enabled: Optional[bool] = True
+
+class ModelTrainingJobResponse(BaseModel):
+    id: str
+    model_id: str
+    job_name: str
+    training_type: str
+    job_status: str = "queued"
+    progress_percentage: Optional[float] = 0.0
+    current_epoch: int = 0
+    current_accuracy: Optional[float] = None
+    best_accuracy: Optional[float] = None
+    estimated_total_cost: Optional[float] = None
+    created_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ModelTrainingJobCreateRequest(BaseModel):
+    model_id: str
+    job_name: str
+    training_type: str
+    job_description: Optional[str] = None
+    base_model_id: Optional[str] = None
+    epochs: Optional[int] = 100
+    batch_size: Optional[int] = 32
+    learning_rate: Optional[float] = 0.001
+    cost_budget_limit: Optional[float] = None
+
+class ModelEvaluationResultResponse(BaseModel):
+    id: str
+    model_id: str
+    evaluation_name: str
+    evaluation_type: str
+    evaluation_date: datetime
+    overall_accuracy: Optional[float] = None
+    overall_f1_score: Optional[float] = None
+    business_accuracy_score: Optional[float] = None
+    review_status: str = "pending"
+    approval_for_production: bool = False
+    evaluated_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ModelEvaluationResultCreateRequest(BaseModel):
+    model_id: str
+    evaluation_name: str
+    evaluation_type: str
+    dataset_size: Optional[int] = None
+    overall_accuracy: Optional[float] = None
+    overall_precision: Optional[float] = None
+    overall_recall: Optional[float] = None
+    overall_f1_score: Optional[float] = None
+    business_accuracy_score: Optional[float] = None
