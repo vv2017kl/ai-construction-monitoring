@@ -2139,6 +2139,578 @@ def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookma
         print(f"   ⚠️ Cleanup error: {e}")
         return False
 
+def test_navigation_routes_api(site_id, user_id):
+    """Test Navigation Routes API endpoints (full CRUD)"""
+    print("\n29. Testing Navigation Routes API")
+    created_route_id = None
+    
+    try:
+        # Test GET all navigation routes
+        print("   29a. Testing GET /api/navigation/routes")
+        response = requests.get(f"{API_BASE_URL}/navigation/routes", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            routes = response.json()
+            print(f"      Found {len(routes)} total navigation routes")
+            print("      ✅ GET all navigation routes working")
+        else:
+            print("      ❌ GET all navigation routes failed")
+            return False, None
+        
+        # Create test navigation route data
+        test_route_data = {
+            "site_id": site_id,
+            "route_name": f"Construction Site Route Alpha {uuid.uuid4().hex[:8]}",
+            "route_code": f"CSR-{uuid.uuid4().hex[:8].upper()}",
+            "description": "Primary navigation route for construction site access",
+            "route_type": "construction_access",
+            "purpose": "site_access",
+            "priority_level": "high",
+            "start_coordinates": {"lat": 40.7128, "lng": -74.0060, "elevation": 10.0},
+            "end_coordinates": {"lat": 40.7589, "lng": -73.9851, "elevation": 15.0},
+            "total_distance_meters": 5280.0,
+            "estimated_duration_minutes": 45,
+            "elevation_change_meters": 5.0,
+            "difficulty_level": "moderate",
+            "safety_rating": "caution",
+            "accessibility_level": "vehicle",
+            "ppe_requirements": ["hard_hat", "safety_vest", "steel_toe_boots"],
+            "hazard_warnings": ["heavy_machinery", "uneven_terrain"]
+        }
+        
+        # Test POST create navigation route
+        print("   29b. Testing POST /api/navigation/routes")
+        response = requests.post(
+            f"{API_BASE_URL}/navigation/routes",
+            json=test_route_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            route = response.json()
+            created_route_id = route.get("id")
+            print(f"      Created navigation route ID: {created_route_id}")
+            print("      ✅ POST navigation route creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST navigation route creation failed")
+            return False, None
+        
+        # Test GET specific navigation route
+        print("   29c. Testing GET /api/navigation/routes/{route_id}")
+        response = requests.get(f"{API_BASE_URL}/navigation/routes/{created_route_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            route = response.json()
+            if route.get("route_name") == test_route_data["route_name"]:
+                print("      ✅ GET specific navigation route working")
+            else:
+                print("      ❌ Navigation route data mismatch")
+                return False, created_route_id
+        else:
+            print("      ❌ GET specific navigation route failed")
+            return False, created_route_id
+        
+        # Test PUT update navigation route
+        print("   29d. Testing PUT /api/navigation/routes/{route_id}")
+        update_data = test_route_data.copy()
+        update_data["description"] = "Updated navigation route for enhanced site access"
+        update_data["priority_level"] = "critical"
+        
+        response = requests.put(
+            f"{API_BASE_URL}/navigation/routes/{created_route_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_route = response.json()
+            if updated_route.get("description") == update_data["description"]:
+                print("      ✅ PUT navigation route update working")
+            else:
+                print("      ❌ Navigation route update data mismatch")
+                return False, created_route_id
+        else:
+            print("      ❌ PUT navigation route update failed")
+            return False, created_route_id
+        
+        # Test GET navigation routes with filters
+        print("   29e. Testing GET /api/navigation/routes with filters")
+        response = requests.get(f"{API_BASE_URL}/navigation/routes?site_id={site_id}&route_type=construction_access", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_routes = response.json()
+            print(f"      Found {len(filtered_routes)} routes for site with construction_access type")
+            print("      ✅ GET navigation routes with filters working")
+        else:
+            print("      ❌ GET navigation routes with filters failed")
+            return False, created_route_id
+        
+        return True, created_route_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_route_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_route_id
+
+def test_route_waypoints_api(route_id):
+    """Test Route Waypoints API endpoints (full CRUD)"""
+    print("\n30. Testing Route Waypoints API")
+    created_waypoint_id = None
+    
+    try:
+        # Test GET all route waypoints
+        print("   30a. Testing GET /api/navigation/waypoints")
+        response = requests.get(f"{API_BASE_URL}/navigation/waypoints", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            waypoints = response.json()
+            print(f"      Found {len(waypoints)} total route waypoints")
+            print("      ✅ GET all route waypoints working")
+        else:
+            print("      ❌ GET all route waypoints failed")
+            return False, None
+        
+        # Create test route waypoint data
+        test_waypoint_data = {
+            "route_id": route_id,
+            "waypoint_name": f"Checkpoint Alpha {uuid.uuid4().hex[:8]}",
+            "waypoint_code": f"CP-{uuid.uuid4().hex[:8].upper()}",
+            "sequence_order": 1,
+            "latitude": 40.7300,
+            "longitude": -74.0000,
+            "elevation": 12.5,
+            "waypoint_type": "checkpoint",
+            "action_required": "safety_check",
+            "approach_instructions": "Approach from the north entrance, maintain 15 mph speed limit",
+            "departure_instructions": "Continue south towards main construction area",
+            "safety_level": "caution",
+            "hazard_types": ["heavy_machinery", "construction_vehicles"],
+            "associated_camera_ids": [],
+            "monitoring_required": True,
+            "photo_documentation_required": True
+        }
+        
+        # Test POST create route waypoint
+        print("   30b. Testing POST /api/navigation/waypoints")
+        response = requests.post(
+            f"{API_BASE_URL}/navigation/waypoints",
+            json=test_waypoint_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            waypoint = response.json()
+            created_waypoint_id = waypoint.get("id")
+            print(f"      Created route waypoint ID: {created_waypoint_id}")
+            print("      ✅ POST route waypoint creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST route waypoint creation failed")
+            return False, None
+        
+        # Test GET specific route waypoint
+        print("   30c. Testing GET /api/navigation/waypoints/{waypoint_id}")
+        response = requests.get(f"{API_BASE_URL}/navigation/waypoints/{created_waypoint_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            waypoint = response.json()
+            if waypoint.get("waypoint_name") == test_waypoint_data["waypoint_name"]:
+                print("      ✅ GET specific route waypoint working")
+            else:
+                print("      ❌ Route waypoint data mismatch")
+                return False, created_waypoint_id
+        else:
+            print("      ❌ GET specific route waypoint failed")
+            return False, created_waypoint_id
+        
+        # Test GET route waypoints with filters
+        print("   30d. Testing GET /api/navigation/waypoints with filters")
+        response = requests.get(f"{API_BASE_URL}/navigation/waypoints?route_id={route_id}&waypoint_type=checkpoint", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_waypoints = response.json()
+            print(f"      Found {len(filtered_waypoints)} waypoints for route with checkpoint type")
+            print("      ✅ GET route waypoints with filters working")
+        else:
+            print("      ❌ GET route waypoints with filters failed")
+            return False, created_waypoint_id
+        
+        return True, created_waypoint_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_waypoint_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_waypoint_id
+
+def test_navigation_sessions_api(user_id, route_id):
+    """Test Navigation Sessions API endpoints"""
+    print("\n31. Testing Navigation Sessions API")
+    created_session_id = None
+    
+    try:
+        # Test GET all navigation sessions
+        print("   31a. Testing GET /api/navigation/sessions")
+        response = requests.get(f"{API_BASE_URL}/navigation/sessions", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            sessions = response.json()
+            print(f"      Found {len(sessions)} total navigation sessions")
+            print("      ✅ GET all navigation sessions working")
+        else:
+            print("      ❌ GET all navigation sessions failed")
+            return False, None
+        
+        # Create test navigation session data
+        test_session_data = {
+            "user_id": user_id,
+            "route_id": route_id,
+            "session_name": f"Site Inspection Session {uuid.uuid4().hex[:8]}",
+            "session_purpose": "safety_inspection",
+            "planned_duration_minutes": 60,
+            "total_waypoints": 5,
+            "device_type": "tablet",
+            "device_id": f"TABLET-{uuid.uuid4().hex[:8].upper()}",
+            "weather_conditions": {
+                "temperature": 22,
+                "humidity": 65,
+                "wind_speed": 8,
+                "conditions": "partly_cloudy"
+            }
+        }
+        
+        # Test POST create navigation session
+        print("   31b. Testing POST /api/navigation/sessions")
+        response = requests.post(
+            f"{API_BASE_URL}/navigation/sessions",
+            json=test_session_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            session = response.json()
+            created_session_id = session.get("id")
+            print(f"      Created navigation session ID: {created_session_id}")
+            print("      ✅ POST navigation session creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST navigation session creation failed")
+            return False, None
+        
+        # Test GET specific navigation session
+        print("   31c. Testing GET /api/navigation/sessions/{session_id}")
+        response = requests.get(f"{API_BASE_URL}/navigation/sessions/{created_session_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            session = response.json()
+            if session.get("session_purpose") == test_session_data["session_purpose"]:
+                print("      ✅ GET specific navigation session working")
+            else:
+                print("      ❌ Navigation session data mismatch")
+                return False, created_session_id
+        else:
+            print("      ❌ GET specific navigation session failed")
+            return False, created_session_id
+        
+        # Test PUT complete navigation session
+        print("   31d. Testing PUT /api/navigation/sessions/{session_id}/complete")
+        response = requests.put(f"{API_BASE_URL}/navigation/sessions/{created_session_id}/complete", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "completed successfully" in result.get("message", ""):
+                print("      ✅ PUT navigation session completion working")
+            else:
+                print("      ❌ Navigation session completion response unexpected")
+                return False, created_session_id
+        else:
+            print("      ❌ PUT navigation session completion failed")
+            return False, created_session_id
+        
+        # Test GET navigation sessions with filters
+        print("   31e. Testing GET /api/navigation/sessions with filters")
+        response = requests.get(f"{API_BASE_URL}/navigation/sessions?user_id={user_id}&route_id={route_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_sessions = response.json()
+            print(f"      Found {len(filtered_sessions)} sessions for user and route")
+            print("      ✅ GET navigation sessions with filters working")
+        else:
+            print("      ❌ GET navigation sessions with filters failed")
+            return False, created_session_id
+        
+        return True, created_session_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_session_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_session_id
+
+def test_street_view_cameras_api():
+    """Test Street View Cameras API endpoints (full CRUD)"""
+    print("\n32. Testing Street View Cameras API")
+    created_camera_config_id = None
+    camera_id = None
+    
+    try:
+        # Get existing cameras to use a valid camera_id
+        print("   32a. Getting existing cameras for valid camera_id")
+        response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
+        if response.status_code == 200:
+            cameras = response.json()
+            if cameras:
+                camera_id = cameras[0]["id"]
+                print(f"      Using existing camera ID: {camera_id}")
+            else:
+                print("      No existing cameras found, skipping Street View Camera tests")
+                print("      ⚠️ Street View Camera tests require existing camera")
+                return True, None  # Mark as passed since no cameras exist
+        else:
+            print("      ❌ Failed to get cameras list")
+            return False, None
+        
+        # Test GET all street view cameras
+        print("   32b. Testing GET /api/navigation/street-view-cameras")
+        response = requests.get(f"{API_BASE_URL}/navigation/street-view-cameras", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            cameras = response.json()
+            print(f"      Found {len(cameras)} total street view cameras")
+            print("      ✅ GET all street view cameras working")
+        else:
+            print("      ❌ GET all street view cameras failed")
+            return False, None
+        
+        # Create test street view camera data
+        test_camera_data = {
+            "camera_id": camera_id,
+            "is_street_view_enabled": True,
+            "street_view_priority": 2,
+            "field_of_view_degrees": 120,
+            "ptz_enabled": True,
+            "streaming_resolution": "4K",
+            "streaming_fps": 60,
+            "ai_detection_enabled": True,
+            "precise_latitude": 40.7128,
+            "precise_longitude": -74.0060,
+            "mounting_height_meters": 8.5,
+            "orientation_degrees": 180.0,
+            "route_coverage": ["route_1", "route_2"],
+            "waypoint_coverage": ["waypoint_1", "waypoint_2", "waypoint_3"]
+        }
+        
+        # Test POST create street view camera
+        print("   32c. Testing POST /api/navigation/street-view-cameras")
+        response = requests.post(
+            f"{API_BASE_URL}/navigation/street-view-cameras",
+            json=test_camera_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_config = response.json()
+            created_camera_config_id = camera_config.get("id")
+            print(f"      Created street view camera config ID: {created_camera_config_id}")
+            print("      ✅ POST street view camera creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST street view camera creation failed")
+            return False, None
+        
+        # Test GET specific street view camera
+        print("   32d. Testing GET /api/navigation/street-view-cameras/{camera_config_id}")
+        response = requests.get(f"{API_BASE_URL}/navigation/street-view-cameras/{created_camera_config_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera_config = response.json()
+            if camera_config.get("camera_id") == test_camera_data["camera_id"]:
+                print("      ✅ GET specific street view camera working")
+            else:
+                print("      ❌ Street view camera data mismatch")
+                return False, created_camera_config_id
+        else:
+            print("      ❌ GET specific street view camera failed")
+            return False, created_camera_config_id
+        
+        # Test PUT update street view camera
+        print("   32e. Testing PUT /api/navigation/street-view-cameras/{camera_config_id}")
+        update_data = test_camera_data.copy()
+        update_data["field_of_view_degrees"] = 150
+        update_data["streaming_fps"] = 30
+        
+        response = requests.put(
+            f"{API_BASE_URL}/navigation/street-view-cameras/{created_camera_config_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_camera_config = response.json()
+            if updated_camera_config.get("field_of_view_degrees") == update_data["field_of_view_degrees"]:
+                print("      ✅ PUT street view camera update working")
+            else:
+                print("      ❌ Street view camera update data mismatch")
+                return False, created_camera_config_id
+        else:
+            print("      ❌ PUT street view camera update failed")
+            return False, created_camera_config_id
+        
+        # Test GET street view cameras with filters
+        print("   32f. Testing GET /api/navigation/street-view-cameras with filters")
+        response = requests.get(f"{API_BASE_URL}/navigation/street-view-cameras?camera_id={camera_id}&is_enabled=true", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_cameras = response.json()
+            print(f"      Found {len(filtered_cameras)} enabled street view cameras for camera")
+            print("      ✅ GET street view cameras with filters working")
+        else:
+            print("      ❌ GET street view cameras with filters failed")
+            return False, created_camera_config_id
+        
+        return True, created_camera_config_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_camera_config_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_camera_config_id
+
+def test_navigation_analytics_api(site_id, route_id):
+    """Test Navigation Analytics API endpoints"""
+    print("\n33. Testing Navigation Analytics API")
+    
+    try:
+        # Test GET route usage analytics (general)
+        print("   33a. Testing GET /api/navigation/analytics/route-usage")
+        response = requests.get(f"{API_BASE_URL}/navigation/analytics/route-usage", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            analytics = response.json()
+            required_fields = ["analytics_period_days", "total_routes_analyzed", "route_analytics"]
+            if all(field in analytics for field in required_fields):
+                print("      ✅ GET route usage analytics working")
+            else:
+                print("      ❌ Missing required fields in route usage analytics")
+                return False
+        else:
+            print("      ❌ GET route usage analytics failed")
+            return False
+        
+        # Test GET route usage analytics with site filter
+        print("   33b. Testing GET /api/navigation/analytics/route-usage?site_id={site_id}")
+        response = requests.get(f"{API_BASE_URL}/navigation/analytics/route-usage?site_id={site_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            site_analytics = response.json()
+            print("      ✅ GET site route usage analytics working")
+        else:
+            print("      ❌ GET site route usage analytics failed")
+            return False
+        
+        # Test GET route usage analytics with days filter
+        print("   33c. Testing GET /api/navigation/analytics/route-usage?days=7")
+        response = requests.get(f"{API_BASE_URL}/navigation/analytics/route-usage?days=7", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            weekly_analytics = response.json()
+            if weekly_analytics.get("analytics_period_days") == 7:
+                print("      ✅ GET route usage analytics with days filter working")
+            else:
+                print("      ❌ Days filter not applied correctly")
+                return False
+        else:
+            print("      ❌ GET route usage analytics with days filter failed")
+            return False
+        
+        # Test GET session performance analytics (general)
+        print("   33d. Testing GET /api/navigation/analytics/session-performance")
+        response = requests.get(f"{API_BASE_URL}/navigation/analytics/session-performance", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            performance = response.json()
+            required_fields = ["analytics_period_days", "total_sessions"]
+            if all(field in performance for field in required_fields):
+                print("      ✅ GET session performance analytics working")
+            else:
+                print("      ❌ Missing required fields in session performance analytics")
+                return False
+        else:
+            print("      ❌ GET session performance analytics failed")
+            return False
+        
+        # Test GET session performance analytics with route filter
+        print("   33e. Testing GET /api/navigation/analytics/session-performance?route_id={route_id}")
+        response = requests.get(f"{API_BASE_URL}/navigation/analytics/session-performance?route_id={route_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            route_performance = response.json()
+            print("      ✅ GET route session performance analytics working")
+        else:
+            print("      ❌ GET route session performance analytics failed")
+            return False
+        
+        # Test GET session performance analytics with days filter
+        print("   33f. Testing GET /api/navigation/analytics/session-performance?days=14")
+        response = requests.get(f"{API_BASE_URL}/navigation/analytics/session-performance?days=14", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            biweekly_performance = response.json()
+            if biweekly_performance.get("analytics_period_days") == 14:
+                print("      ✅ GET session performance analytics with days filter working")
+            else:
+                print("      ❌ Days filter not applied correctly")
+                return False
+        else:
+            print("      ❌ GET session performance analytics with days filter failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
 def main():
     """Run all backend tests"""
     print("Starting AI Construction Management Backend API Tests...")
@@ -2152,6 +2724,10 @@ def main():
     created_model_id = None
     created_bookmark_id = None
     created_export_id = None
+    created_route_id = None
+    created_waypoint_id = None
+    created_session_id = None
+    created_camera_config_id = None
     
     # Test basic connectivity
     connectivity_ok = test_api_connectivity()
