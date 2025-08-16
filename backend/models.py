@@ -117,6 +117,70 @@ class AlertPriority(enum.Enum):
     low = "low"
     info = "info"
 
+class DetectionType(enum.Enum):
+    person = "person"
+    vehicle = "vehicle"
+    ppe = "ppe"
+    safety_violation = "safety_violation"
+    equipment = "equipment"
+    activity = "activity"
+
+class ModelType(enum.Enum):
+    person_detection = "person_detection"
+    ppe_detection = "ppe_detection"
+    vehicle_detection = "vehicle_detection"
+    activity_recognition = "activity_recognition"
+
+class ModelStatus(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    training = "training"
+    deprecated = "deprecated"
+
+class CorrelationType(enum.Enum):
+    direct = "direct"
+    temporal = "temporal"
+    spatial = "spatial"
+
+class RecordingSessionType(enum.Enum):
+    manual = "manual"
+    scheduled = "scheduled"
+    triggered = "triggered"
+    continuous = "continuous"
+
+class TriggerType(enum.Enum):
+    user_initiated = "user_initiated"
+    ai_detection = "ai_detection"
+    motion = "motion"
+    alert = "alert"
+    schedule = "schedule"
+
+class RecordingStatus(enum.Enum):
+    starting = "starting"
+    active = "active"
+    stopping = "stopping"
+    completed = "completed"
+    failed = "failed"
+    interrupted = "interrupted"
+
+class EvaluationType(enum.Enum):
+    automated = "automated"
+    manual = "manual"
+    field_test = "field_test"
+    benchmark = "benchmark"
+
+class TrendType(enum.Enum):
+    increasing = "increasing"
+    stable = "stable"
+    decreasing = "decreasing"
+
+class PerformanceTier(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    average = "average"
+    poor = "poor"
+    critical = "critical"
+
 class AlertStatus(enum.Enum):
     open = "open"
     acknowledged = "acknowledged"
