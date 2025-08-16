@@ -439,7 +439,7 @@ def main():
         executions_ok, execution_id = test_field_operations_path_executions(path_id, user_id)
     
     # Test templates
-    templates_ok, template_id = test_field_operations_path_templates()
+    templates_ok, template_id = test_field_operations_path_templates(user_id if user_id else "system")
     
     # Test analytics
     if site_id:
