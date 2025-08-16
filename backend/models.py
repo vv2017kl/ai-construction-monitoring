@@ -292,7 +292,7 @@ class User(Base):
     
     # Relationships
     managed_sites = relationship("Site", back_populates="manager")
-    site_access = relationship("UserSiteAccess", back_populates="user")
+    site_access = relationship("UserSiteAccess", back_populates="user", foreign_keys="UserSiteAccess.user_id")
     
     # Indexes
     __table_args__ = (
