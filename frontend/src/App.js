@@ -18,6 +18,8 @@ import SolutionUserPersonnelManagement from "./portals/solution-user/PersonnelMa
 import SolutionUserReportsCenter from "./portals/solution-user/ReportsCenter";
 import SolutionUserFieldAssessment from "./portals/solution-user/FieldAssessment";
 import SolutionUserMyProfile from "./portals/solution-user/MyProfile";
+import SolutionUserSettings from "./portals/solution-user/Settings";
+import SolutionUserHelpDocumentation from "./portals/solution-user/HelpDocumentation";
 import SolutionUserTimeComparison from "./portals/solution-user/TimeComparison";
 import SolutionUserHistoricalStreetView from "./portals/solution-user/HistoricalStreetView";
 import SolutionUserStreetViewComparison from "./portals/solution-user/StreetViewComparison";
