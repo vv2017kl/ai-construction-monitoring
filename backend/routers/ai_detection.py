@@ -66,55 +66,56 @@ async def get_ai_models(skip: int = 0, limit: int = 100, db: Session = Depends(g
     models = db.query(AIModel).offset(skip).limit(limit).all()
     return models
 
-@router.post("/ai-models", response_model=AIModelResponse)
-async def create_ai_model(model_data: AIModelCreateRequest, db: Session = Depends(get_db)):
-    """Create a new AI model"""
-    new_model = AIModel(
-        name=model_data.name,
-        description=model_data.description,
-        model_type=model_data.model_type,
-        provider=model_data.provider,
-        endpoint_url=model_data.endpoint_url,
-        confidence_threshold=model_data.confidence_threshold
-    )
-    
-    db.add(new_model)
-    db.commit()
-    db.refresh(new_model)
-    return new_model
+# AI Model endpoints moved to dedicated ai_models router
+# @router.post("/ai-models", response_model=AIModelResponse)
+# async def create_ai_model(model_data: AIModelCreateRequest, db: Session = Depends(get_db)):
+#     """Create a new AI model"""
+#     new_model = AIModel(
+#         name=model_data.name,
+#         description=model_data.description,
+#         model_type=model_data.model_type,
+#         provider=model_data.provider,
+#         endpoint_url=model_data.endpoint_url,
+#         confidence_threshold=model_data.confidence_threshold
+#     )
+#     
+#     db.add(new_model)
+#     db.commit()
+#     db.refresh(new_model)
+#     return new_model
 
-@router.get("/ai-models/{model_id}", response_model=AIModelResponse)
-async def get_ai_model(model_id: str, db: Session = Depends(get_db)):
-    """Get a specific AI model by ID"""
-    model = db.query(AIModel).filter(AIModel.id == model_id).first()
-    if not model:
-        raise HTTPException(status_code=404, detail="AI Model not found")
-    return model
+# @router.get("/ai-models/{model_id}", response_model=AIModelResponse)
+# async def get_ai_model(model_id: str, db: Session = Depends(get_db)):
+#     """Get a specific AI model by ID"""
+#     model = db.query(AIModel).filter(AIModel.id == model_id).first()
+#     if not model:
+#         raise HTTPException(status_code=404, detail="AI Model not found")
+#     return model
 
-@router.put("/ai-models/{model_id}", response_model=AIModelResponse)
-async def update_ai_model(model_id: str, model_data: AIModelCreateRequest, db: Session = Depends(get_db)):
-    """Update an existing AI model"""
-    model = db.query(AIModel).filter(AIModel.id == model_id).first()
-    if not model:
-        raise HTTPException(status_code=404, detail="AI Model not found")
-    
-    for field, value in model_data.dict(exclude_unset=True).items():
-        setattr(model, field, value)
-    
-    db.commit()
-    db.refresh(model)
-    return model
+# @router.put("/ai-models/{model_id}", response_model=AIModelResponse)
+# async def update_ai_model(model_id: str, model_data: AIModelCreateRequest, db: Session = Depends(get_db)):
+#     """Update an existing AI model"""
+#     model = db.query(AIModel).filter(AIModel.id == model_id).first()
+#     if not model:
+#         raise HTTPException(status_code=404, detail="AI Model not found")
+#     
+#     for field, value in model_data.dict(exclude_unset=True).items():
+#         setattr(model, field, value)
+#     
+#     db.commit()
+#     db.refresh(model)
+#     return model
 
-@router.delete("/ai-models/{model_id}")
-async def delete_ai_model(model_id: str, db: Session = Depends(get_db)):
-    """Delete an AI model"""
-    model = db.query(AIModel).filter(AIModel.id == model_id).first()
-    if not model:
-        raise HTTPException(status_code=404, detail="AI Model not found")
-    
-    db.delete(model)
-    db.commit()
-    return {"message": "AI Model deleted successfully"}
+# @router.delete("/ai-models/{model_id}")
+# async def delete_ai_model(model_id: str, db: Session = Depends(get_db)):
+#     """Delete an AI model"""
+#     model = db.query(AIModel).filter(AIModel.id == model_id).first()
+#     if not model:
+#         raise HTTPException(status_code=404, detail="AI Model not found")
+#     
+#     db.delete(model)
+#     db.commit()
+#     return {"message": "AI Model deleted successfully"}
 
 # RECORDING SESSIONS ENDPOINTS
 @router.get("/recording-sessions", response_model=List[RecordingSessionResponse])
