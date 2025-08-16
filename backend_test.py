@@ -2413,7 +2413,7 @@ def test_navigation_sessions_api(user_id, route_id):
             "user_id": user_id,
             "route_id": route_id,
             "session_name": f"Site Inspection Session {uuid.uuid4().hex[:8]}",
-            "session_purpose": "safety_inspection",
+            "session_purpose": "inspection",  # Valid enum: patrol, inspection, emergency, training, tour, maintenance, other
             "planned_duration_minutes": 60,
             "total_waypoints": 5,
             "device_type": "tablet",
