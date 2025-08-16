@@ -1021,3 +1021,182 @@ class CameraAIPerformance(Base):
         Index('idx_camera_performance_accuracy', 'accuracy_rate'),
         Index('idx_camera_performance_tier', 'performance_tier', 'overall_performance_score'),
     )
+
+# ANALYTICS & REPORTING TABLES
+class Report(Base):
+    __tablename__ = "reports"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    report_type = Column(SQLEnum(ReportType), nullable=False)
+    
+    # Report configuration
+    parameters = Column(JSON)  # Report generation parameters
+    schedule_cron = Column(String(100))  # Cron expression for scheduled reports
+    output_format = Column(SQLEnum(OutputFormat), default=OutputFormat.pdf)
+    
+    # Generation tracking
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    last_generated = Column(TIMESTAMP)
+    generation_status = Column(SQLEnum(GenerationStatus), default=GenerationStatus.pending)
+    file_url = Column(String(500))
+    file_size_bytes = Column(BigInteger)
+    
+    # Access control
+    visibility = Column(SQLEnum(ReportVisibility), default=ReportVisibility.site)
+    shared_with = Column(JSON)  # Array of user IDs with access
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_reports_site', 'site_id'),
+        Index('idx_reports_type', 'report_type'),
+        Index('idx_reports_creator', 'created_by'),
+        Index('idx_reports_schedule', 'schedule_cron'),
+        Index('idx_reports_status', 'generation_status'),
+    )
+
+class AnalyticsCache(Base):
+    __tablename__ = "analytics_cache"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    metric_type = Column(String(100), nullable=False)  # 'dashboard_summary', 'safety_trends', etc.
+    time_period = Column(String(50), nullable=False)  # 'hourly', 'daily', 'weekly', 'monthly'
+    
+    # Cache data
+    data = Column(JSON, nullable=False)
+    calculated_at = Column(TIMESTAMP, default=func.current_timestamp())
+    expires_at = Column(TIMESTAMP, nullable=False)
+    
+    # Cache metadata
+    calculation_time_ms = Column(Integer)
+    data_points_count = Column(Integer)
+    
+    # Relationships
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('site_id', 'metric_type', 'time_period', name='unique_cache_key'),
+        Index('idx_cache_expires', 'expires_at'),
+        Index('idx_cache_site_metric', 'site_id', 'metric_type'),
+        Index('idx_cache_calculated', 'calculated_at'),
+    )
+
+# SYSTEM & CONFIGURATION TABLES
+class SystemConfig(Base):
+    __tablename__ = "system_config"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    config_key = Column(String(255), unique=True, nullable=False)
+    config_value = Column(JSON, nullable=False)
+    config_type = Column(SQLEnum(ConfigType), nullable=False)
+    description = Column(Text)
+    
+    # Configuration metadata
+    category = Column(String(100))  # 'ai', 'camera', 'alerts', 'system'
+    is_sensitive = Column(Boolean, default=False)  # For passwords, API keys
+    requires_restart = Column(Boolean, default=False)
+    
+    # Change tracking
+    created_by = Column(CHAR(36), ForeignKey('users.id'))
+    updated_by = Column(CHAR(36), ForeignKey('users.id'))
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    updated_by_user = relationship("User", foreign_keys=[updated_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_config_category', 'category'),
+        Index('idx_config_sensitive', 'is_sensitive'),
+        Index('idx_config_updated', 'updated_at'),
+    )
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'))
+    action = Column(String(255), nullable=False)
+    resource_type = Column(String(100))  # 'alert', 'camera', 'site', etc.
+    resource_id = Column(CHAR(36))
+    
+    # Action details
+    old_values = Column(JSON)
+    new_values = Column(JSON)
+    ip_address = Column(String(45))  # IPv6 compatible
+    user_agent = Column(Text)
+    
+    # Context
+    site_id = Column(CHAR(36), ForeignKey('sites.id'))
+    session_id = Column(String(255))
+    request_id = Column(String(255))
+    
+    timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User")
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_audit_user_time', 'user_id', 'timestamp'),
+        Index('idx_audit_resource', 'resource_type', 'resource_id'),
+        Index('idx_audit_site', 'site_id'),
+        Index('idx_audit_action', 'action'),
+        Index('idx_audit_timestamp', 'timestamp'),
+    )
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    title = Column(String(255), nullable=False)
+    message = Column(Text)
+    notification_type = Column(SQLEnum(NotificationType), nullable=False)
+    
+    # Notification data
+    related_id = Column(CHAR(36))  # ID of related alert, report, etc.
+    related_type = Column(String(100))  # 'alert', 'report', 'detection'
+    data = Column(JSON)  # Additional notification data
+    
+    # Delivery
+    channels = Column(JSON)  # ['in_app', 'email', 'sms', 'push']
+    sent_at = Column(TIMESTAMP)
+    delivery_status = Column(JSON)  # Status per channel
+    
+    # User interaction
+    read_at = Column(TIMESTAMP)
+    action_taken = Column(String(100))  # 'acknowledged', 'dismissed', 'clicked'
+    action_taken_at = Column(TIMESTAMP)
+    
+    # Priority and expiry
+    priority = Column(SQLEnum(NotificationPriority), default=NotificationPriority.medium)
+    expires_at = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_notifications_user_time', 'user_id', 'created_at'),
+        Index('idx_notifications_type', 'notification_type'),
+        Index('idx_notifications_unread', 'user_id', 'read_at'),
+        Index('idx_notifications_priority', 'priority', 'created_at'),
+        Index('idx_notifications_expires', 'expires_at'),
+    )
