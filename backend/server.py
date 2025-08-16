@@ -100,6 +100,12 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     logger.info("AI Construction Management API starting up...")
     logger.info(f"Database connection: {'OK' if test_connection() else 'FAILED'}")
+    logger.info("Modular router structure loaded:")
+    logger.info("  - Core Foundation: Sites, Users, Zones, Cameras, Alerts, Personnel")
+    logger.info("  - AI & Detection: AI Models, Detections, Recording Sessions, Analytics")
+    logger.info("  - Video & Evidence: Bookmarks, Access Logs, Exports, Quality Metrics")
+    logger.info("  - System & Reports: Reports, Config, Notifications, Audit Logs")
+    logger.info("  - Time-lapse & Progress: Sequences, Bookmarks, Events, Milestones")
 
 @app.on_event("shutdown")
 async def shutdown_event():
