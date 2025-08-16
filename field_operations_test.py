@@ -92,10 +92,10 @@ def test_field_operations_inspection_paths():
             "schedule_frequency": "daily"
         }
         
-        # Test POST create inspection path
+        # Test POST create inspection path (with user_id as query param)
         print("   1b. Testing POST /api/inspection-paths")
         response = requests.post(
-            f"{API_BASE_URL}/inspection-paths",
+            f"{API_BASE_URL}/inspection-paths?current_user_id={user_id}",
             json=test_path_data,
             headers={"Content-Type": "application/json"},
             timeout=10
