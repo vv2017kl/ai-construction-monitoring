@@ -960,6 +960,8 @@ def main():
     results = []
     created_user_id = None
     created_site_id = None
+    created_detection_id = None
+    created_model_id = None
     
     # Test basic connectivity
     connectivity_ok = test_api_connectivity()
@@ -1008,8 +1010,33 @@ def main():
     legacy_ok = test_legacy_status_endpoints()
     results.append(("Legacy Status Endpoints", legacy_ok))
     
+    # NEW AI & DETECTION TESTS
+    print("\n" + "=" * 80)
+    print("STARTING AI & DETECTION API TESTS")
+    print("=" * 80)
+    
+    # Test AI Detections API
+    ai_detections_ok, created_detection_id = test_ai_detections_api(created_site_id)
+    results.append(("AI Detections API", ai_detections_ok))
+    
+    # Test AI Models API (full CRUD)
+    ai_models_ok, created_model_id = test_ai_models_api()
+    results.append(("AI Models API", ai_models_ok))
+    
+    # Test Recording Sessions API
+    recording_sessions_ok = test_recording_sessions_api(created_site_id)
+    results.append(("Recording Sessions API", recording_sessions_ok))
+    
+    # Test AI Analytics API
+    ai_analytics_ok = test_ai_analytics_api(created_site_id)
+    results.append(("AI Analytics API", ai_analytics_ok))
+    
+    # Test Database Verification
+    db_verification_ok = test_database_verification()
+    results.append(("Database Verification", db_verification_ok))
+    
     # Cleanup test data
-    cleanup_ok = cleanup_test_data(created_site_id, created_user_id)
+    cleanup_ok = cleanup_test_data(created_site_id, created_user_id, created_detection_id, created_model_id)
     results.append(("Test Data Cleanup", cleanup_ok))
     
     # Summary
@@ -1018,19 +1045,35 @@ def main():
     print("=" * 80)
     
     all_passed = True
+    core_tests_passed = 0
+    ai_tests_passed = 0
+    
     for test_name, passed in results:
         status = "✅ PASS" if passed else "❌ FAIL"
         print(f"{test_name:<30} {status}")
         if not passed:
             all_passed = False
+        
+        # Count AI-specific tests
+        if any(ai_keyword in test_name for ai_keyword in ["AI", "Recording", "Analytics", "Database Verification"]):
+            if passed:
+                ai_tests_passed += 1
+        else:
+            if passed:
+                core_tests_passed += 1
     
     print("=" * 80)
+    print(f"Core Backend Tests: {core_tests_passed} passed")
+    print(f"AI & Detection Tests: {ai_tests_passed} passed")
+    
     if all_passed:
         print("🎉 ALL BACKEND TESTS PASSED!")
         print("✅ MySQL database connection working")
-        print("✅ All API endpoints functioning correctly")
+        print("✅ All core API endpoints functioning correctly")
+        print("✅ All AI & Detection endpoints functioning correctly")
         print("✅ CRUD operations working")
         print("✅ Error handling implemented")
+        print("✅ Database tables verified")
         return True
     else:
         print("⚠️  SOME BACKEND TESTS FAILED!")
