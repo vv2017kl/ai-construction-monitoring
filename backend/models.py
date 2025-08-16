@@ -1009,48 +1009,6 @@ class AIDetection(Base):
         Index('idx_detections_processed', 'processed', 'timestamp'),
     )
 
-class AIModel(Base):
-    __tablename__ = "ai_models"
-    
-    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
-    name = Column(String(255), nullable=False)
-    description = Column(Text)
-    model_type = Column(SQLEnum(ModelType))
-    provider = Column(String(100))  # 'roboflow', 'custom', 'openai', etc.
-    
-    # Model configuration
-    endpoint_url = Column(String(500))
-    model_version = Column(String(50))
-    confidence_threshold = Column(Decimal(5,2), default=0.50)
-    overlap_threshold = Column(Decimal(5,2), default=0.30)
-    
-    # Performance metrics
-    accuracy_score = Column(Decimal(5,2))
-    precision_score = Column(Decimal(5,2))
-    recall_score = Column(Decimal(5,2))
-    avg_processing_time_ms = Column(Integer)
-    
-    # Status & lifecycle
-    status = Column(SQLEnum(ModelStatus), default=ModelStatus.active)
-    deployed_at = Column(TIMESTAMP)
-    last_updated = Column(TIMESTAMP)
-    
-    # Configuration
-    input_requirements = Column(JSON)  # Image size, format, etc.
-    output_format = Column(JSON)  # Expected response structure
-    api_configuration = Column(JSON)  # API keys, headers, etc.
-    
-    created_at = Column(TIMESTAMP, default=func.current_timestamp())
-    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
-    
-    # Indexes
-    __table_args__ = (
-        Index('idx_models_type', 'model_type'),
-        Index('idx_models_provider', 'provider'),
-        Index('idx_models_status', 'status'),
-        Index('idx_models_performance', 'accuracy_score'),
-    )
-
 class EventCorrelation(Base):
     __tablename__ = "event_correlations"
     
