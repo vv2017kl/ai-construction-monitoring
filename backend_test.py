@@ -1611,8 +1611,8 @@ def test_field_operations_path_waypoints(path_id):
     
     try:
         # Test GET all path waypoints
-        print("   24a. Testing GET /api/path-waypoints")
-        response = requests.get(f"{API_BASE_URL}/path-waypoints", timeout=10)
+        print("   24a. Testing GET /api/field-operations/path-waypoints")
+        response = requests.get(f"{API_BASE_URL}/field-operations/path-waypoints", timeout=10)
         print(f"      Status Code: {response.status_code}")
         
         if response.status_code == 200:
