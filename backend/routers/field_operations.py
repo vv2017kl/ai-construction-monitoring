@@ -195,7 +195,7 @@ async def get_path_executions(path_id: Optional[str] = None, executor_id: Option
     return executions
 
 @router.post("/path-executions", response_model=PathExecutionResponse)
-async def create_path_execution(execution_data: PathExecutionCreateRequest, current_user_id: str = "system", db: Session = Depends(get_db)):
+async def create_path_execution(execution_data: PathExecutionCreateRequest, db: Session = Depends(get_db)):
     """Create a new path execution"""
     import uuid
     
@@ -204,9 +204,12 @@ async def create_path_execution(execution_data: PathExecutionCreateRequest, curr
     if not path:
         raise HTTPException(status_code=404, detail="Inspection path not found")
     
+    # Use the path's created_by user as the executor
+    executor_id = path.created_by
+    
     new_execution = PathExecution(
         path_id=execution_data.path_id,
-        executor_id=current_user_id,  # TODO: Get from auth
+        executor_id=executor_id,
         session_id=str(uuid.uuid4()),
         execution_type=execution_data.execution_type,
         execution_reason=execution_data.execution_reason,
