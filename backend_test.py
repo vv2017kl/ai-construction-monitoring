@@ -33,8 +33,8 @@ TEST_SITE_DATA = {
 }
 
 TEST_USER_DATA = {
-    "username": "john_manager",
-    "email": "john.manager@construction.com",
+    "username": f"john_manager_{uuid.uuid4().hex[:8]}",
+    "email": f"john.manager.{uuid.uuid4().hex[:8]}@construction.com",
     "first_name": "John",
     "last_name": "Manager",
     "password": "SecurePass123!",
