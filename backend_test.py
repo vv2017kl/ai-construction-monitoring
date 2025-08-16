@@ -680,8 +680,12 @@ def test_ai_models_api():
         # Test PUT update AI model
         print("   14d. Testing PUT /api/ai-models/{model_id}")
         update_data = {
+            "name": test_model_data["name"],  # Keep original name
             "description": "Updated AI model for enhanced safety detection",
-            "confidence_threshold": 0.80
+            "model_type": test_model_data["model_type"],  # Keep original type
+            "provider": test_model_data["provider"],  # Keep original provider
+            "endpoint_url": test_model_data["endpoint_url"],  # Keep original URL
+            "confidence_threshold": 0.80  # Updated threshold
         }
         response = requests.put(
             f"{API_BASE_URL}/ai-models/{created_model_id}",
