@@ -1491,8 +1491,8 @@ def test_field_operations_inspection_paths(site_id, user_id):
     
     try:
         # Test GET all inspection paths
-        print("   23a. Testing GET /api/inspection-paths")
-        response = requests.get(f"{API_BASE_URL}/inspection-paths", timeout=10)
+        print("   23a. Testing GET /api/field-operations/inspection-paths")
+        response = requests.get(f"{API_BASE_URL}/field-operations/inspection-paths", timeout=10)
         print(f"      Status Code: {response.status_code}")
         
         if response.status_code == 200:
