@@ -545,7 +545,7 @@ def test_ai_detections_api(site_id, camera_id=None):
         test_detection_data = {
             "camera_id": camera_id or str(uuid.uuid4()),
             "site_id": site_id,
-            "zone_id": str(uuid.uuid4()),
+            "zone_id": None,  # Fixed: using None to avoid foreign key constraint
             "detection_type": "person",  # Fixed: using valid enum value
             "person_count": 3,
             "confidence_score": 0.85,
