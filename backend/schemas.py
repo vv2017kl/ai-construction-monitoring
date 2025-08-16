@@ -1386,3 +1386,407 @@ class ModelEvaluationResultCreateRequest(BaseModel):
     overall_recall: Optional[float] = None
     overall_f1_score: Optional[float] = None
     business_accuracy_score: Optional[float] = None
+
+
+# SITE CONFIGURATION & INFRASTRUCTURE SCHEMAS
+
+class SiteConfigurationResponse(BaseModel):
+    id: str
+    site_id: str
+    timezone: str = "America/New_York"
+    working_hours_start: Optional[str] = None  # Time field as string
+    working_hours_end: Optional[str] = None    # Time field as string
+    max_occupancy: int = 100
+    safety_level: str = "standard"
+    ai_detection_enabled: bool = True
+    ai_sensitivity_level: str = "medium"
+    recording_retention_days: int = 30
+    recording_quality: str = "high"
+    alert_notifications_enabled: bool = True
+    access_control_type: str = "keycard"
+    configured_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SiteConfigurationCreateRequest(BaseModel):
+    site_id: str
+    timezone: Optional[str] = "America/New_York"
+    working_hours_start: Optional[str] = None  # "HH:MM" format
+    working_hours_end: Optional[str] = None    # "HH:MM" format
+    max_occupancy: Optional[int] = 100
+    safety_level: Optional[str] = "standard"
+    ai_detection_enabled: Optional[bool] = True
+    ai_sensitivity_level: Optional[str] = "medium"
+    recording_retention_days: Optional[int] = 30
+    recording_quality: Optional[str] = "high"
+    alert_notifications_enabled: Optional[bool] = True
+    access_control_type: Optional[str] = "keycard"
+    emergency_contacts: Optional[list] = None
+    safety_protocols: Optional[list] = None
+
+class SiteInfrastructureResponse(BaseModel):
+    id: str
+    site_id: str
+    network_status: str = "fair"
+    internet_speed_mbps: Optional[int] = None
+    network_provider: Optional[str] = None
+    power_status: str = "stable"
+    backup_power_available: bool = False
+    cellular_coverage: str = "good"
+    uptime_percentage: Optional[float] = 100.0
+    storage_capacity_tb: Optional[float] = None
+    cloud_storage_enabled: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SiteInfrastructureCreateRequest(BaseModel):
+    site_id: str
+    network_status: Optional[str] = "fair"
+    internet_speed_mbps: Optional[int] = None
+    network_provider: Optional[str] = None
+    power_status: Optional[str] = "stable"
+    backup_power_available: Optional[bool] = False
+    cellular_coverage: Optional[str] = "good"
+    storage_capacity_tb: Optional[float] = None
+    cloud_storage_enabled: Optional[bool] = True
+    environmental_sensors: Optional[list] = None
+
+class SiteZoneConfigurationResponse(BaseModel):
+    id: str
+    site_id: str
+    zone_id: str
+    monitoring_level: str = "standard"
+    camera_coverage_percentage: Optional[float] = 0.0
+    max_personnel: Optional[int] = None
+    safety_score: Optional[float] = 100.0
+    compliance_score: Optional[float] = 100.0
+    zone_status: str = "active"
+    configured_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SiteZoneConfigurationCreateRequest(BaseModel):
+    site_id: str
+    zone_id: str
+    monitoring_level: Optional[str] = "standard"
+    max_personnel: Optional[int] = None
+    authorized_roles: Optional[list] = None
+    ppe_requirements: Optional[list] = None
+    detection_sensitivity: Optional[str] = "medium"
+    safety_requirements: Optional[list] = None
+
+class SitePerformanceTrackingResponse(BaseModel):
+    id: str
+    site_id: str
+    tracking_date: datetime
+    tracking_period: str
+    system_health_score: Optional[float] = 100.0
+    uptime_percentage: Optional[float] = 100.0
+    safety_incident_count: int = 0
+    compliance_score: Optional[float] = 100.0
+    performance_trend: str = "stable"
+    health_trend: str = "stable"
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SitePerformanceTrackingCreateRequest(BaseModel):
+    site_id: str
+    tracking_date: str  # YYYY-MM-DD format
+    tracking_period: str
+    system_health_score: Optional[float] = 100.0
+    uptime_percentage: Optional[float] = 100.0
+    safety_incident_count: Optional[int] = 0
+    compliance_score: Optional[float] = 100.0
+    performance_notes: Optional[str] = None
+
+class SiteComplianceTrackingResponse(BaseModel):
+    id: str
+    site_id: str
+    compliance_framework: str
+    compliance_date: datetime
+    overall_compliance_score: float
+    compliance_status: str = "compliant"
+    audit_type: str
+    audit_date: datetime
+    total_findings: int = 0
+    safety_compliance_score: Optional[float] = 100.0
+    reported_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SiteComplianceTrackingCreateRequest(BaseModel):
+    site_id: str
+    compliance_framework: str
+    compliance_date: str  # YYYY-MM-DD format
+    overall_compliance_score: float
+    audit_type: str
+    audit_date: str  # YYYY-MM-DD format
+    auditor_name: Optional[str] = None
+    total_findings: Optional[int] = 0
+    safety_compliance_score: Optional[float] = 100.0
+
+# SYSTEM MONITORING & INFRASTRUCTURE HEALTH SCHEMAS
+
+class SystemHealthMonitoringResponse(BaseModel):
+    id: str
+    timestamp: datetime
+    overall_health_score: float
+    system_status: str = "healthy"
+    availability_percentage: Optional[float] = 100.0
+    total_services_count: int = 0
+    healthy_services_count: int = 0
+    warning_services_count: int = 0
+    critical_services_count: int = 0
+    health_trend: str = "stable"
+    performance_trend: str = "stable"
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SystemHealthMonitoringCreateRequest(BaseModel):
+    overall_health_score: float
+    system_status: Optional[str] = "healthy"
+    availability_percentage: Optional[float] = 100.0
+    total_services_count: Optional[int] = 0
+    healthy_services_count: Optional[int] = 0
+    warning_services_count: Optional[int] = 0
+    critical_services_count: Optional[int] = 0
+    monitoring_interval_minutes: Optional[int] = 5
+
+class ServiceHealthMetricResponse(BaseModel):
+    id: str
+    service_name: str
+    service_type: str
+    timestamp: datetime
+    service_status: str = "healthy"
+    uptime_percentage: Optional[float] = 100.0
+    response_time_avg_ms: Optional[float] = None
+    success_rate_percentage: Optional[float] = 100.0
+    cpu_utilization_percentage: Optional[float] = None
+    memory_utilization_percentage: Optional[float] = None
+    error_rate_percentage: Optional[float] = 0.0
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ServiceHealthMetricCreateRequest(BaseModel):
+    service_name: str
+    service_type: str
+    service_status: Optional[str] = "healthy"
+    uptime_percentage: Optional[float] = 100.0
+    response_time_avg_ms: Optional[float] = None
+    success_rate_percentage: Optional[float] = 100.0
+    cpu_utilization_percentage: Optional[float] = None
+    memory_utilization_percentage: Optional[float] = None
+
+class SystemAlertResponse(BaseModel):
+    id: str
+    alert_id: str
+    alert_level: str
+    alert_category: str
+    alert_type: str
+    alert_source: str
+    title: str
+    message: str
+    triggered_at: datetime
+    status: str = "active"
+    business_impact: str = "none"
+    assigned_to: Optional[str] = None
+    resolved_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SystemAlertCreateRequest(BaseModel):
+    alert_id: str
+    alert_level: str
+    alert_category: str
+    alert_type: str
+    alert_source: str
+    title: str
+    message: str
+    triggered_at: Optional[str] = None  # ISO datetime string
+    business_impact: Optional[str] = "none"
+    detailed_description: Optional[str] = None
+    recommended_actions: Optional[list] = None
+
+class MonitoringDashboardResponse(BaseModel):
+    id: str
+    dashboard_name: str
+    dashboard_type: str
+    created_by: str
+    refresh_interval_seconds: int = 30
+    auto_refresh_enabled: bool = True
+    is_public: bool = False
+    view_count: int = 0
+    widget_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class MonitoringDashboardCreateRequest(BaseModel):
+    dashboard_name: str
+    dashboard_type: str
+    created_by: str
+    layout_config: Optional[dict] = None
+    refresh_interval_seconds: Optional[int] = 30
+    auto_refresh_enabled: Optional[bool] = True
+    is_public: Optional[bool] = False
+    widgets: Optional[list] = None
+
+# INTEGRATION & USER EXPERIENCE SCHEMAS
+
+class ThirdPartyIntegrationResponse(BaseModel):
+    id: str
+    integration_name: str
+    integration_type: str
+    provider_name: str
+    description: Optional[str] = None
+    status: str = "pending"
+    health_score: Optional[float] = 0.0
+    monthly_usage: int = 0
+    error_rate: Optional[float] = 0.0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ThirdPartyIntegrationCreateRequest(BaseModel):
+    integration_name: str
+    integration_type: str
+    provider_name: str
+    description: Optional[str] = None
+    configuration: dict
+    endpoints: Optional[dict] = None
+    rate_limits: Optional[dict] = None
+    monthly_limit: Optional[int] = None
+
+class UserProfileSettingResponse(BaseModel):
+    id: str
+    user_id: str
+    profile_picture_url: Optional[str] = None
+    bio: Optional[str] = None
+    preferences: Optional[dict] = None
+    notification_settings: Optional[dict] = None
+    dashboard_config: Optional[dict] = None
+    theme_settings: Optional[dict] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserProfileSettingCreateRequest(BaseModel):
+    user_id: str
+    profile_picture_url: Optional[str] = None
+    bio: Optional[str] = None
+    preferences: Optional[dict] = None
+    notification_settings: Optional[dict] = None
+    dashboard_config: Optional[dict] = None
+    theme_settings: Optional[dict] = None
+
+class UserApplicationSettingResponse(BaseModel):
+    id: str
+    user_id: str
+    language: str = "en"
+    timezone: Optional[str] = None
+    time_format: str = "12h"
+    theme: str = "light"
+    font_size: str = "medium"
+    notifications_enabled: bool = True
+    email_notifications: bool = True
+    quiet_hours_enabled: bool = False
+    data_sharing_enabled: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserApplicationSettingCreateRequest(BaseModel):
+    user_id: str
+    language: Optional[str] = "en"
+    timezone: Optional[str] = None
+    time_format: Optional[str] = "12h"
+    theme: Optional[str] = "light"
+    font_size: Optional[str] = "medium"
+    notifications_enabled: Optional[bool] = True
+    email_notifications: Optional[bool] = True
+    quiet_hours_enabled: Optional[bool] = False
+
+class HelpArticleResponse(BaseModel):
+    id: str
+    title: str
+    content: str
+    category: str
+    subcategory: Optional[str] = None
+    tags: Optional[list] = None
+    author_id: str
+    is_published: bool = False
+    view_count: int = 0
+    helpful_count: int = 0
+    unhelpful_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class HelpArticleCreateRequest(BaseModel):
+    title: str
+    content: str
+    category: str
+    subcategory: Optional[str] = None
+    tags: Optional[list] = None
+    is_published: Optional[bool] = False
+    search_keywords: Optional[str] = None
+
+class UserFeedbackResponse(BaseModel):
+    id: str
+    user_id: str
+    feedback_type: str
+    title: str
+    description: str
+    priority: str = "medium"
+    status: str = "submitted"
+    category: Optional[str] = None
+    upvote_count: int = 0
+    admin_response: Optional[str] = None
+    responded_by: Optional[str] = None
+    responded_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserFeedbackCreateRequest(BaseModel):
+    user_id: str
+    feedback_type: str
+    title: str
+    description: str
+    priority: Optional[str] = "medium"
+    category: Optional[str] = None
+    attachments: Optional[list] = None
