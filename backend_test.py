@@ -2093,36 +2093,474 @@ def test_field_operations_analytics(site_id):
         print(f"   ❌ Unexpected error: {e}")
         return False
 
-def cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
-                     created_bookmark_id, created_export_id, created_route_id=None, created_waypoint_id=None, 
-                     created_session_id=None, created_camera_config_id=None):
-    """Clean up test data created during testing"""
-    print("\n34. Cleaning up test data")
+def test_analytics_certifications_api(user_id):
+    """Test Analytics - User Certifications API endpoints"""
+    print("\n29. Testing Analytics - User Certifications API")
+    created_certification_id = None
     
     try:
+        # Test GET all user certifications
+        print("   29a. Testing GET /api/analytics/certifications")
+        response = requests.get(f"{API_BASE_URL}/analytics/certifications", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            certifications = response.json()
+            print(f"      Found {len(certifications)} total certifications")
+            print("      ✅ GET all certifications working")
+        else:
+            print("      ❌ GET all certifications failed")
+            return False, None
+        
+        # Create test certification data
+        test_certification_data = {
+            "user_id": user_id,
+            "certification_name": f"OSHA 30-Hour Construction Safety {uuid.uuid4().hex[:8]}",
+            "certification_type": "safety",
+            "certification_number": f"OSHA-{uuid.uuid4().hex[:8].upper()}",
+            "issuing_authority": "Occupational Safety and Health Administration",
+            "issue_date": "2024-01-15",
+            "expiry_date": "2027-01-15",
+            "renewal_period_months": 36,
+            "required_for_roles": ["site_manager", "supervisor"],
+            "certificate_file_path": "/certificates/osha_30_hour.pdf"
+        }
+        
+        # Test POST create certification
+        print("   29b. Testing POST /api/analytics/certifications")
+        response = requests.post(
+            f"{API_BASE_URL}/analytics/certifications",
+            json=test_certification_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            certification = response.json()
+            created_certification_id = certification.get("id")
+            print(f"      Created certification ID: {created_certification_id}")
+            print("      ✅ POST certification creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST certification creation failed")
+            return False, None
+        
+        # Test GET specific certification
+        print("   29c. Testing GET /api/analytics/certifications/{certification_id}")
+        response = requests.get(f"{API_BASE_URL}/analytics/certifications/{created_certification_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            certification = response.json()
+            if certification.get("certification_name") == test_certification_data["certification_name"]:
+                print("      ✅ GET specific certification working")
+            else:
+                print("      ❌ Certification data mismatch")
+                return False, created_certification_id
+        else:
+            print("      ❌ GET specific certification failed")
+            return False, created_certification_id
+        
+        # Test PUT verify certification
+        print("   29d. Testing PUT /api/analytics/certifications/{certification_id}/verify")
+        response = requests.put(f"{API_BASE_URL}/analytics/certifications/{created_certification_id}/verify", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "verified successfully" in result.get("message", ""):
+                print("      ✅ PUT certification verification working")
+            else:
+                print("      ❌ Certification verification response unexpected")
+                return False, created_certification_id
+        else:
+            print("      ❌ PUT certification verification failed")
+            return False, created_certification_id
+        
+        return True, created_certification_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_certification_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_certification_id
+
+def test_analytics_performance_metrics_api(site_id):
+    """Test Analytics - Performance Metrics API endpoints"""
+    print("\n30. Testing Analytics - Performance Metrics API")
+    created_metric_id = None
+    
+    try:
+        # Test GET all performance metrics
+        print("   30a. Testing GET /api/analytics/performance-metrics")
+        response = requests.get(f"{API_BASE_URL}/analytics/performance-metrics", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            metrics = response.json()
+            print(f"      Found {len(metrics)} total performance metrics")
+            print("      ✅ GET all performance metrics working")
+        else:
+            print("      ❌ GET all performance metrics failed")
+            return False, None
+        
+        # Test GET with filtering
+        print("   30b. Testing GET /api/analytics/performance-metrics with filters")
+        response = requests.get(f"{API_BASE_URL}/analytics/performance-metrics?site_id={site_id}&days=7&is_kpi=true", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_metrics = response.json()
+            print(f"      Found {len(filtered_metrics)} filtered metrics")
+            print("      ✅ GET filtered performance metrics working")
+        else:
+            print("      ❌ GET filtered performance metrics failed")
+            return False, None
+        
+        # Create test performance metric data
+        test_metric_data = {
+            "site_id": site_id,
+            "metric_date": "2024-01-15",
+            "metric_hour": 14,
+            "metric_type": "safety_compliance",
+            "metric_value": 95.5,
+            "target_value": 98.0,
+            "measurement_unit": "percentage",
+            "data_source": "automated_inspection",
+            "is_kpi": True,
+            "confidence_score": 0.92
+        }
+        
+        # Test POST create performance metric
+        print("   30c. Testing POST /api/analytics/performance-metrics")
+        response = requests.post(
+            f"{API_BASE_URL}/analytics/performance-metrics",
+            json=test_metric_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            metric = response.json()
+            created_metric_id = metric.get("id")
+            print(f"      Created performance metric ID: {created_metric_id}")
+            print("      ✅ POST performance metric creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST performance metric creation failed")
+            return False, None
+        
+        return True, created_metric_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_metric_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_metric_id
+
+def test_analytics_summary_apis(site_id):
+    """Test Analytics - Summary API endpoints"""
+    print("\n31. Testing Analytics - Summary APIs")
+    
+    try:
+        # Test GET KPI dashboard summary
+        print("   31a. Testing GET /api/analytics/summary/kpi-dashboard")
+        response = requests.get(f"{API_BASE_URL}/analytics/summary/kpi-dashboard", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            kpi_summary = response.json()
+            required_fields = ["analysis_period_days", "total_kpi_metrics", "kpi_summary"]
+            if all(field in kpi_summary for field in required_fields):
+                print("      ✅ GET KPI dashboard summary working")
+            else:
+                print("      ❌ Missing required fields in KPI dashboard summary")
+                return False
+        else:
+            print("      ❌ GET KPI dashboard summary failed")
+            return False
+        
+        # Test GET KPI dashboard summary with site filter
+        print("   31b. Testing GET /api/analytics/summary/kpi-dashboard with site filter")
+        response = requests.get(f"{API_BASE_URL}/analytics/summary/kpi-dashboard?site_id={site_id}&days=7", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_kpi_summary = response.json()
+            print("      ✅ GET filtered KPI dashboard summary working")
+        else:
+            print("      ❌ GET filtered KPI dashboard summary failed")
+            return False
+        
+        # Test GET certification compliance summary
+        print("   31c. Testing GET /api/analytics/summary/certification-compliance")
+        response = requests.get(f"{API_BASE_URL}/analytics/summary/certification-compliance", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            compliance_summary = response.json()
+            required_fields = ["total_certifications", "active_certifications", "expired_certifications", "compliance_rate"]
+            if all(field in compliance_summary for field in required_fields):
+                print("      ✅ GET certification compliance summary working")
+            else:
+                print("      ❌ Missing required fields in certification compliance summary")
+                return False
+        else:
+            print("      ❌ GET certification compliance summary failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_admin_dashboard_metrics_api():
+    """Test Admin - Dashboard Metrics API endpoints"""
+    print("\n32. Testing Admin - Dashboard Metrics API")
+    created_metric_id = None
+    
+    try:
+        # Test GET all admin dashboard metrics
+        print("   32a. Testing GET /api/admin/dashboard-metrics")
+        response = requests.get(f"{API_BASE_URL}/admin/dashboard-metrics", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            metrics = response.json()
+            print(f"      Found {len(metrics)} total admin dashboard metrics")
+            print("      ✅ GET all admin dashboard metrics working")
+        else:
+            print("      ❌ GET all admin dashboard metrics failed")
+            return False, None
+        
+        # Test GET current dashboard metrics
+        print("   32b. Testing GET /api/admin/dashboard-metrics/current")
+        response = requests.get(f"{API_BASE_URL}/admin/dashboard-metrics/current", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            current_metrics = response.json()
+            required_fields = ["timestamp", "system_overview", "performance_indicators"]
+            if all(field in current_metrics for field in required_fields):
+                print("      ✅ GET current dashboard metrics working")
+            else:
+                print("      ❌ Missing required fields in current dashboard metrics")
+                return False, None
+        else:
+            print("      ❌ GET current dashboard metrics failed")
+            return False, None
+        
+        # Create test admin dashboard metric data
+        test_metric_data = {
+            "metric_date": "2024-01-15",
+            "metric_hour": 14,
+            "aggregation_level": "system",
+            "total_users": 150,
+            "active_users_24h": 45,
+            "total_sites": 12,
+            "active_sites": 10,
+            "total_cameras": 240,
+            "online_cameras": 235
+        }
+        
+        # Test POST create admin dashboard metric
+        print("   32c. Testing POST /api/admin/dashboard-metrics")
+        response = requests.post(
+            f"{API_BASE_URL}/admin/dashboard-metrics",
+            json=test_metric_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            metric = response.json()
+            created_metric_id = metric.get("id")
+            print(f"      Created admin dashboard metric ID: {created_metric_id}")
+            print("      ✅ POST admin dashboard metric creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST admin dashboard metric creation failed")
+            return False, None
+        
+        return True, created_metric_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_metric_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_metric_id
+
+def test_admin_system_health_api():
+    """Test Admin - System Health API endpoints"""
+    print("\n33. Testing Admin - System Health API")
+    created_log_id = None
+    
+    try:
+        # Test GET all system health logs
+        print("   33a. Testing GET /api/admin/system-health")
+        response = requests.get(f"{API_BASE_URL}/admin/system-health", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            logs = response.json()
+            print(f"      Found {len(logs)} total system health logs")
+            print("      ✅ GET all system health logs working")
+        else:
+            print("      ❌ GET all system health logs failed")
+            return False, None
+        
+        # Test GET system health summary
+        print("   33b. Testing GET /api/admin/system-health/summary")
+        response = requests.get(f"{API_BASE_URL}/admin/system-health/summary?hours=24", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            summary = response.json()
+            required_fields = ["analysis_period_hours", "total_measurements", "health_distribution", "overall_health_score"]
+            if all(field in summary for field in required_fields):
+                print("      ✅ GET system health summary working")
+            else:
+                print("      ❌ Missing required fields in system health summary")
+                return False, None
+        else:
+            print("      ❌ GET system health summary failed")
+            return False, None
+        
+        # Create test system health log data
+        test_log_data = {
+            "server_id": f"server-{uuid.uuid4().hex[:8]}",
+            "component_type": "database",
+            "cpu_usage_percentage": 45.2,
+            "memory_usage_percentage": 67.8,
+            "disk_usage_percentage": 23.1,
+            "response_time_ms": 125,
+            "service_status": "healthy",
+            "monitoring_source": "automated_monitoring"
+        }
+        
+        # Test POST create system health log
+        print("   33c. Testing POST /api/admin/system-health")
+        response = requests.post(
+            f"{API_BASE_URL}/admin/system-health",
+            json=test_log_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            log = response.json()
+            created_log_id = log.get("id")
+            print(f"      Created system health log ID: {created_log_id}")
+            print("      ✅ POST system health log creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST system health log creation failed")
+            return False, None
+        
+        return True, created_log_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_log_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_log_id
+
+def test_admin_analytics_api():
+    """Test Admin - Analytics API endpoints"""
+    print("\n34. Testing Admin - Analytics API")
+    
+    try:
+        # Test GET system overview analytics
+        print("   34a. Testing GET /api/admin/analytics/system-overview")
+        response = requests.get(f"{API_BASE_URL}/admin/analytics/system-overview", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            analytics = response.json()
+            required_fields = ["analysis_period_days", "current_metrics", "system_health", "activity_summary", "timestamp"]
+            if all(field in analytics for field in required_fields):
+                print("      ✅ GET system overview analytics working")
+            else:
+                print("      ❌ Missing required fields in system overview analytics")
+                return False
+        else:
+            print("      ❌ GET system overview analytics failed")
+            return False
+        
+        # Test GET system overview analytics with custom period
+        print("   34b. Testing GET /api/admin/analytics/system-overview with custom period")
+        response = requests.get(f"{API_BASE_URL}/admin/analytics/system-overview?days=7", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            custom_analytics = response.json()
+            if custom_analytics.get("analysis_period_days") == 7:
+                print("      ✅ GET custom period system overview analytics working")
+            else:
+                print("      ❌ Custom period not applied correctly")
+                return False
+        else:
+            print("      ❌ GET custom period system overview analytics failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
+                     created_bookmark_id, created_export_id, created_route_id=None, created_waypoint_id=None, 
+                     created_session_id=None, created_camera_config_id=None, created_certification_id=None,
+                     created_metric_id=None, created_admin_metric_id=None, created_health_log_id=None):
+    """Clean up test data created during testing"""
+    print("\n35. Cleaning up test data")
+    
+    try:
+        # Delete analytics test data
+        if created_certification_id:
+            print("   35a. Deleting test certification")
+            response = requests.delete(f"{API_BASE_URL}/analytics/certifications/{created_certification_id}", timeout=10)
+            print(f"      Certification deletion status: {response.status_code}")
+        
         # Delete navigation test data
         if created_camera_config_id:
-            print("   34a. Deleting test street view camera config")
+            print("   35b. Deleting test street view camera config")
             response = requests.delete(f"{API_BASE_URL}/navigation/street-view-cameras/{created_camera_config_id}", timeout=10)
             print(f"      Status Code: {response.status_code}")
         
         if created_waypoint_id:
-            print("   34b. Deleting test route waypoint")
+            print("   35c. Deleting test route waypoint")
             response = requests.delete(f"{API_BASE_URL}/navigation/waypoints/{created_waypoint_id}", timeout=10)
             print(f"      Status Code: {response.status_code}")
         
         # Note: Navigation sessions don't have DELETE endpoint, they are archived
         if created_session_id:
-            print("   34c. Navigation session will remain (no DELETE endpoint)")
+            print("   35d. Navigation session will remain (no DELETE endpoint)")
         
         if created_route_id:
-            print("   34d. Deleting test navigation route")
+            print("   35e. Deleting test navigation route")
             response = requests.delete(f"{API_BASE_URL}/navigation/routes/{created_route_id}", timeout=10)
             print(f"      Status Code: {response.status_code}")
         
         # Delete test video bookmark
         if created_bookmark_id:
-            print("   34e. Deleting test video bookmark")
+            print("   35f. Deleting test video bookmark")
             response = requests.delete(f"{API_BASE_URL}/video-bookmarks/{created_bookmark_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test video bookmark deleted successfully")
@@ -2131,13 +2569,13 @@ def cleanup_test_data(created_user_id, created_site_id, created_detection_id, cr
         
         # Delete AI detection if created
         if created_detection_id:
-            print("   34f. Deleting test AI detection")
+            print("   35g. Deleting test AI detection")
             response = requests.delete(f"{API_BASE_URL}/ai-detections/{created_detection_id}", timeout=10)
             print(f"      Status Code: {response.status_code}")
         
         # Delete AI model if created
         if created_model_id:
-            print("   34g. Deleting test AI model")
+            print("   35h. Deleting test AI model")
             response = requests.delete(f"{API_BASE_URL}/ai-models/{created_model_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test AI model deleted successfully")
@@ -2146,7 +2584,7 @@ def cleanup_test_data(created_user_id, created_site_id, created_detection_id, cr
         
         # Delete site if created
         if created_site_id:
-            print("   34h. Deleting test site")
+            print("   35i. Deleting test site")
             response = requests.delete(f"{API_BASE_URL}/sites/{created_site_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test site deleted successfully")
@@ -2155,12 +2593,12 @@ def cleanup_test_data(created_user_id, created_site_id, created_detection_id, cr
         
         # Delete user if created
         if created_user_id:
-            print("   34i. Deleting test user")
+            print("   35j. Deleting test user")
             response = requests.delete(f"{API_BASE_URL}/users/{created_user_id}", timeout=10)
             print(f"      Status Code: {response.status_code}")
         
         # Note: We don't delete video export as there are no DELETE endpoints implemented
-        print("   34j. Video export cleanup skipped (no DELETE endpoint)")
+        print("   35k. Video export cleanup skipped (no DELETE endpoint)")
         
         print("   ✅ Test data cleanup completed")
         return True
