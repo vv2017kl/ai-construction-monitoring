@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script
-Tests the FastAPI backend endpoints to ensure proper functionality
+Backend API Testing Script for AI Construction Management System
+Tests the MySQL-based FastAPI backend endpoints to ensure proper functionality
 """
 
 import requests
@@ -10,6 +10,7 @@ import sys
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import uuid
 
 # Load environment variables
 load_dotenv('/app/frontend/.env')
@@ -18,8 +19,29 @@ load_dotenv('/app/frontend/.env')
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL')
 API_BASE_URL = f"{BACKEND_URL}/api"
 
-print(f"Testing Backend API at: {API_BASE_URL}")
-print("=" * 60)
+print(f"Testing AI Construction Management Backend API at: {API_BASE_URL}")
+print("=" * 80)
+
+# Test data for creating records
+TEST_SITE_DATA = {
+    "name": "Construction Site Alpha",
+    "code": "CSA-001",
+    "address": "123 Construction Ave, Builder City, BC 12345",
+    "type": "commercial",
+    "phase": "construction",
+    "manager_id": None  # Will be set after creating a user
+}
+
+TEST_USER_DATA = {
+    "username": "john_manager",
+    "email": "john.manager@construction.com",
+    "first_name": "John",
+    "last_name": "Manager",
+    "password": "SecurePass123!",
+    "role": "site_manager",
+    "department": "Operations",
+    "phone": "+1-555-0123"
+}
 
 def test_root_endpoint():
     """Test the root API endpoint"""
@@ -31,7 +53,7 @@ def test_root_endpoint():
         
         if response.status_code == 200:
             data = response.json()
-            if data.get("message") == "Hello World":
+            if "AI Construction Management API" in data.get("message", ""):
                 print("   ✅ Root endpoint working correctly")
                 return True
             else:
@@ -39,6 +61,61 @@ def test_root_endpoint():
                 return False
         else:
             print("   ❌ Root endpoint failed")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_health_endpoint():
+    """Test the health check endpoint"""
+    print("\n2. Testing Health Check Endpoint (GET /api/health)")
+    try:
+        response = requests.get(f"{API_BASE_URL}/health", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        print(f"   Response: {response.json()}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("status") == "healthy" and data.get("database") == "connected":
+                print("   ✅ Health check passed - MySQL database connected")
+                return True
+            else:
+                print("   ❌ Health check failed - database connection issue")
+                return False
+        else:
+            print("   ❌ Health endpoint failed")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_dashboard_stats():
+    """Test the dashboard stats endpoint"""
+    print("\n3. Testing Dashboard Stats (GET /api/dashboard/stats)")
+    try:
+        response = requests.get(f"{API_BASE_URL}/dashboard/stats", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        print(f"   Response: {response.json()}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            required_fields = ["total_sites", "active_sites", "total_users", "total_cameras", "active_alerts"]
+            if all(field in data for field in required_fields):
+                print("   ✅ Dashboard stats endpoint working correctly")
+                return True
+            else:
+                print("   ❌ Missing required fields in dashboard stats")
+                return False
+        else:
+            print("   ❌ Dashboard stats endpoint failed")
             return False
             
     except requests.exceptions.RequestException as e:
