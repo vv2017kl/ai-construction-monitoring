@@ -1677,3 +1677,386 @@ class VideoQualityMetric(Base):
         Index('idx_video_quality_issues', 'file_corruption_detected', 'recording_gaps_detected'),
         Index('idx_video_quality_lighting', 'lighting_condition', 'analysis_date'),
     )
+
+# TIME-LAPSE & PROGRESS TRACKING TABLES
+class TimelapseSequence(Base):
+    __tablename__ = "timelapse_sequences"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    
+    # Basic sequence information
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Source configuration
+    primary_camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    additional_camera_ids = Column(JSON)  # Array of additional camera IDs for multi-camera sequences
+    
+    # Time range
+    start_datetime = Column(TIMESTAMP, nullable=False)
+    end_datetime = Column(TIMESTAMP, nullable=False)
+    duration_seconds = Column(Integer, nullable=False)
+    
+    # Generation settings
+    compression_level = Column(SQLEnum(CompressionLevel), default=CompressionLevel.medium)
+    frame_rate_fps = Column(Integer, default=30)
+    playback_speed = Column(Decimal(5,2), default=1.0)  # Default playback speed multiplier
+    resolution_width = Column(Integer, default=1920)
+    resolution_height = Column(Integer, default=1080)
+    
+    # Processing information
+    generation_status = Column(SQLEnum(GenerationStatus), default=GenerationStatus.queued)
+    processing_started_at = Column(TIMESTAMP)
+    processing_completed_at = Column(TIMESTAMP)
+    processing_duration_seconds = Column(Integer)
+    
+    # File information
+    output_file_path = Column(String(500))
+    output_file_format = Column(String(10))  # mp4, gif, webm, avi
+    file_size_bytes = Column(BigInteger)
+    thumbnail_path = Column(String(500))
+    preview_gif_path = Column(String(500))
+    
+    # Quality metrics
+    total_frames_processed = Column(Integer)
+    frames_with_activity = Column(Integer)
+    activity_score = Column(Decimal(5,2))  # 0-10 overall activity level
+    quality_score = Column(Decimal(5,2))  # 0-10 visual quality assessment
+    
+    # Metadata
+    weather_conditions = Column(JSON)  # Weather during the time period
+    project_phase = Column(String(100))  # Construction phase during sequence
+    milestone_events = Column(JSON)  # Major milestones captured in sequence
+    
+    # Usage and sharing
+    view_count = Column(Integer, default=0)
+    download_count = Column(Integer, default=0)
+    share_count = Column(Integer, default=0)
+    bookmark_count = Column(Integer, default=0)
+    
+    # Status and lifecycle
+    status = Column(SQLEnum(SequenceStatus), default=SequenceStatus.active)
+    archived_at = Column(TIMESTAMP)
+    retention_date = Column(Date)  # When sequence can be deleted
+    
+    # Error handling
+    error_message = Column(Text)
+    retry_count = Column(Integer, default=0)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    primary_camera = relationship("Camera")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_timelapse_sequences_site', 'site_id', 'created_at'),
+        Index('idx_timelapse_sequences_creator', 'created_by', 'created_at'),
+        Index('idx_timelapse_sequences_camera', 'primary_camera_id', 'start_datetime'),
+        Index('idx_timelapse_sequences_status', 'generation_status', 'processing_started_at'),
+        Index('idx_timelapse_sequences_timerange', 'start_datetime', 'end_datetime'),
+        Index('idx_timelapse_sequences_quality', 'quality_score', 'activity_score'),
+    )
+
+class TimelapseBookmark(Base):
+    __tablename__ = "timelapse_bookmarks"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    timelapse_sequence_id = Column(CHAR(36), ForeignKey('timelapse_sequences.id'), nullable=False)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Bookmark details
+    bookmark_name = Column(String(255), nullable=False)
+    description = Column(Text)
+    
+    # Temporal information
+    timestamp_seconds = Column(Decimal(10,3), nullable=False)  # Precise timestamp within sequence
+    frame_number = Column(Integer)  # Exact frame number for precise positioning
+    
+    # Context information
+    bookmark_type = Column(SQLEnum(TimelapseBookmarkType), default=TimelapseBookmarkType.manual)
+    activity_detected = Column(String(100))  # Type of activity at bookmark
+    personnel_count = Column(Integer)  # Number of personnel visible at bookmark
+    equipment_present = Column(JSON)  # Array of equipment visible
+    
+    # Visual markers
+    thumbnail_path = Column(String(500))  # Thumbnail image at bookmark time
+    marker_color = Column(String(7), default='#FFA500')  # Hex color for timeline display
+    marker_icon = Column(String(50))  # Icon identifier for bookmark type
+    
+    # Annotations
+    annotations = Column(JSON)  # Array of annotation objects with coordinates and text
+    highlight_areas = Column(JSON)  # Array of highlight regions in the frame
+    
+    # Collaboration
+    is_shared = Column(Boolean, default=False)
+    shared_with = Column(JSON)  # Array of user IDs with access
+    comments_enabled = Column(Boolean, default=True)
+    
+    # Workflow status
+    status = Column(SQLEnum(SequenceStatus), default=SequenceStatus.active)
+    reviewed = Column(Boolean, default=False)
+    reviewed_by = Column(CHAR(36), ForeignKey('users.id'))
+    reviewed_at = Column(TIMESTAMP)
+    
+    # Usage tracking
+    access_count = Column(Integer, default=0)
+    last_accessed = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    timelapse_sequence = relationship("TimelapseSequence")
+    user = relationship("User", foreign_keys=[user_id])
+    reviewed_by_user = relationship("User", foreign_keys=[reviewed_by])
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('user_id', 'timelapse_sequence_id', 'timestamp_seconds', 
+                        name='unique_user_sequence_timestamp'),
+        Index('idx_timelapse_bookmarks_sequence', 'timelapse_sequence_id', 'timestamp_seconds'),
+        Index('idx_timelapse_bookmarks_user', 'user_id', 'created_at'),
+        Index('idx_timelapse_bookmarks_type', 'bookmark_type', 'status'),
+        Index('idx_timelapse_bookmarks_shared', 'is_shared'),
+    )
+
+class TimelapseEvent(Base):
+    __tablename__ = "timelapse_events"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    timelapse_sequence_id = Column(CHAR(36), ForeignKey('timelapse_sequences.id'), nullable=False)
+    
+    # Event timing
+    event_timestamp = Column(TIMESTAMP, nullable=False)
+    sequence_timestamp_seconds = Column(Decimal(10,3), nullable=False)  # Time within the sequence
+    duration_seconds = Column(Integer)  # Event duration if applicable
+    
+    # Event classification
+    event_type = Column(SQLEnum(TimelapseEventType), nullable=False)
+    event_category = Column(String(100))  # More specific categorization
+    
+    # Event details
+    event_title = Column(String(255), nullable=False)
+    event_description = Column(Text)
+    confidence_score = Column(Decimal(5,2))  # AI confidence in event detection
+    
+    # Detected elements
+    personnel_count = Column(Integer, default=0)
+    equipment_detected = Column(JSON)  # Array of detected equipment
+    vehicle_count = Column(Integer, default=0)
+    activity_level = Column(SQLEnum(ActivityLevel), default=ActivityLevel.moderate)
+    
+    # Spatial information
+    detection_zones = Column(JSON)  # Array of zone IDs where event occurred
+    bounding_boxes = Column(JSON)  # Coordinate data for detected objects
+    camera_angle_info = Column(JSON)  # Camera positioning data
+    
+    # Correlation data
+    related_alert_id = Column(CHAR(36), ForeignKey('alerts.id'))  # Link to safety alerts if applicable
+    related_detection_ids = Column(JSON)  # Array of AI detection IDs
+    milestone_reference = Column(String(255))  # Project milestone reference
+    
+    # Visual evidence
+    thumbnail_path = Column(String(500))
+    evidence_images = Column(JSON)  # Array of evidence image paths
+    annotation_data = Column(JSON)  # Visual annotations and highlights
+    
+    # Impact assessment
+    impact_level = Column(SQLEnum(ImpactLevel), default=ImpactLevel.minimal)
+    safety_implications = Column(SQLEnum(SafetyImplications), default=SafetyImplications.none)
+    
+    # Verification and validation
+    auto_detected = Column(Boolean, default=True)
+    manually_verified = Column(Boolean, default=False)
+    verified_by = Column(CHAR(36), ForeignKey('users.id'))
+    verified_at = Column(TIMESTAMP)
+    
+    # Status
+    status = Column(SQLEnum(EventStatus), default=EventStatus.detected)
+    
+    # Relationships
+    timelapse_sequence = relationship("TimelapseSequence")
+    related_alert = relationship("Alert")
+    verified_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_timelapse_events_sequence_time', 'timelapse_sequence_id', 'sequence_timestamp_seconds'),
+        Index('idx_timelapse_events_type', 'event_type', 'event_category'),
+        Index('idx_timelapse_events_timestamp', 'event_timestamp'),
+        Index('idx_timelapse_events_impact', 'impact_level', 'safety_implications'),
+        Index('idx_timelapse_events_verification', 'auto_detected', 'manually_verified'),
+        Index('idx_timelapse_events_confidence', 'confidence_score'),
+    )
+
+class TimelapseShare(Base):
+    __tablename__ = "timelapse_shares"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    timelapse_sequence_id = Column(CHAR(36), ForeignKey('timelapse_sequences.id'), nullable=False)
+    
+    # Sharing details
+    shared_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    share_type = Column(SQLEnum(ShareType), nullable=False)
+    
+    # Recipients and access
+    shared_with_users = Column(JSON)  # Array of user IDs
+    shared_with_emails = Column(JSON)  # Array of email addresses for external sharing
+    access_level = Column(SQLEnum(AccessLevel), default=AccessLevel.view)
+    
+    # Share configuration
+    share_token = Column(String(255), unique=True)
+    password_protected = Column(Boolean, default=False)
+    password_hash = Column(String(255))
+    
+    # Playback context
+    start_time_seconds = Column(Decimal(10,3), default=0)  # Starting playback position
+    playback_speed = Column(Decimal(5,2), default=1.0)
+    include_bookmarks = Column(Boolean, default=True)
+    include_annotations = Column(Boolean, default=True)
+    
+    # Restrictions and limits
+    expires_at = Column(TIMESTAMP)
+    max_views = Column(Integer)
+    max_downloads = Column(Integer)
+    allowed_ip_ranges = Column(JSON)
+    
+    # Usage tracking
+    view_count = Column(Integer, default=0)
+    download_count = Column(Integer, default=0)
+    unique_viewers = Column(Integer, default=0)
+    last_accessed_at = Column(TIMESTAMP)
+    
+    # Access logs summary
+    total_watch_time_seconds = Column(Integer, default=0)
+    average_session_duration_seconds = Column(Integer)
+    bookmarks_created_by_viewers = Column(Integer, default=0)
+    
+    # Feedback collection
+    allow_feedback = Column(Boolean, default=False)
+    feedback_collected = Column(JSON)  # Array of feedback objects
+    
+    # Share metadata
+    share_title = Column(String(255))
+    share_description = Column(Text)
+    custom_thumbnail_path = Column(String(500))
+    
+    # Status and lifecycle
+    status = Column(SQLEnum(ShareStatus), default=ShareStatus.active)
+    revoked_at = Column(TIMESTAMP)
+    revoked_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    timelapse_sequence = relationship("TimelapseSequence")
+    shared_by_user = relationship("User", foreign_keys=[shared_by])
+    revoked_by_user = relationship("User", foreign_keys=[revoked_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_timelapse_shares_sequence', 'timelapse_sequence_id', 'created_at'),
+        Index('idx_timelapse_shares_token', 'share_token', 'status'),
+        Index('idx_timelapse_shares_sharer', 'shared_by', 'created_at'),
+        Index('idx_timelapse_shares_expires', 'expires_at', 'status'),
+        Index('idx_timelapse_shares_usage', 'view_count', 'download_count'),
+    )
+
+class ConstructionMilestone(Base):
+    __tablename__ = "construction_milestones"
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Milestone identification
+    milestone_name = Column(String(255), nullable=False)
+    milestone_code = Column(String(50))  # Project-specific milestone identifier
+    description = Column(Text)
+    
+    # Project context
+    project_phase = Column(String(100))
+    work_package = Column(String(100))
+    contractor = Column(String(255))
+    
+    # Scheduling information
+    planned_start_date = Column(Date)
+    planned_completion_date = Column(Date)
+    actual_start_date = Column(Date)
+    actual_completion_date = Column(Date)
+    
+    # Progress tracking
+    completion_percentage = Column(Decimal(5,2), default=0.00)
+    status = Column(SQLEnum(MilestoneStatus), default=MilestoneStatus.not_started)
+    
+    # Dependencies
+    prerequisite_milestones = Column(JSON)  # Array of milestone IDs that must be completed first
+    dependent_milestones = Column(JSON)  # Array of milestone IDs that depend on this one
+    
+    # Quality and compliance
+    quality_checkpoints = Column(JSON)  # Array of quality check requirements
+    compliance_requirements = Column(JSON)  # Regulatory compliance requirements
+    safety_requirements = Column(JSON)  # Safety-specific requirements
+    
+    # Documentation
+    specification_documents = Column(JSON)  # Array of specification document references
+    approval_documents = Column(JSON)  # Array of approval document references
+    inspection_records = Column(JSON)  # Array of inspection record references
+    
+    # Visual documentation
+    reference_images = Column(JSON)  # Array of reference/plan images
+    progress_images = Column(JSON)  # Array of progress photos
+    timelapse_sequences = Column(JSON)  # Array of related time-lapse sequence IDs
+    
+    # Budget and resources
+    budgeted_amount = Column(Decimal(12,2))
+    actual_cost = Column(Decimal(12,2))
+    allocated_resources = Column(JSON)  # Personnel and equipment allocations
+    
+    # Timeline analysis
+    planned_duration_days = Column(Integer)
+    actual_duration_days = Column(Integer)
+    delay_days = Column(Integer, default=0)
+    delay_reasons = Column(JSON)  # Array of delay reason descriptions
+    
+    # Automated detection
+    auto_detection_enabled = Column(Boolean, default=False)
+    detection_criteria = Column(JSON)  # Criteria for automated milestone detection
+    last_detection_check = Column(TIMESTAMP)
+    
+    # Approval workflow
+    requires_approval = Column(Boolean, default=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approved_at = Column(TIMESTAMP)
+    approval_notes = Column(Text)
+    
+    # Change management
+    change_requests = Column(JSON)  # Array of change request references
+    revision_number = Column(Integer, default=1)
+    previous_version_id = Column(CHAR(36), ForeignKey('construction_milestones.id'))
+    
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    previous_version = relationship("ConstructionMilestone", remote_side=[id])
+    
+    # Indexes
+    __table_args__ = (
+        UniqueConstraint('site_id', 'milestone_code', name='unique_site_milestone_code'),
+        Index('idx_construction_milestones_site', 'site_id', 'planned_completion_date'),
+        Index('idx_construction_milestones_status', 'status', 'completion_percentage'),
+        Index('idx_construction_milestones_phase', 'project_phase', 'status'),
+        Index('idx_construction_milestones_schedule', 'planned_start_date', 'planned_completion_date'),
+        Index('idx_construction_milestones_delays', 'delay_days', 'status'),
+        Index('idx_construction_milestones_creator', 'created_by', 'created_at'),
+    )
