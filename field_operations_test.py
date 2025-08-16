@@ -37,12 +37,12 @@ def test_field_operations_inspection_paths():
     }
     
     user_data = {
-        "username": f"test_inspector_{uuid.uuid4().hex[:8]}",
-        "email": f"inspector.{uuid.uuid4().hex[:8]}@test.com",
+        "username": f"test_supervisor_{uuid.uuid4().hex[:8]}",
+        "email": f"supervisor.{uuid.uuid4().hex[:8]}@test.com",
         "first_name": "Test",
-        "last_name": "Inspector",
+        "last_name": "Supervisor",
         "password": "TestPass123!",
-        "role": "inspector",
+        "role": "supervisor",  # Fixed: using valid enum value
         "department": "Safety"
     }
     
