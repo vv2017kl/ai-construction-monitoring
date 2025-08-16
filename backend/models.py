@@ -52,11 +52,17 @@ class SafetyLevel(enum.Enum):
     restricted = "restricted"
     danger = "danger"
 
-class AccessLevel(enum.Enum):
+class ZoneAccessLevel(enum.Enum):
     public = "public"
     personnel = "personnel"
     authorized = "authorized"
     management = "management"
+
+class ShareAccessLevel(enum.Enum):
+    view = "view"
+    comment = "comment"
+    bookmark = "bookmark"
+    download = "download"
 
 class ZoneStatus(enum.Enum):
     active = "active"
