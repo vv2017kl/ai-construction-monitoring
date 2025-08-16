@@ -2093,51 +2093,81 @@ def test_field_operations_analytics(site_id):
         print(f"   ❌ Unexpected error: {e}")
         return False
 
-def cleanup_test_data(site_id, user_id, detection_id=None, model_id=None, bookmark_id=None, export_id=None, 
-                     path_id=None, waypoint_ids=None, execution_id=None, template_id=None):
+def cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
+                     created_bookmark_id, created_export_id, created_route_id=None, created_waypoint_id=None, 
+                     created_session_id=None, created_camera_config_id=None):
     """Clean up test data created during testing"""
-    print("\n23. Cleaning up test data")
+    print("\n34. Cleaning up test data")
     
     try:
+        # Delete navigation test data
+        if created_camera_config_id:
+            print("   34a. Deleting test street view camera config")
+            response = requests.delete(f"{API_BASE_URL}/navigation/street-view-cameras/{created_camera_config_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+        
+        if created_waypoint_id:
+            print("   34b. Deleting test route waypoint")
+            response = requests.delete(f"{API_BASE_URL}/navigation/waypoints/{created_waypoint_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+        
+        # Note: Navigation sessions don't have DELETE endpoint, they are archived
+        if created_session_id:
+            print("   34c. Navigation session will remain (no DELETE endpoint)")
+        
+        if created_route_id:
+            print("   34d. Deleting test navigation route")
+            response = requests.delete(f"{API_BASE_URL}/navigation/routes/{created_route_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+        
         # Delete test video bookmark
-        if bookmark_id:
-            print("   23a. Deleting test video bookmark")
-            response = requests.delete(f"{API_BASE_URL}/video-bookmarks/{bookmark_id}", timeout=10)
+        if created_bookmark_id:
+            print("   34e. Deleting test video bookmark")
+            response = requests.delete(f"{API_BASE_URL}/video-bookmarks/{created_bookmark_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test video bookmark deleted successfully")
             else:
                 print(f"      ⚠️ Could not delete test video bookmark: {response.status_code}")
         
-        # Delete test AI model
-        if model_id:
-            print("   23b. Deleting test AI model")
-            response = requests.delete(f"{API_BASE_URL}/ai-models/{model_id}", timeout=10)
+        # Delete AI detection if created
+        if created_detection_id:
+            print("   34f. Deleting test AI detection")
+            response = requests.delete(f"{API_BASE_URL}/ai-detections/{created_detection_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+        
+        # Delete AI model if created
+        if created_model_id:
+            print("   34g. Deleting test AI model")
+            response = requests.delete(f"{API_BASE_URL}/ai-models/{created_model_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test AI model deleted successfully")
             else:
                 print(f"      ⚠️ Could not delete test AI model: {response.status_code}")
         
-        # Delete test site
-        if site_id:
-            print("   23c. Deleting test site")
-            response = requests.delete(f"{API_BASE_URL}/sites/{site_id}", timeout=10)
+        # Delete site if created
+        if created_site_id:
+            print("   34h. Deleting test site")
+            response = requests.delete(f"{API_BASE_URL}/sites/{created_site_id}", timeout=10)
             if response.status_code == 200:
                 print("      ✅ Test site deleted successfully")
             else:
                 print(f"      ⚠️ Could not delete test site: {response.status_code}")
         
-        # Note: We don't delete the user, AI detection, or video export as there are no DELETE endpoints implemented
-        # This is acceptable for testing purposes
-        print("   23d. Test user, AI detection, and video export cleanup skipped (no DELETE endpoints)")
+        # Delete user if created
+        if created_user_id:
+            print("   34i. Deleting test user")
+            response = requests.delete(f"{API_BASE_URL}/users/{created_user_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
         
+        # Note: We don't delete video export as there are no DELETE endpoints implemented
+        print("   34j. Video export cleanup skipped (no DELETE endpoint)")
+        
+        print("   ✅ Test data cleanup completed")
         return True
         
-    except requests.exceptions.RequestException as e:
-        print(f"   ⚠️ Cleanup connection error: {e}")
-        return False
     except Exception as e:
-        print(f"   ⚠️ Cleanup error: {e}")
-        return False
+        print(f"   ⚠️ Cleanup error (non-critical): {e}")
+        return True  # Don't fail the test suite for cleanup issues
 
 def test_navigation_routes_api(site_id, user_id):
     """Test Navigation Routes API endpoints (full CRUD)"""
