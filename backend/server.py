@@ -269,6 +269,87 @@ class NotificationCreateRequest(BaseModel):
     related_id: Optional[str] = None
     related_type: Optional[str] = None
 
+class VideoBookmarkResponse(BaseModel):
+    id: str
+    camera_id: str
+    user_id: str
+    bookmark_date: datetime
+    timestamp_seconds: int
+    title: str
+    description: Optional[str] = None
+    bookmark_type: str
+    priority_level: Optional[str] = None
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class VideoBookmarkCreateRequest(BaseModel):
+    camera_id: str
+    bookmark_date: str  # YYYY-MM-DD format
+    timestamp_seconds: int
+    title: str
+    description: Optional[str] = None
+    bookmark_type: str
+    priority_level: Optional[str] = "medium"
+
+class VideoAccessLogResponse(BaseModel):
+    id: str
+    user_id: str
+    camera_id: str
+    session_id: str
+    video_date: datetime
+    access_method: str
+    access_reason: str
+    session_duration_minutes: Optional[int] = None
+    total_video_watched_seconds: int = 0
+    access_start: datetime
+
+    class Config:
+        from_attributes = True
+
+class VideoExportResponse(BaseModel):
+    id: str
+    user_id: str
+    camera_id: str
+    source_video_date: datetime
+    export_type: str
+    export_format: str
+    export_status: str
+    export_purpose: str
+    file_size_bytes: Optional[int] = None
+    download_url: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class VideoExportCreateRequest(BaseModel):
+    camera_id: str
+    source_video_date: str  # YYYY-MM-DD format
+    start_timestamp_seconds: int
+    end_timestamp_seconds: int
+    export_type: str
+    export_format: str
+    export_purpose: str
+    export_justification: str
+    quality_setting: Optional[str] = "high"
+
+class VideoQualityMetricResponse(BaseModel):
+    id: str
+    camera_id: str
+    analysis_date: datetime
+    analysis_hour: int = 0
+    sharpness_score: Optional[float] = None
+    brightness_score: Optional[float] = None
+    forensic_quality_rating: Optional[str] = None
+    lighting_condition: Optional[str] = None
+    calculated_at: datetime
+
+    class Config:
+        from_attributes = True
+
 # Basic API routes
 @api_router.get("/")
 async def root():
