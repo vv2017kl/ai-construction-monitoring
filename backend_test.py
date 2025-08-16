@@ -3196,6 +3196,10 @@ def main():
     created_waypoint_id = None
     created_session_id = None
     created_camera_config_id = None
+    created_certification_id = None
+    created_metric_id = None
+    created_admin_metric_id = None
+    created_health_log_id = None
     
     # Test basic connectivity
     connectivity_ok = test_api_connectivity()
@@ -3331,10 +3335,57 @@ def main():
         print("   ⚠️ Skipping Navigation Analytics tests - missing site or route")
         results.append(("Navigation Analytics API", False))
     
+    # COMPLETE ANALYTICS & REPORTING TESTS
+    print("\n" + "=" * 80)
+    print("STARTING COMPLETE ANALYTICS & REPORTING API TESTS")
+    print("=" * 80)
+    
+    # Test Analytics - User Certifications API
+    if created_user_id:
+        analytics_certifications_ok, created_certification_id = test_analytics_certifications_api(created_user_id)
+        results.append(("Analytics Certifications API", analytics_certifications_ok))
+    else:
+        print("   ⚠️ Skipping Analytics Certifications tests - no user created")
+        results.append(("Analytics Certifications API", False))
+    
+    # Test Analytics - Performance Metrics API
+    if created_site_id:
+        analytics_metrics_ok, created_metric_id = test_analytics_performance_metrics_api(created_site_id)
+        results.append(("Analytics Performance Metrics API", analytics_metrics_ok))
+    else:
+        print("   ⚠️ Skipping Analytics Performance Metrics tests - no site created")
+        results.append(("Analytics Performance Metrics API", False))
+    
+    # Test Analytics - Summary APIs
+    if created_site_id:
+        analytics_summary_ok = test_analytics_summary_apis(created_site_id)
+        results.append(("Analytics Summary APIs", analytics_summary_ok))
+    else:
+        print("   ⚠️ Skipping Analytics Summary tests - no site created")
+        results.append(("Analytics Summary APIs", False))
+    
+    # ADMIN DASHBOARD & SYSTEM MANAGEMENT TESTS
+    print("\n" + "=" * 80)
+    print("STARTING ADMIN DASHBOARD & SYSTEM MANAGEMENT API TESTS")
+    print("=" * 80)
+    
+    # Test Admin - Dashboard Metrics API
+    admin_dashboard_metrics_ok, created_admin_metric_id = test_admin_dashboard_metrics_api()
+    results.append(("Admin Dashboard Metrics API", admin_dashboard_metrics_ok))
+    
+    # Test Admin - System Health API
+    admin_system_health_ok, created_health_log_id = test_admin_system_health_api()
+    results.append(("Admin System Health API", admin_system_health_ok))
+    
+    # Test Admin - Analytics API
+    admin_analytics_ok = test_admin_analytics_api()
+    results.append(("Admin Analytics API", admin_analytics_ok))
+    
     # Cleanup test data
     cleanup_ok = cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                                  created_bookmark_id, created_export_id, created_route_id, created_waypoint_id, 
-                                 created_session_id, created_camera_config_id)
+                                 created_session_id, created_camera_config_id, created_certification_id,
+                                 created_metric_id, created_admin_metric_id, created_health_log_id)
     results.append(("Test Data Cleanup", cleanup_ok))
     
     # Summary
@@ -3347,21 +3398,29 @@ def main():
     ai_tests_passed = 0
     video_tests_passed = 0
     navigation_tests_passed = 0
+    analytics_tests_passed = 0
+    admin_tests_passed = 0
     
     for test_name, passed in results:
         status = "✅ PASS" if passed else "❌ FAIL"
-        print(f"{test_name:<35} {status}")
+        print(f"{test_name:<40} {status}")
         if not passed:
             all_passed = False
         
         # Count test categories
-        if any(nav_keyword in test_name for nav_keyword in ["Navigation", "Route", "Street View"]):
+        if any(admin_keyword in test_name for admin_keyword in ["Admin"]):
+            if passed:
+                admin_tests_passed += 1
+        elif any(analytics_keyword in test_name for analytics_keyword in ["Analytics"]):
+            if passed:
+                analytics_tests_passed += 1
+        elif any(nav_keyword in test_name for nav_keyword in ["Navigation", "Route", "Street View"]):
             if passed:
                 navigation_tests_passed += 1
         elif any(video_keyword in test_name for video_keyword in ["Video", "video"]):
             if passed:
                 video_tests_passed += 1
-        elif any(ai_keyword in test_name for ai_keyword in ["AI", "Recording", "Analytics", "Database Verification"]):
+        elif any(ai_keyword in test_name for ai_keyword in ["AI", "Recording", "Database Verification"]):
             if passed:
                 ai_tests_passed += 1
         else:
@@ -3373,6 +3432,8 @@ def main():
     print(f"AI & Detection Tests: {ai_tests_passed} passed")
     print(f"Video & Evidence Tests: {video_tests_passed} passed")
     print(f"Navigation & Street View Tests: {navigation_tests_passed} passed")
+    print(f"Analytics & Reporting Tests: {analytics_tests_passed} passed")
+    print(f"Admin Dashboard & System Tests: {admin_tests_passed} passed")
     
     if all_passed:
         print("🎉 ALL BACKEND TESTS PASSED!")
@@ -3381,6 +3442,8 @@ def main():
         print("✅ All AI & Detection endpoints functioning correctly")
         print("✅ All Video & Evidence Management endpoints functioning correctly")
         print("✅ All Navigation & Street View endpoints functioning correctly")
+        print("✅ All Analytics & Reporting endpoints functioning correctly")
+        print("✅ All Admin Dashboard & System Management endpoints functioning correctly")
         print("✅ CRUD operations working")
         print("✅ Error handling implemented")
         print("✅ Database tables verified")
