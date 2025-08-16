@@ -340,6 +340,87 @@ class AnalysisMethod(enum.Enum):
     manual = "manual"
     hybrid = "hybrid"
 
+class CompressionLevel(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+class GenerationStatus(enum.Enum):
+    queued = "queued"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+    cancelled = "cancelled"
+
+class SequenceStatus(enum.Enum):
+    active = "active"
+    archived = "archived"
+    deleted = "deleted"
+
+class TimelapseBookmarkType(enum.Enum):
+    manual = "manual"
+    milestone = "milestone"
+    activity = "activity"
+    safety = "safety"
+    progress = "progress"
+    custom = "custom"
+
+class TimelapseEventType(enum.Enum):
+    personnel_activity = "personnel_activity"
+    equipment_movement = "equipment_movement"
+    safety_incident = "safety_incident"
+    milestone_completion = "milestone_completion"
+    weather_change = "weather_change"
+    construction_phase = "construction_phase"
+    inspection = "inspection"
+    delivery = "delivery"
+
+class ImpactLevel(enum.Enum):
+    minimal = "minimal"
+    low = "low"
+    moderate = "moderate"
+    significant = "significant"
+    critical = "critical"
+
+class SafetyImplications(enum.Enum):
+    none = "none"
+    minor = "minor"
+    moderate = "moderate"
+    serious = "serious"
+    critical = "critical"
+
+class EventStatus(enum.Enum):
+    detected = "detected"
+    verified = "verified"
+    false_positive = "false_positive"
+    archived = "archived"
+
+class ShareType(enum.Enum):
+    link = "link"
+    email = "email"
+    embed = "embed"
+    download = "download"
+
+class AccessLevel(enum.Enum):
+    view = "view"
+    comment = "comment"
+    bookmark = "bookmark"
+    download = "download"
+
+class ShareStatus(enum.Enum):
+    active = "active"
+    expired = "expired"
+    disabled = "disabled"
+    revoked = "revoked"
+
+class MilestoneStatus(enum.Enum):
+    not_started = "not_started"
+    in_progress = "in_progress"
+    completed = "completed"
+    delayed = "delayed"
+    cancelled = "cancelled"
+    on_hold = "on_hold"
+
 class AlertStatus(enum.Enum):
     open = "open"
     acknowledged = "acknowledged"
