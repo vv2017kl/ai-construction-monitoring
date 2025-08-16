@@ -405,3 +405,144 @@ class ConstructionMilestoneCreateRequest(BaseModel):
     project_phase: Optional[str] = None
     planned_start_date: Optional[str] = None    # YYYY-MM-DD format
     planned_completion_date: Optional[str] = None  # YYYY-MM-DD format
+
+# FIELD OPERATIONS & ASSESSMENT SCHEMAS
+class InspectionPathResponse(BaseModel):
+    id: str
+    site_id: str
+    name: str
+    description: Optional[str] = None
+    path_type: str
+    status: str
+    priority: str
+    created_by: str
+    estimated_duration_minutes: Optional[int] = None
+    waypoint_count: int = 0
+    usage_count: int = 0
+    completion_rate: Optional[float] = None
+    is_scheduled: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class InspectionPathCreateRequest(BaseModel):
+    site_id: str
+    name: str
+    description: Optional[str] = None
+    path_type: str
+    priority: Optional[str] = "medium"
+    assigned_to: Optional[str] = None
+    estimated_duration_minutes: Optional[int] = None
+    zone_coverage: Optional[list] = None
+    is_scheduled: Optional[bool] = False
+    schedule_frequency: Optional[str] = None
+
+class PathWaypointResponse(BaseModel):
+    id: str
+    path_id: str
+    waypoint_order: int
+    waypoint_name: str
+    description: Optional[str] = None
+    coordinates_x: float
+    coordinates_y: float
+    waypoint_type: str
+    is_mandatory: bool = True
+    estimated_time_minutes: int = 5
+    safety_level: str
+    visit_count: int = 0
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PathWaypointCreateRequest(BaseModel):
+    path_id: str
+    waypoint_order: int
+    waypoint_name: str
+    description: Optional[str] = None
+    coordinates_x: float
+    coordinates_y: float
+    waypoint_type: str
+    zone_id: Optional[str] = None
+    is_mandatory: Optional[bool] = True
+    estimated_time_minutes: Optional[int] = 5
+    inspection_checklist: Optional[dict] = None
+
+class PathExecutionResponse(BaseModel):
+    id: str
+    path_id: str
+    executor_id: str
+    session_id: str
+    execution_type: str
+    execution_status: str
+    started_at: datetime
+    completed_at: Optional[datetime] = None
+    completion_percentage: Optional[float] = None
+    quality_score: Optional[float] = None
+    issues_found: int = 0
+    safety_incidents: int = 0
+    compliance_score: Optional[float] = None
+    is_completed: bool = False
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PathExecutionCreateRequest(BaseModel):
+    path_id: str
+    execution_type: str
+    execution_reason: Optional[str] = None
+    planned_duration_minutes: Optional[int] = None
+    weather_conditions: Optional[str] = None
+    equipment_used: Optional[list] = None
+
+class PathExecutionWaypointResponse(BaseModel):
+    id: str
+    execution_id: str
+    waypoint_id: str
+    visited_at: Optional[datetime] = None
+    time_spent_minutes: Optional[float] = None
+    is_skipped: bool = False
+    inspection_completed: bool = False
+    issues_found: int = 0
+    photos_taken: int = 0
+    ppe_compliance: bool = True
+    safety_protocol_followed: bool = True
+    requires_follow_up: bool = False
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PathTemplateResponse(BaseModel):
+    id: str
+    template_name: str
+    description: Optional[str] = None
+    template_type: str
+    difficulty_level: str
+    safety_level: str
+    base_waypoint_count: Optional[int] = None
+    estimated_duration_minutes: Optional[int] = None
+    usage_count: int = 0
+    success_rate: Optional[float] = None
+    user_rating: Optional[float] = None
+    is_public: bool = True
+    is_active: bool = True
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PathTemplateCreateRequest(BaseModel):
+    template_name: str
+    description: Optional[str] = None
+    template_type: str
+    difficulty_level: Optional[str] = "basic"
+    safety_level: Optional[str] = "medium"
+    base_waypoint_count: Optional[int] = None
+    estimated_duration_minutes: Optional[int] = None
+    recommended_zones: Optional[list] = None
+    required_equipment: Optional[list] = None
+    is_public: Optional[bool] = True
