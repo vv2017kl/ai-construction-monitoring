@@ -64,6 +64,14 @@ class SiteCreateRequest(BaseModel):
     phase: Optional[str] = None
     manager_id: Optional[str] = None
 
+class SiteUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    address: Optional[str] = None
+    type: Optional[str] = None
+    phase: Optional[str] = None
+    manager_id: Optional[str] = None
+
 class UserResponse(BaseModel):
     id: str
     username: str
