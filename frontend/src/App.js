@@ -103,10 +103,14 @@ function App() {
             <Route path="/reports" element={<SolutionUserReportsCenter />} />
             <Route path="/field-assessment" element={<SolutionUserFieldAssessment />} />
             <Route path="/profile" element={<SolutionUserMyProfile />} />
+            <Route path="/my-profile" element={<SolutionUserMyProfile />} />
+            <Route path="/settings" element={<SolutionUserSettings />} />
+            <Route path="/help" element={<SolutionUserHelpDocumentation />} />
             <Route path="/time-comparison" element={<SolutionUserTimeComparison />} />
             <Route path="/historical-street" element={<SolutionUserHistoricalStreetView />} />
             <Route path="/street-comparison" element={<SolutionUserStreetViewComparison />} />
             <Route path="/path-admin" element={<SolutionUserPathAdministration />} />
+            <Route path="/path-administration" element={<SolutionUserPathAdministration />} />
             <Route path="/cesium-dashboard" element={<CesiumDashboard />} />
             <Route path="/map-live-view/:cameraId" element={<MapLiveView />} />
             
