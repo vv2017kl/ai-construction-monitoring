@@ -78,6 +78,7 @@ api_router.include_router(video_evidence.router, tags=["Video & Evidence"])
 api_router.include_router(system_reports.router, tags=["System & Reports"])
 api_router.include_router(timelapse.router, tags=["Time-lapse & Progress"])
 api_router.include_router(field_operations.router, tags=["Field Operations & Assessment"])
+api_router.include_router(navigation.router, tags=["Navigation & Street View"])
 
 # Include the main router in the app
 app.include_router(api_router)
