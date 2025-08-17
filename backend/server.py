@@ -88,6 +88,7 @@ api_router.include_router(site_configuration.router, tags=["Site Configuration &
 api_router.include_router(system_monitoring.router, tags=["System Monitoring & Infrastructure Health"])
 api_router.include_router(integration_user_experience.router, tags=["Integration & User Experience"])
 api_router.include_router(street_view_comparison.router, tags=["Street View Comparison & Analysis"])
+api_router.include_router(historical_temporal_analysis.router, tags=["Historical Data & Temporal Analysis"])
 
 # Include the main router in the app
 app.include_router(api_router)
