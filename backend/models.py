@@ -7740,3 +7740,545 @@ class ProjectMilestone(Base):
         Index('idx_milestones_category', 'milestone_category', 'status'),
         Index('idx_milestones_performance', 'performance_score', 'schedule_variance_days'),
     )
+
+
+# RESOURCE MANAGEMENT & LOGISTICS TABLES
+
+# Resource Management enums
+class ResourceType(enum.Enum):
+    material = "material"
+    equipment = "equipment"
+    vehicle = "vehicle"
+    tool = "tool"
+    consumable = "consumable"
+
+class MaterialCategory(enum.Enum):
+    concrete = "concrete"
+    steel = "steel"
+    lumber = "lumber"
+    electrical = "electrical"
+    plumbing = "plumbing"
+    roofing = "roofing"
+    insulation = "insulation"
+    finishing = "finishing"
+
+class DeliveryStatus(enum.Enum):
+    scheduled = "scheduled"
+    in_transit = "in_transit"
+    delivered = "delivered"
+    delayed = "delayed"
+    cancelled = "cancelled"
+
+class StorageCondition(enum.Enum):
+    indoor_dry = "indoor_dry"
+    indoor_climate_controlled = "indoor_climate_controlled"
+    outdoor_covered = "outdoor_covered"
+    outdoor_uncovered = "outdoor_uncovered"
+    refrigerated = "refrigerated"
+
+class UsageStatus(enum.Enum):
+    available = "available"
+    reserved = "reserved"
+    in_use = "in_use"
+    maintenance = "maintenance"
+    damaged = "damaged"
+    retired = "retired"
+
+class VendorRating(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    satisfactory = "satisfactory"
+    poor = "poor"
+    blacklisted = "blacklisted"
+
+
+class MaterialInventory(Base):
+    __tablename__ = 'material_inventory'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Material identification
+    material_name = Column(String(255), nullable=False)
+    material_code = Column(String(100))  # SKU or internal code
+    material_category = Column(SQLEnum(MaterialCategory), nullable=False)
+    description = Column(Text)
+    
+    # Specifications
+    specifications = Column(JSON)  # Technical specifications
+    unit_of_measure = Column(String(50), nullable=False)  # tons, cubic meters, pieces, etc.
+    grade_quality = Column(String(100))  # Material grade or quality rating
+    
+    # Inventory tracking
+    quantity_on_hand = Column(Decimal(10,4), default=0.0000)
+    quantity_reserved = Column(Decimal(10,4), default=0.0000)
+    quantity_available = Column(Decimal(10,4), default=0.0000)
+    reorder_point = Column(Decimal(10,4))
+    maximum_stock_level = Column(Decimal(10,4))
+    
+    # Cost tracking
+    unit_cost = Column(Decimal(10,2), nullable=False)
+    total_value = Column(Decimal(15,2), default=0.00)
+    average_cost = Column(Decimal(10,2))  # Weighted average cost
+    
+    # Storage information
+    storage_location = Column(String(255))
+    storage_condition = Column(SQLEnum(StorageCondition), nullable=False)
+    storage_requirements = Column(Text)
+    
+    # Quality and lifecycle
+    expiry_date = Column(Date)
+    batch_number = Column(String(100))
+    quality_certification = Column(String(255))
+    shelf_life_days = Column(Integer)
+    
+    # Supplier information
+    primary_supplier_id = Column(CHAR(36), ForeignKey('users.id'))  # Assuming suppliers are in users
+    supplier_part_number = Column(String(100))
+    lead_time_days = Column(Integer)
+    
+    # Usage tracking
+    last_used_date = Column(Date)
+    monthly_usage_average = Column(Decimal(10,4))
+    usage_trend = Column(SQLEnum(TrendDirection))
+    
+    # Status and flags
+    is_active = Column(Boolean, default=True)
+    is_hazardous = Column(Boolean, default=False)
+    requires_certification = Column(Boolean, default=False)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    primary_supplier = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_inventory_site_category', 'site_id', 'material_category'),
+        Index('idx_inventory_stock', 'quantity_on_hand', 'reorder_point'),
+        Index('idx_inventory_cost', 'unit_cost', 'total_value'),
+        Index('idx_inventory_supplier', 'primary_supplier_id', 'material_category'),
+        Index('idx_inventory_expiry', 'expiry_date', 'is_active'),
+    )
+
+
+class ResourceScheduling(Base):
+    __tablename__ = 'resource_scheduling'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Resource identification
+    resource_type = Column(SQLEnum(ResourceType), nullable=False)
+    resource_id = Column(CHAR(36), nullable=False)  # ID of equipment, material, etc.
+    resource_name = Column(String(255), nullable=False)
+    
+    # Scheduling details
+    scheduled_start = Column(TIMESTAMP, nullable=False)
+    scheduled_end = Column(TIMESTAMP, nullable=False)
+    actual_start = Column(TIMESTAMP)
+    actual_end = Column(TIMESTAMP)
+    
+    # Usage details
+    requested_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    assigned_to = Column(CHAR(36), ForeignKey('users.id'))  # Operator/responsible person
+    
+    # Purpose and location
+    purpose_description = Column(Text, nullable=False)
+    work_location = Column(String(500))
+    coordinates_x = Column(Decimal(10,6))
+    coordinates_y = Column(Decimal(10,6))
+    
+    # Status tracking
+    status = Column(SQLEnum(UsageStatus), default=UsageStatus.reserved)
+    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.medium)
+    
+    # Resource requirements
+    quantity_required = Column(Decimal(10,4), nullable=False)
+    duration_hours = Column(Decimal(8,2))
+    special_requirements = Column(Text)
+    
+    # Conflicts and dependencies
+    conflicting_schedules = Column(JSON)  # Overlapping schedule IDs
+    dependency_schedules = Column(JSON)  # Required predecessor schedules
+    
+    # Performance tracking
+    utilization_percentage = Column(Decimal(5,2))
+    efficiency_score = Column(Decimal(5,2))
+    downtime_minutes = Column(Integer, default=0)
+    
+    # Cost calculations
+    hourly_rate = Column(Decimal(8,2))
+    total_cost = Column(Decimal(12,2))
+    overtime_cost = Column(Decimal(10,2), default=0.00)
+    
+    # Notes and documentation
+    preparation_notes = Column(Text)
+    completion_notes = Column(Text)
+    issues_encountered = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    requested_by_user = relationship("User", foreign_keys=[requested_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    assigned_to_user = relationship("User", foreign_keys=[assigned_to])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_scheduling_site_dates', 'site_id', 'scheduled_start', 'scheduled_end'),
+        Index('idx_scheduling_resource', 'resource_type', 'resource_id', 'status'),
+        Index('idx_scheduling_assignee', 'assigned_to', 'scheduled_start'),
+        Index('idx_scheduling_priority', 'priority_level', 'status'),
+    )
+
+
+class DeliveryTracking(Base):
+    __tablename__ = 'delivery_tracking'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Delivery identification
+    delivery_number = Column(String(100), nullable=False)
+    purchase_order_number = Column(String(100))
+    supplier_delivery_number = Column(String(100))
+    
+    # Delivery details
+    scheduled_delivery_date = Column(Date, nullable=False)
+    scheduled_time_window_start = Column(Time)
+    scheduled_time_window_end = Column(Time)
+    actual_delivery_date = Column(Date)
+    actual_delivery_time = Column(Time)
+    
+    # Status and tracking
+    status = Column(SQLEnum(DeliveryStatus), default=DeliveryStatus.scheduled)
+    tracking_number = Column(String(255))
+    carrier_name = Column(String(255))
+    
+    # Delivery contents
+    items_manifest = Column(JSON, nullable=False)  # List of items being delivered
+    total_items_count = Column(Integer)
+    total_weight_kg = Column(Decimal(10,3))
+    total_volume_m3 = Column(Decimal(10,3))
+    
+    # Recipient information
+    received_by = Column(CHAR(36), ForeignKey('users.id'))
+    delivery_location = Column(String(500))
+    special_delivery_instructions = Column(Text)
+    
+    # Quality and inspection
+    inspection_required = Column(Boolean, default=True)
+    inspection_completed = Column(Boolean, default=False)
+    quality_check_passed = Column(Boolean)
+    inspection_notes = Column(Text)
+    
+    # Documentation
+    delivery_receipt_url = Column(String(500))
+    photos_urls = Column(JSON)  # Photos of delivered items
+    damage_report = Column(JSON)  # Any damage documentation
+    
+    # Cost and billing
+    delivery_cost = Column(Decimal(10,2))
+    fuel_surcharge = Column(Decimal(8,2))
+    additional_charges = Column(JSON)
+    
+    # Performance metrics
+    on_time_delivery = Column(Boolean)
+    delivery_accuracy_percentage = Column(Decimal(5,2))
+    condition_rating = Column(String(50))  # excellent, good, fair, poor
+    
+    # Notifications and communication
+    notification_sent = Column(Boolean, default=False)
+    recipient_notifications = Column(JSON)  # Notification history
+    
+    # GPS and location tracking
+    delivery_coordinates_x = Column(Decimal(10,6))
+    delivery_coordinates_y = Column(Decimal(10,6))
+    gps_accuracy_meters = Column(Integer)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    received_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_delivery_site_date', 'site_id', 'scheduled_delivery_date'),
+        Index('idx_delivery_status', 'status', 'scheduled_delivery_date'),
+        Index('idx_delivery_tracking', 'tracking_number', 'carrier_name'),
+        Index('idx_delivery_performance', 'on_time_delivery', 'delivery_accuracy_percentage'),
+        UniqueConstraint('delivery_number', 'site_id', name='unique_delivery_site'),
+    )
+
+
+class VendorManagement(Base):
+    __tablename__ = 'vendor_management'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    
+    # Vendor identification
+    vendor_name = Column(String(255), nullable=False)
+    vendor_code = Column(String(50))  # Internal vendor code
+    business_registration_number = Column(String(100))
+    tax_id = Column(String(100))
+    
+    # Contact information
+    primary_contact_name = Column(String(255))
+    primary_contact_email = Column(String(255))
+    primary_contact_phone = Column(String(50))
+    secondary_contact_name = Column(String(255))
+    secondary_contact_email = Column(String(255))
+    
+    # Address information
+    business_address = Column(Text)
+    billing_address = Column(Text)
+    shipping_address = Column(Text)
+    
+    # Business details
+    vendor_category = Column(String(100))  # materials, equipment, services, etc.
+    services_provided = Column(JSON)  # Array of service types
+    geographical_coverage = Column(JSON)  # Service areas
+    
+    # Performance metrics
+    overall_rating = Column(SQLEnum(VendorRating), default=VendorRating.satisfactory)
+    quality_score = Column(Decimal(5,2))  # 0-100
+    delivery_performance_score = Column(Decimal(5,2))  # 0-100
+    cost_competitiveness_score = Column(Decimal(5,2))  # 0-100
+    service_quality_score = Column(Decimal(5,2))  # 0-100
+    
+    # Contract and financial
+    contract_start_date = Column(Date)
+    contract_end_date = Column(Date)
+    payment_terms = Column(String(255))
+    credit_limit = Column(Decimal(15,2))
+    outstanding_balance = Column(Decimal(15,2), default=0.00)
+    
+    # Compliance and certifications
+    required_certifications = Column(JSON)  # Required certs
+    current_certifications = Column(JSON)  # Current valid certs
+    insurance_coverage = Column(JSON)  # Insurance details
+    safety_rating = Column(String(50))
+    
+    # Performance history
+    total_orders = Column(Integer, default=0)
+    completed_orders = Column(Integer, default=0)
+    cancelled_orders = Column(Integer, default=0)
+    average_delivery_time_days = Column(Decimal(5,2))
+    
+    # Risk assessment
+    financial_stability_rating = Column(String(50))
+    business_continuity_score = Column(Decimal(5,2))
+    risk_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.low)
+    
+    # Vendor status
+    is_active = Column(Boolean, default=True)
+    is_preferred = Column(Boolean, default=False)
+    requires_approval = Column(Boolean, default=False)
+    approval_status = Column(String(50), default="approved")
+    
+    # Communication preferences
+    preferred_communication_method = Column(SQLEnum(CommunicationChannel))
+    emergency_contact_24h = Column(String(255))
+    
+    # Notes and relationship management
+    relationship_manager = Column(CHAR(36), ForeignKey('users.id'))
+    vendor_notes = Column(Text)
+    last_evaluation_date = Column(Date)
+    next_evaluation_due = Column(Date)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    relationship_manager_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_vendors_rating', 'overall_rating', 'is_active'),
+        Index('idx_vendors_category', 'vendor_category', 'is_preferred'),
+        Index('idx_vendors_performance', 'quality_score', 'delivery_performance_score'),
+        Index('idx_vendors_contract', 'contract_end_date', 'is_active'),
+        UniqueConstraint('vendor_name', name='unique_vendor_name'),
+    )
+
+
+class ProcurementRequest(Base):
+    __tablename__ = 'procurement_requests'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Request identification
+    request_number = Column(String(100), nullable=False)
+    request_type = Column(String(100), nullable=False)  # material, equipment, service
+    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.medium)
+    
+    # Request details
+    requested_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    department = Column(String(100))
+    justification = Column(Text, nullable=False)
+    
+    # Items requested
+    items_requested = Column(JSON, nullable=False)  # Structured item list
+    total_estimated_cost = Column(Decimal(15,2))
+    budget_code = Column(String(100))
+    
+    # Timeline requirements
+    required_delivery_date = Column(Date, nullable=False)
+    earliest_acceptable_date = Column(Date)
+    latest_acceptable_date = Column(Date)
+    
+    # Approval workflow
+    approval_status = Column(String(50), default="pending")
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approval_date = Column(Date)
+    approval_comments = Column(Text)
+    
+    # Procurement process
+    rfq_sent_date = Column(Date)  # Request for Quote
+    quotes_received_count = Column(Integer, default=0)
+    selected_vendor_id = Column(CHAR(36), ForeignKey('vendor_management.id'))
+    purchase_order_number = Column(String(100))
+    
+    # Status tracking
+    status = Column(String(50), default="submitted")  # submitted, approved, quoted, ordered, delivered
+    completion_percentage = Column(Decimal(5,2), default=0.00)
+    
+    # Cost tracking
+    approved_budget = Column(Decimal(15,2))
+    actual_cost = Column(Decimal(15,2))
+    cost_variance_percentage = Column(Decimal(5,2))
+    
+    # Delivery tracking
+    expected_delivery_date = Column(Date)
+    actual_delivery_date = Column(Date)
+    delivery_performance = Column(String(50))  # on_time, early, late
+    
+    # Quality and satisfaction
+    quality_rating = Column(Decimal(5,2))  # 0-100
+    satisfaction_score = Column(Decimal(5,2))  # 0-100
+    would_reorder = Column(Boolean)
+    
+    # Documentation
+    supporting_documents = Column(JSON)  # URLs to supporting docs
+    vendor_quotes = Column(JSON)  # Quote comparison data
+    
+    # Lessons learned
+    lessons_learned = Column(Text)
+    process_improvements = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    requested_by_user = relationship("User", foreign_keys=[requested_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    selected_vendor = relationship("VendorManagement")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_procurement_site_date', 'site_id', 'required_delivery_date'),
+        Index('idx_procurement_status', 'status', 'approval_status'),
+        Index('idx_procurement_requester', 'requested_by', 'created_at'),
+        Index('idx_procurement_vendor', 'selected_vendor_id', 'actual_delivery_date'),
+        Index('idx_procurement_priority', 'priority_level', 'required_delivery_date'),
+        UniqueConstraint('request_number', 'site_id', name='unique_request_site'),
+    )
+
+
+class CostTracking(Base):
+    __tablename__ = 'cost_tracking'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Cost identification
+    cost_category = Column(String(100), nullable=False)  # materials, labor, equipment, overhead
+    cost_subcategory = Column(String(100))
+    cost_center = Column(String(100))
+    project_phase = Column(String(100))
+    
+    # Transaction details
+    transaction_date = Column(Date, nullable=False)
+    transaction_type = Column(String(50), nullable=False)  # expense, budget_allocation, adjustment
+    amount = Column(Decimal(15,2), nullable=False)
+    currency = Column(String(10), default="USD")
+    
+    # Reference information
+    reference_number = Column(String(100))  # Invoice, PO, receipt number
+    vendor_id = Column(CHAR(36), ForeignKey('vendor_management.id'))
+    purchase_order_id = Column(CHAR(36))
+    
+    # Description and details
+    description = Column(Text, nullable=False)
+    quantity = Column(Decimal(10,4))
+    unit_cost = Column(Decimal(10,2))
+    
+    # Budget tracking
+    budget_category = Column(String(100))
+    budgeted_amount = Column(Decimal(15,2))
+    variance_amount = Column(Decimal(15,2))
+    variance_percentage = Column(Decimal(5,2))
+    
+    # Approval and authorization
+    authorized_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approval_required = Column(Boolean, default=True)
+    approval_status = Column(String(50), default="pending")
+    
+    # Payment tracking
+    payment_due_date = Column(Date)
+    payment_date = Column(Date)
+    payment_method = Column(String(100))
+    payment_reference = Column(String(255))
+    
+    # Allocation and distribution
+    cost_allocation = Column(JSON)  # How cost is allocated across phases/areas
+    overhead_percentage = Column(Decimal(5,2))
+    markup_percentage = Column(Decimal(5,2))
+    
+    # Classification flags
+    is_billable = Column(Boolean, default=True)
+    is_reimbursable = Column(Boolean, default=False)
+    is_recurring = Column(Boolean, default=False)
+    
+    # Forecast impact
+    affects_forecast = Column(Boolean, default=True)
+    forecast_category = Column(String(100))
+    
+    # Audit trail
+    entered_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    last_modified_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Supporting documentation
+    receipt_urls = Column(JSON)  # Receipt/invoice images
+    supporting_documents = Column(JSON)  # Additional documentation
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    vendor = relationship("VendorManagement")
+    authorized_by_user = relationship("User", foreign_keys=[authorized_by])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    entered_by_user = relationship("User", foreign_keys=[entered_by])
+    last_modified_by_user = relationship("User", foreign_keys=[last_modified_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_cost_site_date', 'site_id', 'transaction_date'),
+        Index('idx_cost_category', 'cost_category', 'cost_subcategory'),
+        Index('idx_cost_vendor', 'vendor_id', 'transaction_date'),
+        Index('idx_cost_approval', 'approval_status', 'authorized_by'),
+        Index('idx_cost_budget', 'budget_category', 'variance_percentage'),
+    )
