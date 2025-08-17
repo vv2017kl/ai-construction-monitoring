@@ -5537,6 +5537,44 @@ def main():
         print("   ⚠️ Skipping User Feedback tests - no user created")
         results.append(("User Feedback API", False))
     
+    # STREET VIEW COMPARISON & ANALYSIS TESTS
+    print("\n" + "=" * 80)
+    print("STARTING STREET VIEW COMPARISON & ANALYSIS API TESTS")
+    print("=" * 80)
+    
+    created_comparison_id = None
+    created_sv_session_id = None
+    created_change_id = None
+    created_location_id = None
+    created_sv_metric_id = None
+    
+    # Test Street View Comparison & Analysis APIs
+    if created_site_id:
+        street_view_ok, (created_comparison_id, created_sv_session_id, created_change_id, created_location_id, created_sv_metric_id) = test_street_view_comparison_apis(created_site_id)
+        results.append(("Street View Comparison & Analysis APIs", street_view_ok))
+    else:
+        print("   ⚠️ Skipping Street View Comparison & Analysis tests - no site created")
+        results.append(("Street View Comparison & Analysis APIs", False))
+    
+    # HISTORICAL DATA & TEMPORAL ANALYSIS TESTS
+    print("\n" + "=" * 80)
+    print("STARTING HISTORICAL DATA & TEMPORAL ANALYSIS API TESTS")
+    print("=" * 80)
+    
+    created_snapshot_id = None
+    created_job_id = None
+    created_benchmark_id = None
+    created_pred_model_id = None
+    created_prediction_id = None
+    
+    # Test Historical Data & Temporal Analysis APIs
+    if created_site_id:
+        historical_ok, (created_snapshot_id, created_job_id, created_benchmark_id, created_pred_model_id, created_prediction_id) = test_historical_temporal_analysis_apis(created_site_id)
+        results.append(("Historical Data & Temporal Analysis APIs", historical_ok))
+    else:
+        print("   ⚠️ Skipping Historical Data & Temporal Analysis tests - no site created")
+        results.append(("Historical Data & Temporal Analysis APIs", False))
+    
     # Cleanup test data
     cleanup_ok = cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                                  created_bookmark_id, created_export_id, created_route_id, created_waypoint_id, 
