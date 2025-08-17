@@ -6965,7 +6965,7 @@ class ActivityFeed(Base):
     session_id = Column(String(255))
     
     # Impact and severity
-    impact_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.low)
+    impact_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.info)
     requires_attention = Column(Boolean, default=False)
     is_system_generated = Column(Boolean, default=False)
     
