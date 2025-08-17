@@ -5585,11 +5585,11 @@ def main():
     created_prediction_id = None
     
     # Test Historical Data & Temporal Analysis APIs
-    if created_site_id:
-        historical_ok, (created_snapshot_id, created_job_id, created_benchmark_id, created_pred_model_id, created_prediction_id) = test_historical_temporal_analysis_apis(created_site_id)
+    if created_site_id and created_user_id:
+        historical_ok, (created_snapshot_id, created_job_id, created_benchmark_id, created_pred_model_id, created_prediction_id) = test_historical_temporal_analysis_apis(created_site_id, created_user_id)
         results.append(("Historical Data & Temporal Analysis APIs", historical_ok))
     else:
-        print("   ⚠️ Skipping Historical Data & Temporal Analysis tests - no site created")
+        print("   ⚠️ Skipping Historical Data & Temporal Analysis tests - no site or user created")
         results.append(("Historical Data & Temporal Analysis APIs", False))
     
     # Cleanup test data
