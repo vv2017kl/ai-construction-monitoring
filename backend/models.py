@@ -7894,7 +7894,7 @@ class ResourceScheduling(Base):
     
     # Status tracking
     status = Column(SQLEnum(UsageStatus), default=UsageStatus.reserved)
-    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.medium)
+    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.warning)
     
     # Resource requirements
     quantity_required = Column(Decimal(10,4), nullable=False)
