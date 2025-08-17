@@ -3905,6 +3905,655 @@ def test_ai_model_management_apis():
         print(f"   ❌ Unexpected error: {e}")
         return False, created_ai_model_id, created_deployment_id, created_training_job_id, created_evaluation_id
 
+def test_integration_third_party_integrations_api(user_id):
+    """Test Integration & User Experience - Third Party Integrations API endpoints"""
+    print("\n29. Testing Integration & User Experience - Third Party Integrations API")
+    created_integration_id = None
+    
+    try:
+        # Test GET all third-party integrations
+        print("   29a. Testing GET /api/integration/integrations")
+        response = requests.get(f"{API_BASE_URL}/integration/integrations", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            integrations = response.json()
+            print(f"      Found {len(integrations)} total third-party integrations")
+            print("      ✅ GET all third-party integrations working")
+        else:
+            print("      ❌ GET all third-party integrations failed")
+            return False, None
+        
+        # Create test third-party integration data
+        test_integration_data = {
+            "integration_name": f"Slack Construction Alerts {uuid.uuid4().hex[:8]}",
+            "integration_type": "communication",
+            "provider_name": "Slack Technologies",
+            "description": "Real-time construction site alerts and notifications via Slack",
+            "configuration": {
+                "webhook_url": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+                "channel": "#construction-alerts",
+                "username": "ConstructionBot"
+            },
+            "endpoints": {
+                "webhook": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+                "api_base": "https://slack.com/api/"
+            },
+            "rate_limits": {
+                "requests_per_minute": 60,
+                "burst_limit": 100
+            },
+            "monthly_limit": 10000
+        }
+        
+        # Test POST create third-party integration
+        print("   29b. Testing POST /api/integration/integrations")
+        response = requests.post(
+            f"{API_BASE_URL}/integration/integrations?created_by={user_id}",
+            json=test_integration_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            integration = response.json()
+            created_integration_id = integration.get("id")
+            print(f"      Created third-party integration ID: {created_integration_id}")
+            print("      ✅ POST third-party integration creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST third-party integration creation failed")
+            return False, None
+        
+        # Test GET specific third-party integration
+        print("   29c. Testing GET /api/integration/integrations/{integration_id}")
+        response = requests.get(f"{API_BASE_URL}/integration/integrations/{created_integration_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            integration = response.json()
+            if integration.get("integration_name") == test_integration_data["integration_name"]:
+                print("      ✅ GET specific third-party integration working")
+            else:
+                print("      ❌ Third-party integration data mismatch")
+                return False, created_integration_id
+        else:
+            print("      ❌ GET specific third-party integration failed")
+            return False, created_integration_id
+        
+        # Test PUT update third-party integration
+        print("   29d. Testing PUT /api/integration/integrations/{integration_id}")
+        update_data = {
+            "description": "Updated real-time construction site alerts and notifications via Slack",
+            "status": "active"
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/integration/integrations/{created_integration_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_integration = response.json()
+            if updated_integration.get("description") == update_data["description"]:
+                print("      ✅ PUT third-party integration update working")
+            else:
+                print("      ❌ Third-party integration update data mismatch")
+                return False, created_integration_id
+        else:
+            print("      ❌ PUT third-party integration update failed")
+            return False, created_integration_id
+        
+        # Test DELETE third-party integration
+        print("   29e. Testing DELETE /api/integration/integrations/{integration_id}")
+        response = requests.delete(f"{API_BASE_URL}/integration/integrations/{created_integration_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "deleted successfully" in result.get("message", ""):
+                print("      ✅ DELETE third-party integration working")
+                created_integration_id = None  # Mark as deleted
+            else:
+                print("      ❌ Unexpected delete response")
+                return False, created_integration_id
+        else:
+            print("      ❌ DELETE third-party integration failed")
+            return False, created_integration_id
+        
+        # Test GET integration health summary analytics
+        print("   29f. Testing GET /api/integration/integrations/analytics/health-summary")
+        response = requests.get(f"{API_BASE_URL}/integration/integrations/analytics/health-summary", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            health_summary = response.json()
+            required_fields = ["total_integrations", "active_integrations", "health_rate", "average_health_score"]
+            if all(field in health_summary for field in required_fields):
+                print("      ✅ GET integration health summary analytics working")
+            else:
+                print("      ❌ Missing required fields in health summary")
+                return False, created_integration_id
+        else:
+            print("      ❌ GET integration health summary analytics failed")
+            return False, created_integration_id
+        
+        return True, created_integration_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_integration_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_integration_id
+
+def test_integration_user_profile_settings_api(user_id):
+    """Test Integration & User Experience - User Profile Settings API endpoints"""
+    print("\n30. Testing Integration & User Experience - User Profile Settings API")
+    
+    try:
+        # Test GET all user profile settings
+        print("   30a. Testing GET /api/integration/profile-settings")
+        response = requests.get(f"{API_BASE_URL}/integration/profile-settings", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            profile_settings = response.json()
+            print(f"      Found {len(profile_settings)} total user profile settings")
+            print("      ✅ GET all user profile settings working")
+        else:
+            print("      ❌ GET all user profile settings failed")
+            return False
+        
+        # Create test user profile settings data
+        test_profile_data = {
+            "user_id": user_id,
+            "profile_picture_url": "https://example.com/avatars/construction-manager.jpg",
+            "bio": "Experienced construction site manager with 10+ years in the industry",
+            "preferences": {
+                "dashboard_layout": "grid",
+                "default_view": "live_cameras",
+                "auto_refresh": True,
+                "sound_alerts": False
+            },
+            "notification_settings": {
+                "email_alerts": True,
+                "sms_alerts": False,
+                "push_notifications": True,
+                "alert_frequency": "immediate"
+            },
+            "dashboard_config": {
+                "widgets": ["weather", "alerts", "personnel", "cameras"],
+                "layout": "2x2",
+                "theme": "construction_blue"
+            },
+            "theme_settings": {
+                "color_scheme": "blue",
+                "font_size": "medium",
+                "high_contrast": False
+            }
+        }
+        
+        # Test POST create user profile settings
+        print("   30b. Testing POST /api/integration/profile-settings")
+        response = requests.post(
+            f"{API_BASE_URL}/integration/profile-settings",
+            json=test_profile_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            profile_setting = response.json()
+            print(f"      Created user profile settings for user: {profile_setting.get('user_id')}")
+            print("      ✅ POST user profile settings creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST user profile settings creation failed")
+            return False
+        
+        # Test GET user-specific profile settings
+        print("   30c. Testing GET /api/integration/profile-settings/{user_id}")
+        response = requests.get(f"{API_BASE_URL}/integration/profile-settings/{user_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            user_profile = response.json()
+            if user_profile.get("bio") == test_profile_data["bio"]:
+                print("      ✅ GET user-specific profile settings working")
+            else:
+                print("      ❌ User profile settings data mismatch")
+                return False
+        else:
+            print("      ❌ GET user-specific profile settings failed")
+            return False
+        
+        # Test PUT update user profile settings
+        print("   30d. Testing PUT /api/integration/profile-settings/{user_id}")
+        update_data = {
+            "bio": "Updated: Senior construction site manager with 12+ years in the industry",
+            "preferences": {
+                "dashboard_layout": "list",
+                "default_view": "site_overview",
+                "auto_refresh": False,
+                "sound_alerts": True
+            }
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/integration/profile-settings/{user_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_profile = response.json()
+            if updated_profile.get("bio") == update_data["bio"]:
+                print("      ✅ PUT user profile settings update working")
+            else:
+                print("      ❌ User profile settings update data mismatch")
+                return False
+        else:
+            print("      ❌ PUT user profile settings update failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_integration_user_app_settings_api(user_id):
+    """Test Integration & User Experience - User Application Settings API endpoints"""
+    print("\n31. Testing Integration & User Experience - User Application Settings API")
+    
+    try:
+        # Test GET all user application settings
+        print("   31a. Testing GET /api/integration/app-settings")
+        response = requests.get(f"{API_BASE_URL}/integration/app-settings", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            app_settings = response.json()
+            print(f"      Found {len(app_settings)} total user application settings")
+            print("      ✅ GET all user application settings working")
+        else:
+            print("      ❌ GET all user application settings failed")
+            return False
+        
+        # Create test user application settings data
+        test_app_data = {
+            "user_id": user_id,
+            "language": "en",
+            "timezone": "America/New_York",
+            "time_format": "24h",
+            "theme": "dark",
+            "font_size": "large",
+            "notifications_enabled": True,
+            "email_notifications": True,
+            "quiet_hours_enabled": True,
+            "data_sharing_enabled": False
+        }
+        
+        # Test POST create user application settings
+        print("   31b. Testing POST /api/integration/app-settings")
+        response = requests.post(
+            f"{API_BASE_URL}/integration/app-settings",
+            json=test_app_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            app_setting = response.json()
+            print(f"      Created user application settings for user: {app_setting.get('user_id')}")
+            print("      ✅ POST user application settings creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST user application settings creation failed")
+            return False
+        
+        # Test GET user-specific application settings
+        print("   31c. Testing GET /api/integration/app-settings/{user_id}")
+        response = requests.get(f"{API_BASE_URL}/integration/app-settings/{user_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            user_app_settings = response.json()
+            if user_app_settings.get("theme") == test_app_data["theme"]:
+                print("      ✅ GET user-specific application settings working")
+            else:
+                print("      ❌ User application settings data mismatch")
+                return False
+        else:
+            print("      ❌ GET user-specific application settings failed")
+            return False
+        
+        # Test PUT update user application settings
+        print("   31d. Testing PUT /api/integration/app-settings/{user_id}")
+        update_data = {
+            "theme": "light",
+            "font_size": "medium",
+            "quiet_hours_enabled": False
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/integration/app-settings/{user_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_app_settings = response.json()
+            if updated_app_settings.get("theme") == update_data["theme"]:
+                print("      ✅ PUT user application settings update working")
+            else:
+                print("      ❌ User application settings update data mismatch")
+                return False
+        else:
+            print("      ❌ PUT user application settings update failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_integration_help_articles_api(user_id):
+    """Test Integration & User Experience - Help Articles API endpoints"""
+    print("\n32. Testing Integration & User Experience - Help Articles API")
+    created_article_id = None
+    
+    try:
+        # Test GET all help articles
+        print("   32a. Testing GET /api/integration/help/articles")
+        response = requests.get(f"{API_BASE_URL}/integration/help/articles", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            articles = response.json()
+            print(f"      Found {len(articles)} total help articles")
+            print("      ✅ GET all help articles working")
+        else:
+            print("      ❌ GET all help articles failed")
+            return False, None
+        
+        # Create test help article data
+        test_article_data = {
+            "title": f"How to Set Up Camera Monitoring {uuid.uuid4().hex[:8]}",
+            "content": "This comprehensive guide will walk you through the process of setting up camera monitoring for your construction site. Step 1: Access the camera management dashboard...",
+            "category": "Camera Management",
+            "subcategory": "Setup Guide",
+            "tags": ["cameras", "setup", "monitoring", "tutorial"],
+            "is_published": True,
+            "search_keywords": "camera setup monitoring installation guide tutorial"
+        }
+        
+        # Test POST create help article
+        print("   32b. Testing POST /api/integration/help/articles")
+        response = requests.post(
+            f"{API_BASE_URL}/integration/help/articles?author_id={user_id}",
+            json=test_article_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            article = response.json()
+            created_article_id = article.get("id")
+            print(f"      Created help article ID: {created_article_id}")
+            print("      ✅ POST help article creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST help article creation failed")
+            return False, None
+        
+        # Test GET specific help article (should increment view count)
+        print("   32c. Testing GET /api/integration/help/articles/{article_id}")
+        response = requests.get(f"{API_BASE_URL}/integration/help/articles/{created_article_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            article = response.json()
+            if article.get("title") == test_article_data["title"]:
+                print(f"      ✅ GET specific help article working (view count: {article.get('view_count', 0)})")
+            else:
+                print("      ❌ Help article data mismatch")
+                return False, created_article_id
+        else:
+            print("      ❌ GET specific help article failed")
+            return False, created_article_id
+        
+        # Test PUT update help article
+        print("   32d. Testing PUT /api/integration/help/articles/{article_id}")
+        update_data = {
+            "title": test_article_data["title"],  # Keep original title
+            "content": "Updated comprehensive guide with new screenshots and detailed steps...",
+            "category": test_article_data["category"],  # Keep original category
+            "is_published": True
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/integration/help/articles/{created_article_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_article = response.json()
+            if "Updated comprehensive guide" in updated_article.get("content", ""):
+                print("      ✅ PUT help article update working")
+            else:
+                print("      ❌ Help article update data mismatch")
+                return False, created_article_id
+        else:
+            print("      ❌ PUT help article update failed")
+            return False, created_article_id
+        
+        # Test POST mark article helpful
+        print("   32e. Testing POST /api/integration/help/articles/{article_id}/helpful")
+        response = requests.post(f"{API_BASE_URL}/integration/help/articles/{created_article_id}/helpful?helpful=true", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "helpful_count" in result:
+                print(f"      ✅ POST mark article helpful working (helpful count: {result['helpful_count']})")
+            else:
+                print("      ❌ Unexpected helpful response")
+                return False, created_article_id
+        else:
+            print("      ❌ POST mark article helpful failed")
+            return False, created_article_id
+        
+        # Test DELETE help article
+        print("   32f. Testing DELETE /api/integration/help/articles/{article_id}")
+        response = requests.delete(f"{API_BASE_URL}/integration/help/articles/{created_article_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "deleted successfully" in result.get("message", ""):
+                print("      ✅ DELETE help article working")
+                created_article_id = None  # Mark as deleted
+            else:
+                print("      ❌ Unexpected delete response")
+                return False, created_article_id
+        else:
+            print("      ❌ DELETE help article failed")
+            return False, created_article_id
+        
+        # Test GET help categories analytics
+        print("   32g. Testing GET /api/integration/help/analytics/categories")
+        response = requests.get(f"{API_BASE_URL}/integration/help/analytics/categories", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            categories_analytics = response.json()
+            print(f"      Found analytics for {len(categories_analytics)} categories")
+            print("      ✅ GET help categories analytics working")
+        else:
+            print("      ❌ GET help categories analytics failed")
+            return False, created_article_id
+        
+        return True, created_article_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_article_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_article_id
+
+def test_integration_user_feedback_api(user_id):
+    """Test Integration & User Experience - User Feedback API endpoints"""
+    print("\n33. Testing Integration & User Experience - User Feedback API")
+    created_feedback_id = None
+    
+    try:
+        # Test GET all user feedback
+        print("   33a. Testing GET /api/integration/feedback")
+        response = requests.get(f"{API_BASE_URL}/integration/feedback", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            feedback_list = response.json()
+            print(f"      Found {len(feedback_list)} total user feedback items")
+            print("      ✅ GET all user feedback working")
+        else:
+            print("      ❌ GET all user feedback failed")
+            return False, None
+        
+        # Create test user feedback data
+        test_feedback_data = {
+            "user_id": user_id,
+            "feedback_type": "feature_request",
+            "title": f"Enhanced Camera Controls {uuid.uuid4().hex[:8]}",
+            "description": "It would be great to have more granular PTZ controls for the cameras, including preset positions and automated patrol routes.",
+            "priority": "medium",
+            "category": "Camera Management"
+        }
+        
+        # Test POST create user feedback
+        print("   33b. Testing POST /api/integration/feedback")
+        response = requests.post(
+            f"{API_BASE_URL}/integration/feedback",
+            json=test_feedback_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            feedback = response.json()
+            created_feedback_id = feedback.get("id")
+            print(f"      Created user feedback ID: {created_feedback_id}")
+            print("      ✅ POST user feedback creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST user feedback creation failed")
+            return False, None
+        
+        # Test GET specific user feedback
+        print("   33c. Testing GET /api/integration/feedback/{feedback_id}")
+        response = requests.get(f"{API_BASE_URL}/integration/feedback/{created_feedback_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            feedback = response.json()
+            if feedback.get("title") == test_feedback_data["title"]:
+                print("      ✅ GET specific user feedback working")
+            else:
+                print("      ❌ User feedback data mismatch")
+                return False, created_feedback_id
+        else:
+            print("      ❌ GET specific user feedback failed")
+            return False, created_feedback_id
+        
+        # Test PUT update feedback (admin response)
+        print("   33d. Testing PUT /api/integration/feedback/{feedback_id}")
+        update_data = {
+            "status": "in_progress",
+            "admin_response": "Thank you for your feedback! We are currently evaluating enhanced PTZ controls for our next release.",
+            "responded_by": user_id
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/integration/feedback/{created_feedback_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            updated_feedback = response.json()
+            if updated_feedback.get("admin_response") == update_data["admin_response"]:
+                print("      ✅ PUT user feedback update working")
+            else:
+                print("      ❌ User feedback update data mismatch")
+                return False, created_feedback_id
+        else:
+            print("      ❌ PUT user feedback update failed")
+            return False, created_feedback_id
+        
+        # Test POST upvote feedback
+        print("   33e. Testing POST /api/integration/feedback/{feedback_id}/upvote")
+        response = requests.post(f"{API_BASE_URL}/integration/feedback/{created_feedback_id}/upvote", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if "upvote_count" in result:
+                print(f"      ✅ POST upvote feedback working (upvote count: {result['upvote_count']})")
+            else:
+                print("      ❌ Unexpected upvote response")
+                return False, created_feedback_id
+        else:
+            print("      ❌ POST upvote feedback failed")
+            return False, created_feedback_id
+        
+        # Test GET feedback analytics summary
+        print("   33f. Testing GET /api/integration/feedback/analytics/summary")
+        response = requests.get(f"{API_BASE_URL}/integration/feedback/analytics/summary", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            analytics_summary = response.json()
+            required_fields = ["total_feedback", "resolution_rate", "by_type", "by_status"]
+            if all(field in analytics_summary for field in required_fields):
+                print("      ✅ GET feedback analytics summary working")
+            else:
+                print("      ❌ Missing required fields in analytics summary")
+                return False, created_feedback_id
+        else:
+            print("      ❌ GET feedback analytics summary failed")
+            return False, created_feedback_id
+        
+        return True, created_feedback_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_feedback_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_feedback_id
+
 def main():
     """Run all backend tests"""
     print("Starting AI Construction Management Backend API Tests...")
