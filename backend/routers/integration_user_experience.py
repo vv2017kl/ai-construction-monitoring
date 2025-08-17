@@ -246,7 +246,32 @@ def create_app_setting(
     if existing:
         raise HTTPException(status_code=400, detail="Application settings already exist for this user")
     
-    db_setting = UserApplicationSetting(**app_setting.model_dump())
+    # Convert enum values
+    data = app_setting.model_dump()
+    
+    # Convert time_format string to enum
+    if data.get('time_format') == '24h':
+        data['time_format'] = TimeFormat.twenty_four_hour
+    elif data.get('time_format') == '12h':
+        data['time_format'] = TimeFormat.twelve_hour
+    
+    # Convert theme string to enum
+    if data.get('theme') == 'light':
+        data['theme'] = Theme.light
+    elif data.get('theme') == 'dark':
+        data['theme'] = Theme.dark
+    elif data.get('theme') == 'auto':
+        data['theme'] = Theme.auto
+    
+    # Convert font_size string to enum
+    if data.get('font_size') == 'small':
+        data['font_size'] = FontSize.small
+    elif data.get('font_size') == 'medium':
+        data['font_size'] = FontSize.medium
+    elif data.get('font_size') == 'large':
+        data['font_size'] = FontSize.large
+    
+    db_setting = UserApplicationSetting(**data)
     db.add(db_setting)
     db.commit()
     db.refresh(db_setting)
