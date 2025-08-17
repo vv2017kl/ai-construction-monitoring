@@ -527,7 +527,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Integration & User Experience Tables and APIs Implementation"
+    - "Street View Comparison & Analysis Tables and APIs Implementation"
+    - "Historical Data & Temporal Analysis Tables and APIs Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
