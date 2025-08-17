@@ -7704,7 +7704,7 @@ class ProjectMilestone(Base):
     performance_score = Column(Decimal(5,2))  # 0-100 performance rating
     
     # Risk and issues
-    risk_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.low)
+    risk_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.info)
     identified_risks = Column(JSON)  # Risk descriptions and mitigation plans
     current_issues = Column(JSON)  # Active issues affecting milestone
     
