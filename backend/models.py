@@ -6374,3 +6374,300 @@ class ComparisonAnalysisMetric(Base):
         Index('idx_analysis_metrics_trend', 'trend_direction', 'confidence_level'),
         UniqueConstraint('comparison_id', 'metric_type', name='unique_comparison_metric'),
     )
+
+
+# HISTORICAL DATA & TEMPORAL ANALYSIS TABLES
+
+# Historical Analysis enums
+class DataAnalysisType(enum.Enum):
+    historical_trend = "historical_trend"
+    temporal_comparison = "temporal_comparison"
+    performance_analysis = "performance_analysis"
+    predictive_analysis = "predictive_analysis"
+
+class AggregationPeriod(enum.Enum):
+    hourly = "hourly"
+    daily = "daily"
+    weekly = "weekly"
+    monthly = "monthly"
+    quarterly = "quarterly"
+    yearly = "yearly"
+
+class DataSourceType(enum.Enum):
+    cameras = "cameras"
+    sensors = "sensors"
+    personnel = "personnel"
+    equipment = "equipment"
+    weather = "weather"
+    alerts = "alerts"
+
+class AnalysisAlgorithm(enum.Enum):
+    regression = "regression"
+    moving_average = "moving_average"
+    seasonal_decomposition = "seasonal_decomposition"
+    anomaly_detection = "anomaly_detection"
+    clustering = "clustering"
+    forecasting = "forecasting"
+
+
+class HistoricalDataSnapshot(Base):
+    __tablename__ = 'historical_data_snapshots'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    snapshot_date = Column(Date, nullable=False)
+    snapshot_time = Column(Time, nullable=False)
+    
+    # Data source information
+    data_source_type = Column(SQLEnum(DataSourceType), nullable=False)
+    source_entity_id = Column(CHAR(36))  # ID of camera, sensor, etc.
+    source_entity_name = Column(String(255))
+    
+    # Snapshot data
+    data_payload = Column(JSON, nullable=False)  # The actual data snapshot
+    metadata = Column(JSON)  # Additional metadata about the snapshot
+    
+    # Data quality metrics
+    data_completeness_percentage = Column(Decimal(5,2), default=100.00)
+    data_accuracy_score = Column(Decimal(5,2), default=100.00)
+    validation_errors = Column(JSON)  # Any validation issues
+    
+    # Processing information
+    processing_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    processing_duration_ms = Column(Integer)
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_snapshots_site_date', 'site_id', 'snapshot_date', 'snapshot_time'),
+        Index('idx_snapshots_source', 'data_source_type', 'source_entity_id'),
+        Index('idx_snapshots_quality', 'data_completeness_percentage', 'data_accuracy_score'),
+        Index('idx_snapshots_processing', 'processing_timestamp'),
+    )
+
+
+class TemporalAnalysisJob(Base):
+    __tablename__ = 'temporal_analysis_jobs'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Job configuration
+    job_name = Column(String(255), nullable=False)
+    analysis_type = Column(SQLEnum(DataAnalysisType), nullable=False)
+    aggregation_period = Column(SQLEnum(AggregationPeriod), nullable=False)
+    algorithm = Column(SQLEnum(AnalysisAlgorithm), nullable=False)
+    
+    # Time range configuration
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    include_weekends = Column(Boolean, default=True)
+    include_holidays = Column(Boolean, default=True)
+    
+    # Data selection criteria
+    data_sources = Column(JSON, nullable=False)  # Which data sources to analyze
+    filter_criteria = Column(JSON)  # Additional filtering
+    
+    # Job execution
+    status = Column(SQLEnum(JobStatus), default=JobStatus.pending)
+    scheduled_at = Column(TIMESTAMP)
+    started_at = Column(TIMESTAMP)
+    completed_at = Column(TIMESTAMP)
+    execution_duration_seconds = Column(Integer)
+    
+    # Results
+    results_summary = Column(JSON)  # High-level results
+    detailed_results_path = Column(String(500))  # Path to detailed results file
+    visualization_config = Column(JSON)  # Chart/graph configurations
+    
+    # Error handling
+    error_message = Column(Text)
+    retry_count = Column(Integer, default=0)
+    max_retries = Column(Integer, default=3)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_analysis_jobs_site_status', 'site_id', 'status'),
+        Index('idx_analysis_jobs_type_period', 'analysis_type', 'aggregation_period'),
+        Index('idx_analysis_jobs_schedule', 'status', 'scheduled_at'),
+        Index('idx_analysis_jobs_performance', 'execution_duration_seconds', 'completed_at'),
+    )
+
+
+class PerformanceBenchmark(Base):
+    __tablename__ = 'performance_benchmarks'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Benchmark identification
+    benchmark_name = Column(String(255), nullable=False)
+    benchmark_category = Column(String(100), nullable=False)  # safety, productivity, quality, etc.
+    measurement_date = Column(Date, nullable=False)
+    
+    # Benchmark values
+    current_value = Column(Decimal(10,4), nullable=False)
+    target_value = Column(Decimal(10,4), nullable=False)
+    baseline_value = Column(Decimal(10,4))
+    industry_average = Column(Decimal(10,4))
+    
+    # Performance indicators
+    performance_percentage = Column(Decimal(5,2))  # Current vs target
+    improvement_percentage = Column(Decimal(5,2))  # Current vs baseline
+    variance_percentage = Column(Decimal(5,2))  # Current vs industry average
+    
+    # Trend analysis
+    trend_direction = Column(SQLEnum(TrendDirection))
+    trend_strength = Column(Decimal(5,2))  # How strong the trend is
+    seasonal_factor = Column(Decimal(5,2))  # Seasonal adjustment factor
+    
+    # Contextual information
+    measurement_method = Column(String(255))
+    data_source_entities = Column(JSON)  # Which entities contributed to this benchmark
+    external_factors = Column(JSON)  # Weather, holidays, etc.
+    
+    # Validation and quality
+    confidence_level = Column(Decimal(5,2), default=95.00)
+    margin_of_error = Column(Decimal(5,2))
+    sample_size = Column(Integer)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_benchmarks_site_category', 'site_id', 'benchmark_category', 'measurement_date'),
+        Index('idx_benchmarks_performance', 'performance_percentage', 'improvement_percentage'),
+        Index('idx_benchmarks_trend', 'trend_direction', 'trend_strength'),
+        Index('idx_benchmarks_date', 'measurement_date', 'benchmark_category'),
+    )
+
+
+class PredictiveModel(Base):
+    __tablename__ = 'predictive_models'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Model identification
+    model_name = Column(String(255), nullable=False)
+    model_type = Column(String(100), nullable=False)  # regression, classification, time_series, etc.
+    prediction_target = Column(String(255), nullable=False)  # What is being predicted
+    
+    # Model configuration
+    algorithm = Column(SQLEnum(AnalysisAlgorithm), nullable=False)
+    input_features = Column(JSON, nullable=False)  # Features used for prediction
+    hyperparameters = Column(JSON)  # Model hyperparameters
+    
+    # Training information
+    training_data_period_days = Column(Integer, nullable=False)
+    training_start_date = Column(Date, nullable=False)
+    training_end_date = Column(Date, nullable=False)
+    training_sample_count = Column(Integer)
+    
+    # Model performance metrics
+    accuracy_score = Column(Decimal(5,2))
+    precision_score = Column(Decimal(5,2))
+    recall_score = Column(Decimal(5,2))
+    f1_score = Column(Decimal(5,2))
+    mean_absolute_error = Column(Decimal(10,4))
+    r_squared = Column(Decimal(5,2))
+    
+    # Model status and deployment
+    status = Column(SQLEnum(ModelStatus), default=ModelStatus.training)
+    version = Column(String(50), nullable=False)
+    is_active = Column(Boolean, default=False)
+    deployment_date = Column(Date)
+    last_retrained = Column(Date)
+    
+    # Prediction capabilities
+    prediction_horizon_days = Column(Integer, nullable=False)  # How far ahead it can predict
+    prediction_frequency = Column(SQLEnum(AggregationPeriod), nullable=False)  # How often predictions are made
+    confidence_threshold = Column(Decimal(5,2), default=80.00)
+    
+    # Model artifacts
+    model_file_path = Column(String(500))  # Path to serialized model
+    feature_importance = Column(JSON)  # Feature importance scores
+    model_explanation = Column(Text)  # Human-readable explanation
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_models_site_status', 'site_id', 'status', 'is_active'),
+        Index('idx_models_performance', 'accuracy_score', 'deployment_date'),
+        Index('idx_models_type_target', 'model_type', 'prediction_target'),
+        Index('idx_models_version', 'model_name', 'version'),
+    )
+
+
+class PredictiveModelPrediction(Base):
+    __tablename__ = 'predictive_model_predictions'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    model_id = Column(CHAR(36), ForeignKey('predictive_models.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Prediction details
+    prediction_date = Column(Date, nullable=False)  # When prediction was made
+    target_date = Column(Date, nullable=False)  # Date being predicted for
+    target_time = Column(Time)  # Time being predicted for (if applicable)
+    
+    # Prediction values
+    predicted_value = Column(Decimal(10,4), nullable=False)
+    confidence_score = Column(Decimal(5,2), nullable=False)
+    prediction_interval_lower = Column(Decimal(10,4))  # Lower bound of prediction interval
+    prediction_interval_upper = Column(Decimal(10,4))  # Upper bound of prediction interval
+    
+    # Input features used for this prediction
+    input_features_snapshot = Column(JSON, nullable=False)
+    feature_values = Column(JSON, nullable=False)
+    
+    # Validation (once actual value is known)
+    actual_value = Column(Decimal(10,4))
+    prediction_error = Column(Decimal(10,4))
+    absolute_error = Column(Decimal(10,4))
+    percentage_error = Column(Decimal(5,2))
+    is_accurate = Column(Boolean)  # Within acceptable error threshold
+    
+    # Metadata
+    prediction_context = Column(JSON)  # Any relevant context
+    external_factors = Column(JSON)  # External factors considered
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    validated_at = Column(TIMESTAMP)  # When actual value was recorded
+    
+    # Relationships
+    model = relationship("PredictiveModel")
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_predictions_model_date', 'model_id', 'prediction_date', 'target_date'),
+        Index('idx_predictions_site_target', 'site_id', 'target_date'),
+        Index('idx_predictions_accuracy', 'is_accurate', 'confidence_score', 'absolute_error'),
+        Index('idx_predictions_validation', 'validated_at', 'actual_value'),
+    )
