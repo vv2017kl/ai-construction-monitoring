@@ -6425,7 +6425,7 @@ class HistoricalDataSnapshot(Base):
     
     # Snapshot data
     data_payload = Column(JSON, nullable=False)  # The actual data snapshot
-    metadata = Column(JSON)  # Additional metadata about the snapshot
+    data_metadata = Column(JSON)  # Additional metadata about the snapshot
     
     # Data quality metrics
     data_completeness_percentage = Column(Decimal(5,2), default=100.00)
