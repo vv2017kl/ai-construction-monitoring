@@ -8119,7 +8119,7 @@ class ProcurementRequest(Base):
     # Request identification
     request_number = Column(String(100), nullable=False)
     request_type = Column(String(100), nullable=False)  # material, equipment, service
-    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.medium)
+    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.warning)
     
     # Request details
     requested_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
