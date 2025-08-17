@@ -9,13 +9,13 @@ from sqlalchemy import func, and_, or_
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from ..database import get_db
-from ..models import (
+from database import get_db
+from models import (
     ThirdPartyIntegration, UserProfileSetting, UserApplicationSetting, 
     HelpArticle, UserFeedback, User,
     IntegrationType, IntegrationStatus, FeedbackType, FeedbackStatus
 )
-from ..schemas import (
+from schemas import (
     ThirdPartyIntegrationResponse, ThirdPartyIntegrationCreateRequest,
     UserProfileSettingResponse, UserProfileSettingCreateRequest,
     UserApplicationSettingResponse, UserApplicationSettingCreateRequest,
