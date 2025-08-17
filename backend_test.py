@@ -4773,6 +4773,55 @@ def main():
     ai_model_mgmt_ok, created_ai_model_mgmt_id, created_deployment_mgmt_id, created_training_job_mgmt_id, created_evaluation_mgmt_id = test_ai_model_management_apis()
     results.append(("AI Model Management & Deployment APIs", ai_model_mgmt_ok))
     
+    # INTEGRATION & USER EXPERIENCE TESTS
+    print("\n" + "=" * 80)
+    print("STARTING INTEGRATION & USER EXPERIENCE API TESTS")
+    print("=" * 80)
+    
+    created_integration_id = None
+    created_help_article_id = None
+    created_feedback_id = None
+    
+    # Test Third Party Integrations API
+    if created_user_id:
+        integrations_ok, created_integration_id = test_integration_third_party_integrations_api(created_user_id)
+        results.append(("Third Party Integrations API", integrations_ok))
+    else:
+        print("   ⚠️ Skipping Third Party Integrations tests - no user created")
+        results.append(("Third Party Integrations API", False))
+    
+    # Test User Profile Settings API
+    if created_user_id:
+        profile_settings_ok = test_integration_user_profile_settings_api(created_user_id)
+        results.append(("User Profile Settings API", profile_settings_ok))
+    else:
+        print("   ⚠️ Skipping User Profile Settings tests - no user created")
+        results.append(("User Profile Settings API", False))
+    
+    # Test User Application Settings API
+    if created_user_id:
+        app_settings_ok = test_integration_user_app_settings_api(created_user_id)
+        results.append(("User Application Settings API", app_settings_ok))
+    else:
+        print("   ⚠️ Skipping User Application Settings tests - no user created")
+        results.append(("User Application Settings API", False))
+    
+    # Test Help Articles API
+    if created_user_id:
+        help_articles_ok, created_help_article_id = test_integration_help_articles_api(created_user_id)
+        results.append(("Help Articles API", help_articles_ok))
+    else:
+        print("   ⚠️ Skipping Help Articles tests - no user created")
+        results.append(("Help Articles API", False))
+    
+    # Test User Feedback API
+    if created_user_id:
+        user_feedback_ok, created_feedback_id = test_integration_user_feedback_api(created_user_id)
+        results.append(("User Feedback API", user_feedback_ok))
+    else:
+        print("   ⚠️ Skipping User Feedback tests - no user created")
+        results.append(("User Feedback API", False))
+    
     # Cleanup test data
     cleanup_ok = cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                                  created_bookmark_id, created_export_id, created_route_id, created_waypoint_id, 
