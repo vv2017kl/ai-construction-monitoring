@@ -8282,3 +8282,208 @@ class CostTracking(Base):
         Index('idx_cost_approval', 'approval_status', 'authorized_by'),
         Index('idx_cost_budget', 'budget_category', 'variance_percentage'),
     )
+
+
+# FINAL COMPLETION TABLES
+
+# Weather Integration enum
+class WeatherCondition(enum.Enum):
+    clear = "clear"
+    partly_cloudy = "partly_cloudy"
+    cloudy = "cloudy"
+    light_rain = "light_rain"
+    heavy_rain = "heavy_rain"
+    snow = "snow"
+    fog = "fog"
+    windy = "windy"
+    storm = "storm"
+
+class MaintenanceType(enum.Enum):
+    preventive = "preventive"
+    corrective = "corrective"
+    emergency = "emergency"
+    scheduled = "scheduled"
+    condition_based = "condition_based"
+
+
+class WeatherIntegration(Base):
+    __tablename__ = 'weather_integration'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Weather service integration
+    weather_service_provider = Column(String(100))  # OpenWeather, AccuWeather, etc.
+    api_key_reference = Column(String(255))
+    service_status = Column(String(50), default="active")
+    
+    # Location details
+    latitude = Column(Decimal(10,8), nullable=False)
+    longitude = Column(Decimal(11,8), nullable=False)
+    elevation_meters = Column(Decimal(8,3))
+    timezone = Column(String(100))
+    
+    # Current conditions
+    current_temperature_celsius = Column(Decimal(5,2))
+    current_humidity_percentage = Column(Decimal(5,2))
+    current_wind_speed_kmh = Column(Decimal(6,2))
+    current_wind_direction_degrees = Column(Decimal(5,2))
+    current_condition = Column(SQLEnum(WeatherCondition))
+    current_visibility_km = Column(Decimal(5,2))
+    current_pressure_hpa = Column(Decimal(7,2))
+    
+    # Precipitation
+    current_precipitation_mm = Column(Decimal(6,2))
+    precipitation_probability = Column(Decimal(5,2))  # 0-100%
+    
+    # Weather alerts and warnings
+    active_weather_alerts = Column(JSON)  # Current weather warnings
+    severe_weather_probability = Column(Decimal(5,2))  # 0-100%
+    
+    # Construction impact assessment
+    work_suitability_score = Column(Decimal(5,2))  # 0-100% how suitable for construction
+    recommended_work_types = Column(JSON)  # What work can be done safely
+    work_restrictions = Column(JSON)  # What work should be avoided
+    
+    # Forecast integration
+    forecast_hours_ahead = Column(Integer, default=48)
+    forecast_accuracy_percentage = Column(Decimal(5,2))
+    
+    # Data quality and sync
+    last_update_timestamp = Column(TIMESTAMP)
+    update_frequency_minutes = Column(Integer, default=15)
+    data_quality_score = Column(Decimal(5,2), default=100.00)
+    sync_errors_count = Column(Integer, default=0)
+    
+    # Alert thresholds
+    temperature_high_threshold = Column(Decimal(5,2))
+    temperature_low_threshold = Column(Decimal(5,2))
+    wind_speed_threshold = Column(Decimal(6,2))
+    precipitation_threshold = Column(Decimal(6,2))
+    
+    # Historical tracking
+    daily_weather_summary = Column(JSON)
+    monthly_patterns = Column(JSON)
+    seasonal_trends = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_weather_site_update', 'site_id', 'last_update_timestamp'),
+        Index('idx_weather_conditions', 'current_condition', 'work_suitability_score'),
+        Index('idx_weather_alerts', 'severe_weather_probability', 'active_weather_alerts'),
+        Index('idx_weather_coordinates', 'latitude', 'longitude'),
+        UniqueConstraint('site_id', name='unique_weather_per_site'),
+    )
+
+
+class MaintenanceSchedule(Base):
+    __tablename__ = 'maintenance_schedule'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Asset identification
+    asset_type = Column(String(100), nullable=False)  # equipment, infrastructure, vehicle, etc.
+    asset_id = Column(CHAR(36), nullable=False)  # ID of the asset being maintained
+    asset_name = Column(String(255), nullable=False)
+    
+    # Maintenance details
+    maintenance_type = Column(SQLEnum(MaintenanceType), nullable=False)
+    maintenance_description = Column(Text, nullable=False)
+    maintenance_code = Column(String(100))  # Internal maintenance reference
+    
+    # Scheduling
+    scheduled_date = Column(Date, nullable=False)
+    scheduled_start_time = Column(Time)
+    scheduled_end_time = Column(Time)
+    estimated_duration_hours = Column(Decimal(5,2))
+    
+    # Actual execution
+    actual_start_timestamp = Column(TIMESTAMP)
+    actual_end_timestamp = Column(TIMESTAMP)
+    actual_duration_hours = Column(Decimal(5,2))
+    
+    # Assignment and resources
+    assigned_technician_id = Column(CHAR(36), ForeignKey('users.id'))
+    maintenance_team_ids = Column(JSON)  # Array of user IDs
+    required_parts = Column(JSON)  # Parts needed for maintenance
+    required_tools = Column(JSON)  # Tools required
+    
+    # Status and progress
+    status = Column(String(50), default="scheduled")  # scheduled, in_progress, completed, cancelled, delayed
+    completion_percentage = Column(Decimal(5,2), default=0.00)
+    
+    # Maintenance intervals
+    frequency_type = Column(String(50))  # calendar, usage_based, condition_based
+    frequency_interval = Column(Integer)  # Days, hours, cycles, etc.
+    next_maintenance_due = Column(Date)
+    
+    # Cost tracking
+    estimated_cost = Column(Decimal(10,2))
+    actual_cost = Column(Decimal(10,2))
+    parts_cost = Column(Decimal(10,2))
+    labor_cost = Column(Decimal(10,2))
+    
+    # Quality and compliance
+    quality_checklist = Column(JSON, nullable=False)  # Maintenance checklist
+    compliance_requirements = Column(JSON)  # Regulatory requirements
+    inspection_required = Column(Boolean, default=False)
+    inspection_passed = Column(Boolean)
+    
+    # Documentation
+    work_performed = Column(Text)
+    issues_found = Column(JSON)  # Problems discovered during maintenance
+    corrective_actions = Column(JSON)  # Actions taken to resolve issues
+    
+    # Photos and evidence
+    before_photos = Column(JSON)  # Photos before maintenance
+    after_photos = Column(JSON)  # Photos after maintenance
+    documentation_urls = Column(JSON)  # Supporting documents
+    
+    # Performance impact
+    downtime_hours = Column(Decimal(5,2))
+    performance_improvement = Column(Text)
+    reliability_impact = Column(String(100))
+    
+    # Approval workflow
+    requires_supervisor_approval = Column(Boolean, default=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approval_timestamp = Column(TIMESTAMP)
+    approval_comments = Column(Text)
+    
+    # Follow-up tracking
+    follow_up_required = Column(Boolean, default=False)
+    follow_up_date = Column(Date)
+    warranty_period_days = Column(Integer)
+    warranty_expiry_date = Column(Date)
+    
+    # Recurring maintenance
+    is_recurring = Column(Boolean, default=False)
+    recurrence_pattern = Column(JSON)  # Recurrence configuration
+    parent_maintenance_id = Column(CHAR(36))  # Link to recurring series
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    assigned_technician = relationship("User", foreign_keys=[assigned_technician_id])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_maintenance_site_date', 'site_id', 'scheduled_date'),
+        Index('idx_maintenance_asset', 'asset_type', 'asset_id', 'status'),
+        Index('idx_maintenance_technician', 'assigned_technician_id', 'scheduled_date'),
+        Index('idx_maintenance_type', 'maintenance_type', 'frequency_type'),
+        Index('idx_maintenance_due', 'next_maintenance_due', 'is_recurring'),
+        Index('idx_maintenance_status', 'status', 'completion_percentage'),
+    )
