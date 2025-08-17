@@ -7243,3 +7243,500 @@ class DepartmentAssignment(Base):
         Index('idx_dept_assignments_performance', 'performance_rating', 'last_performance_review'),
         UniqueConstraint('user_id', 'site_id', 'assignment_start_date', name='unique_user_assignment_date'),
     )
+
+
+# ADVANCED MONITORING & COMMUNICATION TABLES
+
+# Communication enums
+class CommunicationChannel(enum.Enum):
+    email = "email"
+    sms = "sms"
+    push_notification = "push_notification"
+    in_app = "in_app"
+    radio = "radio"
+    intercom = "intercom"
+
+class MessagePriority(enum.Enum):
+    low = "low"
+    normal = "normal"
+    high = "high"
+    urgent = "urgent"
+    emergency = "emergency"
+
+class DeliveryStatus(enum.Enum):
+    pending = "pending"
+    sent = "sent"
+    delivered = "delivered"
+    read = "read"
+    failed = "failed"
+
+class MonitoringType(enum.Enum):
+    environmental = "environmental"
+    structural = "structural"
+    safety = "safety"
+    security = "security"
+    equipment = "equipment"
+    personnel = "personnel"
+
+class SensorType(enum.Enum):
+    temperature = "temperature"
+    humidity = "humidity"
+    air_quality = "air_quality"
+    noise_level = "noise_level"
+    vibration = "vibration"
+    pressure = "pressure"
+    motion = "motion"
+    light = "light"
+
+class CalibrationStatus(enum.Enum):
+    calibrated = "calibrated"
+    needs_calibration = "needs_calibration"
+    overdue = "overdue"
+    failed = "failed"
+
+
+class CommunicationLog(Base):
+    __tablename__ = 'communication_logs'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Message details
+    message_type = Column(String(100), nullable=False)  # alert, notification, announcement, emergency
+    subject = Column(String(500), nullable=False)
+    message_content = Column(Text, nullable=False)
+    message_priority = Column(SQLEnum(MessagePriority), default=MessagePriority.normal)
+    
+    # Sender information
+    sender_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    sender_name = Column(String(255))
+    sender_role = Column(String(100))
+    
+    # Recipients
+    recipient_ids = Column(JSON, nullable=False)  # Array of user IDs
+    recipient_groups = Column(JSON)  # Array of group/role names
+    total_recipients = Column(Integer, nullable=False)
+    
+    # Delivery channels
+    delivery_channels = Column(JSON, nullable=False)  # Array of communication channels
+    delivery_preferences = Column(JSON)  # Per-recipient channel preferences
+    
+    # Message status and tracking
+    status = Column(String(50), default="pending")
+    sent_count = Column(Integer, default=0)
+    delivered_count = Column(Integer, default=0)
+    read_count = Column(Integer, default=0)
+    failed_count = Column(Integer, default=0)
+    
+    # Timing
+    scheduled_send_time = Column(TIMESTAMP)
+    actual_send_time = Column(TIMESTAMP)
+    delivery_completion_time = Column(TIMESTAMP)
+    
+    # Message metadata
+    related_entity_type = Column(String(50))  # alert, event, report, etc.
+    related_entity_id = Column(CHAR(36))
+    tags = Column(JSON)  # Message categorization tags
+    
+    # Response tracking
+    response_required = Column(Boolean, default=False)
+    response_deadline = Column(TIMESTAMP)
+    response_count = Column(Integer, default=0)
+    acknowledgment_required = Column(Boolean, default=False)
+    acknowledgment_count = Column(Integer, default=0)
+    
+    # Escalation
+    escalation_rules = Column(JSON)  # Escalation configuration
+    escalation_triggered = Column(Boolean, default=False)
+    escalation_level = Column(Integer, default=0)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    sender = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_comm_logs_site_time', 'site_id', 'created_at'),
+        Index('idx_comm_logs_sender', 'sender_id', 'message_type'),
+        Index('idx_comm_logs_priority', 'message_priority', 'status'),
+        Index('idx_comm_logs_entity', 'related_entity_type', 'related_entity_id'),
+        Index('idx_comm_logs_delivery', 'status', 'actual_send_time'),
+    )
+
+
+class EnvironmentalSensor(Base):
+    __tablename__ = 'environmental_sensors'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Sensor identification
+    sensor_name = Column(String(255), nullable=False)
+    sensor_type = Column(SQLEnum(SensorType), nullable=False)
+    manufacturer = Column(String(100))
+    model_number = Column(String(100))
+    serial_number = Column(String(100))
+    
+    # Location and installation
+    location_description = Column(String(500))
+    coordinates_x = Column(Decimal(10,6))
+    coordinates_y = Column(Decimal(10,6))
+    elevation_meters = Column(Decimal(8,3))
+    installation_date = Column(Date)
+    
+    # Technical specifications
+    measurement_unit = Column(String(50), nullable=False)
+    measurement_range_min = Column(Decimal(10,4))
+    measurement_range_max = Column(Decimal(10,4))
+    accuracy_percentage = Column(Decimal(5,2))
+    resolution = Column(Decimal(10,6))
+    
+    # Data collection
+    sampling_interval_seconds = Column(Integer, default=300)  # 5 minutes default
+    data_retention_days = Column(Integer, default=365)
+    last_reading_timestamp = Column(TIMESTAMP)
+    last_reading_value = Column(Decimal(10,4))
+    
+    # Calibration and maintenance
+    calibration_status = Column(SQLEnum(CalibrationStatus), default=CalibrationStatus.calibrated)
+    last_calibration_date = Column(Date)
+    next_calibration_due = Column(Date)
+    calibration_interval_days = Column(Integer, default=90)
+    
+    # Status and health
+    is_active = Column(Boolean, default=True)
+    operational_status = Column(String(50), default="operational")
+    battery_level_percentage = Column(Integer)
+    signal_strength_dbm = Column(Integer)
+    connection_type = Column(String(50))  # wifi, cellular, ethernet, etc.
+    
+    # Thresholds and alerts
+    warning_threshold_low = Column(Decimal(10,4))
+    warning_threshold_high = Column(Decimal(10,4))
+    critical_threshold_low = Column(Decimal(10,4))
+    critical_threshold_high = Column(Decimal(10,4))
+    alert_enabled = Column(Boolean, default=True)
+    
+    # Historical statistics
+    average_reading_24h = Column(Decimal(10,4))
+    min_reading_24h = Column(Decimal(10,4))
+    max_reading_24h = Column(Decimal(10,4))
+    readings_count_24h = Column(Integer, default=0)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_sensors_site_type', 'site_id', 'sensor_type'),
+        Index('idx_sensors_status', 'operational_status', 'is_active'),
+        Index('idx_sensors_location', 'coordinates_x', 'coordinates_y'),
+        Index('idx_sensors_calibration', 'calibration_status', 'next_calibration_due'),
+        Index('idx_sensors_readings', 'last_reading_timestamp', 'sensor_type'),
+    )
+
+
+class SensorReading(Base):
+    __tablename__ = 'sensor_readings'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    sensor_id = Column(CHAR(36), ForeignKey('environmental_sensors.id', ondelete='CASCADE'), nullable=False)
+    
+    # Reading data
+    reading_timestamp = Column(TIMESTAMP, nullable=False)
+    reading_value = Column(Decimal(10,4), nullable=False)
+    reading_unit = Column(String(50), nullable=False)
+    
+    # Quality indicators
+    data_quality_score = Column(Decimal(5,2), default=100.00)  # 0-100
+    is_validated = Column(Boolean, default=True)
+    validation_method = Column(String(100))  # automated, manual, calibrated
+    
+    # Status flags
+    is_anomaly = Column(Boolean, default=False)
+    exceeds_threshold = Column(Boolean, default=False)
+    threshold_type = Column(String(50))  # warning, critical
+    
+    # Environmental context
+    weather_conditions = Column(String(255))
+    temperature_celsius = Column(Decimal(5,2))  # Ambient temperature during reading
+    humidity_percentage = Column(Decimal(5,2))
+    
+    # Processing metadata
+    processing_timestamp = Column(TIMESTAMP, default=func.current_timestamp())
+    processing_latency_ms = Column(Integer)
+    data_source = Column(String(100), default="sensor")  # sensor, manual, estimated
+    
+    # Aggregation support
+    is_aggregated = Column(Boolean, default=False)
+    aggregation_period_minutes = Column(Integer)
+    aggregation_method = Column(String(50))  # avg, min, max, sum
+    sample_count = Column(Integer, default=1)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    sensor = relationship("EnvironmentalSensor")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_readings_sensor_time', 'sensor_id', 'reading_timestamp'),
+        Index('idx_readings_anomaly', 'is_anomaly', 'exceeds_threshold'),
+        Index('idx_readings_quality', 'data_quality_score', 'is_validated'),
+        Index('idx_readings_timestamp', 'reading_timestamp'),
+        Index('idx_readings_threshold', 'exceeds_threshold', 'threshold_type'),
+    )
+
+
+class EquipmentMonitoring(Base):
+    __tablename__ = 'equipment_monitoring'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Equipment identification
+    equipment_name = Column(String(255), nullable=False)
+    equipment_type = Column(String(100), nullable=False)  # crane, excavator, generator, etc.
+    equipment_id = Column(String(100))  # Asset tag or serial number
+    manufacturer = Column(String(100))
+    model = Column(String(100))
+    
+    # Location and deployment
+    current_location = Column(String(500))
+    coordinates_x = Column(Decimal(10,6))
+    coordinates_y = Column(Decimal(10,6))
+    deployment_date = Column(Date)
+    
+    # Operational status
+    operational_status = Column(String(50), default="operational")  # operational, maintenance, down, repair
+    utilization_percentage = Column(Decimal(5,2))  # Current utilization 0-100%
+    efficiency_score = Column(Decimal(5,2))  # Performance efficiency 0-100%
+    
+    # Usage tracking
+    total_operating_hours = Column(Decimal(10,2), default=0.00)
+    hours_since_maintenance = Column(Decimal(8,2), default=0.00)
+    daily_usage_hours = Column(Decimal(5,2), default=0.00)
+    
+    # Maintenance scheduling
+    maintenance_interval_hours = Column(Integer)
+    next_maintenance_due = Column(Date)
+    last_maintenance_date = Column(Date)
+    maintenance_cost_estimate = Column(Decimal(10,2))
+    
+    # Performance metrics
+    fuel_consumption_rate = Column(Decimal(8,4))  # Fuel per hour
+    productivity_metric = Column(Decimal(10,4))  # Units of work per hour
+    downtime_hours_week = Column(Decimal(5,2), default=0.00)
+    availability_percentage = Column(Decimal(5,2))  # Uptime percentage
+    
+    # Operator assignment
+    current_operator_id = Column(CHAR(36), ForeignKey('users.id'))
+    operator_certification_required = Column(Boolean, default=False)
+    operator_skill_level_required = Column(String(50))
+    
+    # Safety and compliance
+    safety_inspection_due = Column(Date)
+    safety_certification_status = Column(String(50), default="current")
+    insurance_expiry = Column(Date)
+    compliance_status = Column(String(50), default="compliant")
+    
+    # Cost tracking
+    hourly_operating_cost = Column(Decimal(8,2))
+    daily_rental_cost = Column(Decimal(10,2))
+    total_project_cost = Column(Decimal(15,2), default=0.00)
+    
+    # Alerts and monitoring
+    monitoring_enabled = Column(Boolean, default=True)
+    alert_thresholds = Column(JSON)  # Configurable alert thresholds
+    last_alert_timestamp = Column(TIMESTAMP)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    current_operator = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_equipment_site_type', 'site_id', 'equipment_type'),
+        Index('idx_equipment_status', 'operational_status', 'utilization_percentage'),
+        Index('idx_equipment_maintenance', 'next_maintenance_due', 'hours_since_maintenance'),
+        Index('idx_equipment_operator', 'current_operator_id', 'deployment_date'),
+        Index('idx_equipment_location', 'coordinates_x', 'coordinates_y'),
+    )
+
+
+class QualityControlInspection(Base):
+    __tablename__ = 'quality_control_inspections'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Inspection identification
+    inspection_type = Column(String(100), nullable=False)  # structural, safety, quality, final
+    inspection_category = Column(String(100), nullable=False)  # foundation, electrical, plumbing, etc.
+    inspection_code = Column(String(50))  # Internal reference code
+    
+    # Scheduling and assignment
+    scheduled_date = Column(Date, nullable=False)
+    actual_date = Column(Date)
+    inspector_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    inspection_duration_hours = Column(Decimal(5,2))
+    
+    # Scope and location
+    inspection_scope = Column(Text, nullable=False)
+    location_description = Column(String(500))
+    coordinates_x = Column(Decimal(10,6))
+    coordinates_y = Column(Decimal(10,6))
+    affected_areas = Column(JSON)  # Array of area/zone names
+    
+    # Results and findings
+    overall_result = Column(String(50), nullable=False)  # pass, fail, conditional_pass, pending
+    compliance_percentage = Column(Decimal(5,2))  # 0-100% compliance score
+    
+    # Detailed findings
+    passed_items_count = Column(Integer, default=0)
+    failed_items_count = Column(Integer, default=0)
+    deficiency_count = Column(Integer, default=0)
+    critical_issues_count = Column(Integer, default=0)
+    
+    # Inspection checklist
+    checklist_items = Column(JSON, nullable=False)  # Structured checklist with results
+    inspection_criteria = Column(JSON)  # Evaluation criteria used
+    
+    # Documentation
+    inspection_notes = Column(Text)
+    recommendations = Column(Text)
+    corrective_actions_required = Column(JSON)  # Array of required actions
+    
+    # Follow-up tracking
+    requires_reinspection = Column(Boolean, default=False)
+    reinspection_date = Column(Date)
+    corrective_action_deadline = Column(Date)
+    
+    # Approval workflow
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approval_timestamp = Column(TIMESTAMP)
+    approval_status = Column(String(50), default="pending")
+    approval_comments = Column(Text)
+    
+    # Related documentation
+    photos_urls = Column(JSON)  # Array of photo URLs
+    documents_urls = Column(JSON)  # Supporting documents
+    video_evidence_urls = Column(JSON)  # Video documentation
+    
+    # Regulatory compliance
+    regulatory_standard = Column(String(255))  # Building code, safety standard, etc.
+    permit_numbers = Column(JSON)  # Related permits
+    regulatory_approval_required = Column(Boolean, default=False)
+    
+    # Cost and impact
+    estimated_correction_cost = Column(Decimal(12,2))
+    estimated_delay_days = Column(Integer)
+    impact_assessment = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    inspector = relationship("User", foreign_keys=[inspector_id])
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_qc_inspections_site_date', 'site_id', 'scheduled_date'),
+        Index('idx_qc_inspections_inspector', 'inspector_id', 'actual_date'),
+        Index('idx_qc_inspections_result', 'overall_result', 'compliance_percentage'),
+        Index('idx_qc_inspections_type', 'inspection_type', 'inspection_category'),
+        Index('idx_qc_inspections_follow_up', 'requires_reinspection', 'reinspection_date'),
+    )
+
+
+class ProjectMilestone(Base):
+    __tablename__ = 'project_milestones'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Milestone identification
+    milestone_name = Column(String(255), nullable=False)
+    milestone_code = Column(String(50))  # Project reference code
+    milestone_category = Column(String(100), nullable=False)  # design, construction, testing, etc.
+    
+    # Scheduling
+    planned_start_date = Column(Date, nullable=False)
+    planned_completion_date = Column(Date, nullable=False)
+    actual_start_date = Column(Date)
+    actual_completion_date = Column(Date)
+    
+    # Status tracking
+    status = Column(String(50), default="not_started")  # not_started, in_progress, completed, delayed, cancelled
+    completion_percentage = Column(Decimal(5,2), default=0.00)
+    
+    # Dependencies and relationships
+    dependencies = Column(JSON)  # Array of milestone IDs this depends on
+    dependent_milestones = Column(JSON)  # Milestones that depend on this one
+    critical_path_flag = Column(Boolean, default=False)
+    
+    # Deliverables and requirements
+    deliverables = Column(JSON, nullable=False)  # Expected outputs/deliverables
+    acceptance_criteria = Column(JSON)  # Criteria for completion
+    quality_requirements = Column(JSON)  # Quality standards required
+    
+    # Resource allocation
+    assigned_team_members = Column(JSON)  # Array of user IDs
+    estimated_person_hours = Column(Decimal(8,2))
+    actual_person_hours = Column(Decimal(8,2), default=0.00)
+    budget_allocated = Column(Decimal(15,2))
+    budget_consumed = Column(Decimal(15,2), default=0.00)
+    
+    # Progress and performance
+    tasks_completed = Column(Integer, default=0)
+    tasks_total = Column(Integer, nullable=False)
+    performance_score = Column(Decimal(5,2))  # 0-100 performance rating
+    
+    # Risk and issues
+    risk_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.low)
+    identified_risks = Column(JSON)  # Risk descriptions and mitigation plans
+    current_issues = Column(JSON)  # Active issues affecting milestone
+    
+    # Financial tracking
+    cost_variance_percentage = Column(Decimal(5,2))  # Budget variance
+    schedule_variance_days = Column(Integer)  # Schedule variance in days
+    
+    # Approval and sign-off
+    requires_client_approval = Column(Boolean, default=False)
+    client_approval_received = Column(Boolean, default=False)
+    approval_date = Column(Date)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Documentation
+    milestone_documents = Column(JSON)  # Related documents
+    completion_evidence = Column(JSON)  # Evidence of completion
+    lessons_learned = Column(Text)  # Post-completion analysis
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_milestones_site_dates', 'site_id', 'planned_completion_date'),
+        Index('idx_milestones_status', 'status', 'completion_percentage'),
+        Index('idx_milestones_critical', 'critical_path_flag', 'risk_level'),
+        Index('idx_milestones_category', 'milestone_category', 'status'),
+        Index('idx_milestones_performance', 'performance_score', 'schedule_variance_days'),
+    )
