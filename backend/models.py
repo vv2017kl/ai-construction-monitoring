@@ -6678,3 +6678,322 @@ class PredictiveModelPrediction(Base):
         Index('idx_predictions_accuracy', 'is_accurate', 'confidence_score', 'absolute_error'),
         Index('idx_predictions_validation', 'validated_at', 'actual_value'),
     )
+
+
+# ALERT MANAGEMENT EXTENSIONS TABLES
+
+# Alert Management enums
+class CommentType(enum.Enum):
+    note = "note"
+    status_update = "status_update"
+    evidence = "evidence"
+    resolution = "resolution"
+    escalation = "escalation"
+
+class VisibilityLevel(enum.Enum):
+    public = "public"
+    team = "team"
+    management = "management"
+    admin = "admin"
+
+class EvidenceType(enum.Enum):
+    image = "image"
+    video = "video"
+    document = "document"
+    audio = "audio"
+    data = "data"
+
+class EvidenceSourceType(enum.Enum):
+    ai_detection = "ai_detection"
+    manual_upload = "manual_upload"
+    zoneminder_event = "zoneminder_event"
+    camera_snapshot = "camera_snapshot"
+    document = "document"
+
+class AssignmentStatus(enum.Enum):
+    assigned = "assigned"
+    in_progress = "in_progress"
+    completed = "completed"
+    reassigned = "reassigned"
+    cancelled = "cancelled"
+
+class AttendanceStatus(enum.Enum):
+    present = "present"
+    absent = "absent"
+    late = "late"
+    early_departure = "early_departure"
+    on_break = "on_break"
+
+
+class AlertComment(Base):
+    __tablename__ = 'alert_comments'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    alert_id = Column(CHAR(36), ForeignKey('alerts.id', ondelete='CASCADE'), nullable=False)
+    author_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Comment content
+    comment_text = Column(Text, nullable=False)
+    comment_type = Column(SQLEnum(CommentType), default=CommentType.note)
+    
+    # Threading support
+    parent_comment_id = Column(CHAR(36), ForeignKey('alert_comments.id'))
+    thread_level = Column(Integer, default=0)
+    
+    # Mentions and notifications
+    mentioned_users = Column(JSON)  # Array of user IDs mentioned
+    notifications_sent = Column(JSON)  # Notification delivery tracking
+    
+    # Attachments
+    attachment_urls = Column(JSON)  # Array of attachment URLs
+    attachment_metadata = Column(JSON)  # File names, sizes, types
+    
+    # Status and visibility
+    is_internal = Column(Boolean, default=False)  # Internal vs external comments
+    is_edited = Column(Boolean, default=False)
+    edit_history = Column(JSON)  # Edit tracking
+    visibility_level = Column(SQLEnum(VisibilityLevel), default=VisibilityLevel.team)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    alert = relationship("Alert")
+    author = relationship("User", foreign_keys=[author_id])
+    parent_comment = relationship("AlertComment", remote_side=[id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_alert_comments_alert', 'alert_id', 'created_at'),
+        Index('idx_alert_comments_author', 'author_id'),
+        Index('idx_alert_comments_thread', 'parent_comment_id', 'thread_level'),
+        Index('idx_alert_comments_visibility', 'visibility_level', 'is_internal'),
+    )
+
+
+class AlertEvidence(Base):
+    __tablename__ = 'alert_evidence'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    alert_id = Column(CHAR(36), ForeignKey('alerts.id', ondelete='CASCADE'), nullable=False)
+    
+    # Evidence source
+    source_type = Column(SQLEnum(EvidenceSourceType), nullable=False)
+    source_reference_id = Column(String(255))  # Reference to source (detection_id, event_id, etc.)
+    
+    # File information
+    evidence_type = Column(SQLEnum(EvidenceType), nullable=False)
+    file_name = Column(String(255), nullable=False)
+    file_path = Column(Text, nullable=False)
+    file_size_bytes = Column(BigInteger)
+    mime_type = Column(String(100))
+    
+    # Evidence metadata
+    capture_timestamp = Column(TIMESTAMP)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'))
+    location_description = Column(String(500))
+    evidence_description = Column(Text)
+    
+    # Processing and analysis
+    is_processed = Column(Boolean, default=False)
+    processing_status = Column(String(50), default="pending")
+    ai_analysis_results = Column(JSON)  # AI analysis of the evidence
+    evidence_quality_score = Column(Decimal(5,2))  # Quality assessment 0-100
+    
+    # Chain of custody
+    collected_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    verified_by = Column(CHAR(36), ForeignKey('users.id'))
+    chain_of_custody = Column(JSON)  # Custody transfer log
+    
+    # Access control
+    access_level = Column(SQLEnum(VisibilityLevel), default=VisibilityLevel.team)
+    retention_until = Column(Date)  # Evidence retention policy
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    alert = relationship("Alert")
+    camera = relationship("Camera")
+    collected_by_user = relationship("User", foreign_keys=[collected_by])
+    verified_by_user = relationship("User", foreign_keys=[verified_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_alert_evidence_alert', 'alert_id', 'created_at'),
+        Index('idx_alert_evidence_source', 'source_type', 'source_reference_id'),
+        Index('idx_alert_evidence_type', 'evidence_type', 'file_name'),
+        Index('idx_alert_evidence_camera', 'camera_id', 'capture_timestamp'),
+        Index('idx_alert_evidence_quality', 'evidence_quality_score', 'is_processed'),
+    )
+
+
+class AlertAssignment(Base):
+    __tablename__ = 'alert_assignments'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    alert_id = Column(CHAR(36), ForeignKey('alerts.id', ondelete='CASCADE'), nullable=False)
+    assigned_to = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    assigned_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Assignment details
+    assignment_reason = Column(Text)
+    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.medium)
+    estimated_completion = Column(TIMESTAMP)
+    
+    # Assignment status
+    status = Column(SQLEnum(AssignmentStatus), default=AssignmentStatus.assigned)
+    acceptance_timestamp = Column(TIMESTAMP)  # When assignee accepted
+    start_timestamp = Column(TIMESTAMP)  # When work started
+    completion_timestamp = Column(TIMESTAMP)  # When completed
+    
+    # Progress tracking
+    progress_percentage = Column(Decimal(5,2), default=0.00)
+    time_spent_hours = Column(Decimal(8,2), default=0.00)
+    progress_notes = Column(JSON)  # Array of progress updates
+    
+    # Escalation handling
+    escalation_level = Column(Integer, default=0)  # Number of escalations
+    escalation_history = Column(JSON)  # Escalation tracking
+    requires_supervisor_approval = Column(Boolean, default=False)
+    
+    # Reassignment tracking
+    previous_assignee = Column(CHAR(36), ForeignKey('users.id'))
+    reassignment_reason = Column(Text)
+    reassignment_count = Column(Integer, default=0)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    alert = relationship("Alert")
+    assigned_user = relationship("User", foreign_keys=[assigned_to])
+    assigner_user = relationship("User", foreign_keys=[assigned_by])
+    previous_assignee_user = relationship("User", foreign_keys=[previous_assignee])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_alert_assignments_alert', 'alert_id', 'status'),
+        Index('idx_alert_assignments_assignee', 'assigned_to', 'status'),
+        Index('idx_alert_assignments_priority', 'priority_level', 'estimated_completion'),
+        Index('idx_alert_assignments_progress', 'progress_percentage', 'status'),
+    )
+
+
+class SafetyMetric(Base):
+    __tablename__ = 'safety_metrics'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Metric identification
+    metric_name = Column(String(255), nullable=False)
+    metric_category = Column(String(100), nullable=False)  # incidents, compliance, training, etc.
+    measurement_date = Column(Date, nullable=False)
+    measurement_period = Column(SQLEnum(AggregationPeriod), nullable=False)
+    
+    # Safety values
+    incident_count = Column(Integer, default=0)
+    near_miss_count = Column(Integer, default=0)
+    safety_violation_count = Column(Integer, default=0)
+    compliance_score = Column(Decimal(5,2))  # 0-100%
+    
+    # Performance metrics
+    training_completion_rate = Column(Decimal(5,2))  # 0-100%
+    safety_equipment_usage_rate = Column(Decimal(5,2))  # 0-100%
+    hazard_identification_rate = Column(Decimal(5,2))  # 0-100%
+    
+    # Benchmarking
+    target_value = Column(Decimal(10,4))
+    industry_benchmark = Column(Decimal(10,4))
+    performance_vs_target = Column(Decimal(5,2))  # Percentage vs target
+    performance_vs_industry = Column(Decimal(5,2))  # Percentage vs industry
+    
+    # Trend analysis
+    trend_direction = Column(SQLEnum(TrendDirection))
+    improvement_percentage = Column(Decimal(5,2))  # Month-over-month improvement
+    
+    # Contributing factors
+    weather_impact = Column(Boolean, default=False)
+    equipment_related = Column(Boolean, default=False)
+    personnel_related = Column(Boolean, default=False)
+    external_factors = Column(JSON)
+    
+    # Quality and validation
+    data_quality_score = Column(Decimal(5,2), default=100.00)
+    validation_status = Column(String(50), default="validated")
+    notes = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_safety_metrics_site_date', 'site_id', 'measurement_date'),
+        Index('idx_safety_metrics_category', 'metric_category', 'measurement_period'),
+        Index('idx_safety_metrics_performance', 'compliance_score', 'incident_count'),
+        Index('idx_safety_metrics_trend', 'trend_direction', 'improvement_percentage'),
+    )
+
+
+class ActivityFeed(Base):
+    __tablename__ = 'activity_feed'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Activity details
+    activity_type = Column(String(100), nullable=False)  # alert_created, user_login, report_generated, etc.
+    activity_category = Column(String(50), nullable=False)  # security, system, user, alert, report
+    entity_type = Column(String(50))  # alert, user, camera, etc.
+    entity_id = Column(CHAR(36))  # ID of the related entity
+    
+    # Activity content
+    title = Column(String(500), nullable=False)
+    description = Column(Text)
+    action_details = Column(JSON)  # Structured details about the action
+    
+    # Activity metadata
+    ip_address = Column(String(45))  # IPv4 or IPv6
+    user_agent = Column(Text)
+    session_id = Column(String(255))
+    
+    # Impact and severity
+    impact_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.low)
+    requires_attention = Column(Boolean, default=False)
+    is_system_generated = Column(Boolean, default=False)
+    
+    # Visibility and filtering
+    visibility_scope = Column(SQLEnum(VisibilityLevel), default=VisibilityLevel.team)
+    tags = Column(JSON)  # Array of tags for filtering
+    
+    # Status and lifecycle
+    is_read = Column(Boolean, default=False)
+    read_timestamp = Column(TIMESTAMP)
+    read_by = Column(CHAR(36), ForeignKey('users.id'))
+    
+    # Aggregation support
+    related_activity_ids = Column(JSON)  # Related activities for grouping
+    aggregation_key = Column(String(255))  # For grouping similar activities
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    user = relationship("User", foreign_keys=[user_id])
+    read_by_user = relationship("User", foreign_keys=[read_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_activity_feed_site_time', 'site_id', 'created_at'),
+        Index('idx_activity_feed_user', 'user_id', 'is_read'),
+        Index('idx_activity_feed_type', 'activity_type', 'activity_category'),
+        Index('idx_activity_feed_entity', 'entity_type', 'entity_id'),
+        Index('idx_activity_feed_attention', 'requires_attention', 'impact_level'),
+    )
