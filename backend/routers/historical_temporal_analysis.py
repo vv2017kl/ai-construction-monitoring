@@ -111,7 +111,7 @@ def create_snapshot(
         source_entity_id=snapshot.source_entity_id,
         source_entity_name=snapshot.source_entity_name,
         data_payload=snapshot.data_payload,
-        metadata=snapshot.metadata,
+        data_metadata=snapshot.data_metadata,
         data_completeness_percentage=snapshot.data_completeness_percentage,
         data_accuracy_score=snapshot.data_accuracy_score,
         created_by=created_by
