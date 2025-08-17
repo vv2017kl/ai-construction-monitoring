@@ -4554,6 +4554,721 @@ def test_integration_user_feedback_api(user_id):
         print(f"   ❌ Unexpected error: {e}")
         return False, created_feedback_id
 
+def test_street_view_comparison_apis(site_id, camera_id=None):
+    """Test Street View Comparison & Analysis API endpoints"""
+    print("\n18. Testing Street View Comparison & Analysis APIs")
+    created_comparison_id = None
+    created_session_id = None
+    created_change_id = None
+    created_location_id = None
+    created_metric_id = None
+    
+    try:
+        # Get existing cameras to use a valid camera_id
+        if not camera_id:
+            print("   18a. Getting existing cameras for valid camera_id")
+            response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
+            if response.status_code == 200:
+                cameras = response.json()
+                if cameras:
+                    camera_id = cameras[0]["id"]
+                    print(f"      Using existing camera ID: {camera_id}")
+                else:
+                    print("      No existing cameras found, using fake camera_id")
+                    camera_id = str(uuid.uuid4())
+            else:
+                print("      Failed to get cameras list, using fake camera_id")
+                camera_id = str(uuid.uuid4())
+        
+        # Test Street View Sessions API
+        print("   18b. Testing Street View Sessions API")
+        
+        # GET all sessions
+        response = requests.get(f"{API_BASE_URL}/street-view/sessions", timeout=10)
+        print(f"      GET all sessions status: {response.status_code}")
+        if response.status_code == 200:
+            sessions = response.json()
+            print(f"      Found {len(sessions)} existing sessions")
+            print("      ✅ GET all sessions working")
+        else:
+            print("      ❌ GET all sessions failed")
+            return False, (None, None, None, None, None)
+        
+        # POST create session
+        test_session_data = {
+            "site_id": site_id,
+            "camera_id": camera_id,
+            "session_label": f"Test Session {uuid.uuid4().hex[:8]}",
+            "session_date": "2024-01-15",
+            "session_time": "14:30:00",
+            "location_coordinates_x": 123.456,
+            "location_coordinates_y": 789.012,
+            "heading_degrees": 45.0,
+            "weather_conditions": "Clear",
+            "recording_quality": "high",
+            "duration_seconds": 300
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/street-view/sessions",
+            json=test_session_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create session status: {response.status_code}")
+        
+        if response.status_code == 200:
+            session = response.json()
+            created_session_id = session.get("id")
+            print(f"      Created session ID: {created_session_id}")
+            print("      ✅ POST session creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST session creation failed")
+            return False, (None, None, None, None, None)
+        
+        # GET specific session
+        response = requests.get(f"{API_BASE_URL}/street-view/sessions/{created_session_id}", timeout=10)
+        print(f"      GET specific session status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ GET specific session working")
+        else:
+            print("      ❌ GET specific session failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # Test Street View Comparisons API
+        print("   18c. Testing Street View Comparisons API")
+        
+        # GET all comparisons
+        response = requests.get(f"{API_BASE_URL}/street-view/comparisons", timeout=10)
+        print(f"      GET all comparisons status: {response.status_code}")
+        if response.status_code == 200:
+            comparisons = response.json()
+            print(f"      Found {len(comparisons)} existing comparisons")
+            print("      ✅ GET all comparisons working")
+        else:
+            print("      ❌ GET all comparisons failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # POST create comparison (using same session for before/after for testing)
+        test_comparison_data = {
+            "session_before_id": created_session_id,
+            "session_after_id": created_session_id,
+            "site_id": site_id,
+            "location_zone": "Construction Zone A",
+            "comparison_type": "progress_tracking",
+            "timespan_days": 30
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/street-view/comparisons",
+            json=test_comparison_data,
+            params={"created_by": str(uuid.uuid4())},  # Fake user ID for testing
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create comparison status: {response.status_code}")
+        
+        if response.status_code == 200:
+            comparison = response.json()
+            created_comparison_id = comparison.get("id")
+            print(f"      Created comparison ID: {created_comparison_id}")
+            print("      ✅ POST comparison creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST comparison creation failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # Test Detected Changes API
+        print("   18d. Testing Detected Changes API")
+        
+        # GET all changes
+        response = requests.get(f"{API_BASE_URL}/street-view/changes", timeout=10)
+        print(f"      GET all changes status: {response.status_code}")
+        if response.status_code == 200:
+            changes = response.json()
+            print(f"      Found {len(changes)} existing changes")
+            print("      ✅ GET all changes working")
+        else:
+            print("      ❌ GET all changes failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # POST create change
+        test_change_data = {
+            "comparison_id": created_comparison_id,
+            "change_type": "construction_progress",
+            "severity": "medium",
+            "description": "New concrete foundation visible",
+            "location_name": "Foundation Area",
+            "location_coordinates_x": 100.0,
+            "location_coordinates_y": 200.0,
+            "confidence_percentage": 85.5,
+            "impact_description": "Construction progress as expected",
+            "ai_model_version": "v2.1",
+            "detection_algorithm": "YOLOv8"
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/street-view/changes",
+            json=test_change_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create change status: {response.status_code}")
+        
+        if response.status_code == 200:
+            change = response.json()
+            created_change_id = change.get("id")
+            print(f"      Created change ID: {created_change_id}")
+            print("      ✅ POST change creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST change creation failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # Test Comparison Locations API
+        print("   18e. Testing Comparison Locations API")
+        
+        # GET all locations
+        response = requests.get(f"{API_BASE_URL}/street-view/locations", timeout=10)
+        print(f"      GET all locations status: {response.status_code}")
+        if response.status_code == 200:
+            locations = response.json()
+            print(f"      Found {len(locations)} existing locations")
+            print("      ✅ GET all locations working")
+        else:
+            print("      ❌ GET all locations failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # POST create location
+        test_location_data = {
+            "site_id": site_id,
+            "location_name": f"Test Location {uuid.uuid4().hex[:8]}",
+            "description": "Test monitoring location",
+            "coordinates_x": 150.0,
+            "coordinates_y": 250.0,
+            "zone_type": "construction",
+            "monitoring_priority": "high"
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/street-view/locations",
+            json=test_location_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create location status: {response.status_code}")
+        
+        if response.status_code == 200:
+            location = response.json()
+            created_location_id = location.get("id")
+            print(f"      Created location ID: {created_location_id}")
+            print("      ✅ POST location creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST location creation failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # Test Comparison Analysis Metrics API
+        print("   18f. Testing Comparison Analysis Metrics API")
+        
+        # GET all metrics
+        response = requests.get(f"{API_BASE_URL}/street-view/metrics", timeout=10)
+        print(f"      GET all metrics status: {response.status_code}")
+        if response.status_code == 200:
+            metrics = response.json()
+            print(f"      Found {len(metrics)} existing metrics")
+            print("      ✅ GET all metrics working")
+        else:
+            print("      ❌ GET all metrics failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # POST create metric
+        test_metric_data = {
+            "comparison_id": created_comparison_id,
+            "metric_type": "progress_percentage",
+            "metric_value": 75.5,
+            "metric_unit": "percentage",
+            "calculation_method": "AI_analysis",
+            "baseline_value": 50.0,
+            "improvement_percentage": 51.0,
+            "trend_direction": "increasing",
+            "confidence_level": 90.0
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/street-view/metrics",
+            json=test_metric_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create metric status: {response.status_code}")
+        
+        if response.status_code == 200:
+            metric = response.json()
+            created_metric_id = metric.get("id")
+            print(f"      Created metric ID: {created_metric_id}")
+            print("      ✅ POST metric creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST metric creation failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # Test Analytics Endpoints
+        print("   18g. Testing Street View Analytics Endpoints")
+        
+        # GET comparison analytics summary
+        response = requests.get(f"{API_BASE_URL}/street-view/analytics/comparison-summary", timeout=10)
+        print(f"      GET comparison analytics status: {response.status_code}")
+        if response.status_code == 200:
+            analytics = response.json()
+            print("      ✅ GET comparison analytics working")
+        else:
+            print("      ❌ GET comparison analytics failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        # GET metrics analytics summary
+        response = requests.get(f"{API_BASE_URL}/street-view/analytics/metrics-summary", timeout=10)
+        print(f"      GET metrics analytics status: {response.status_code}")
+        if response.status_code == 200:
+            metrics_analytics = response.json()
+            print("      ✅ GET metrics analytics working")
+        else:
+            print("      ❌ GET metrics analytics failed")
+            return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+        print("   ✅ Street View Comparison & Analysis APIs testing completed successfully")
+        return True, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
+
+def test_historical_temporal_analysis_apis(site_id):
+    """Test Historical Data & Temporal Analysis API endpoints"""
+    print("\n19. Testing Historical Data & Temporal Analysis APIs")
+    created_snapshot_id = None
+    created_job_id = None
+    created_benchmark_id = None
+    created_model_id = None
+    created_prediction_id = None
+    
+    try:
+        # Test Historical Data Snapshots API
+        print("   19a. Testing Historical Data Snapshots API")
+        
+        # GET all snapshots
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/snapshots", timeout=10)
+        print(f"      GET all snapshots status: {response.status_code}")
+        if response.status_code == 200:
+            snapshots = response.json()
+            print(f"      Found {len(snapshots)} existing snapshots")
+            print("      ✅ GET all snapshots working")
+        else:
+            print("      ❌ GET all snapshots failed")
+            return False, (None, None, None, None, None)
+        
+        # POST create snapshot
+        test_snapshot_data = {
+            "site_id": site_id,
+            "snapshot_date": "2024-01-15",
+            "snapshot_time": "14:30:00",
+            "data_source_type": "camera_feed",
+            "source_entity_id": str(uuid.uuid4()),
+            "source_entity_name": "Camera Alpha",
+            "data_payload": {
+                "detection_count": 15,
+                "safety_score": 95.5,
+                "activity_level": "high"
+            },
+            "data_metadata": {
+                "weather": "clear",
+                "temperature": 22
+            },
+            "data_completeness_percentage": 98.5,
+            "data_accuracy_score": 96.0
+        }
+        
+        fake_user_id = str(uuid.uuid4())
+        response = requests.post(
+            f"{API_BASE_URL}/historical-analysis/snapshots",
+            json=test_snapshot_data,
+            params={"created_by": fake_user_id},
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create snapshot status: {response.status_code}")
+        
+        if response.status_code == 200:
+            snapshot = response.json()
+            created_snapshot_id = snapshot.get("id")
+            print(f"      Created snapshot ID: {created_snapshot_id}")
+            print("      ✅ POST snapshot creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST snapshot creation failed")
+            return False, (None, None, None, None, None)
+        
+        # GET specific snapshot
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/snapshots/{created_snapshot_id}", timeout=10)
+        print(f"      GET specific snapshot status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ GET specific snapshot working")
+        else:
+            print("      ❌ GET specific snapshot failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET data quality analytics
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/snapshots/analytics/data-quality", timeout=10)
+        print(f"      GET data quality analytics status: {response.status_code}")
+        if response.status_code == 200:
+            analytics = response.json()
+            print("      ✅ GET data quality analytics working")
+        else:
+            print("      ❌ GET data quality analytics failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # Test Temporal Analysis Jobs API
+        print("   19b. Testing Temporal Analysis Jobs API")
+        
+        # GET all analysis jobs
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/analysis-jobs", timeout=10)
+        print(f"      GET all analysis jobs status: {response.status_code}")
+        if response.status_code == 200:
+            jobs = response.json()
+            print(f"      Found {len(jobs)} existing analysis jobs")
+            print("      ✅ GET all analysis jobs working")
+        else:
+            print("      ❌ GET all analysis jobs failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # POST create analysis job
+        test_job_data = {
+            "site_id": site_id,
+            "job_name": f"Test Analysis Job {uuid.uuid4().hex[:8]}",
+            "analysis_type": "trend_analysis",
+            "aggregation_period": "daily",
+            "algorithm": "linear_regression",
+            "start_date": "2024-01-01",
+            "end_date": "2024-01-31",
+            "include_weekends": True,
+            "include_holidays": True,
+            "data_sources": {
+                "cameras": ["cam1", "cam2"],
+                "sensors": ["temp1", "humidity1"]
+            },
+            "filter_criteria": {
+                "min_confidence": 0.8
+            }
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/historical-analysis/analysis-jobs",
+            json=test_job_data,
+            params={"created_by": fake_user_id},
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create analysis job status: {response.status_code}")
+        
+        if response.status_code == 200:
+            job = response.json()
+            created_job_id = job.get("id")
+            print(f"      Created analysis job ID: {created_job_id}")
+            print("      ✅ POST analysis job creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST analysis job creation failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET specific analysis job
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/analysis-jobs/{created_job_id}", timeout=10)
+        print(f"      GET specific analysis job status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ GET specific analysis job working")
+        else:
+            print("      ❌ GET specific analysis job failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # PUT update analysis job
+        update_data = {
+            "status": "completed",
+            "results_summary": {
+                "trend": "increasing",
+                "confidence": 0.95
+            }
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/historical-analysis/analysis-jobs/{created_job_id}",
+            json=update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      PUT update analysis job status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ PUT analysis job update working")
+        else:
+            print("      ❌ PUT analysis job update failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # Test Performance Benchmarks API
+        print("   19c. Testing Performance Benchmarks API")
+        
+        # GET all benchmarks
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/benchmarks", timeout=10)
+        print(f"      GET all benchmarks status: {response.status_code}")
+        if response.status_code == 200:
+            benchmarks = response.json()
+            print(f"      Found {len(benchmarks)} existing benchmarks")
+            print("      ✅ GET all benchmarks working")
+        else:
+            print("      ❌ GET all benchmarks failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # POST create benchmark
+        test_benchmark_data = {
+            "site_id": site_id,
+            "benchmark_name": f"Test Benchmark {uuid.uuid4().hex[:8]}",
+            "benchmark_category": "Safety Performance",
+            "measurement_date": "2024-01-15",
+            "current_value": 85.5,
+            "target_value": 90.0,
+            "baseline_value": 75.0,
+            "industry_average": 80.0,
+            "measurement_method": "AI Analysis",
+            "confidence_level": 95.0,
+            "sample_size": 1000
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/historical-analysis/benchmarks",
+            json=test_benchmark_data,
+            params={"created_by": fake_user_id},
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create benchmark status: {response.status_code}")
+        
+        if response.status_code == 200:
+            benchmark = response.json()
+            created_benchmark_id = benchmark.get("id")
+            print(f"      Created benchmark ID: {created_benchmark_id}")
+            print("      ✅ POST benchmark creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST benchmark creation failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET specific benchmark
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/benchmarks/{created_benchmark_id}", timeout=10)
+        print(f"      GET specific benchmark status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ GET specific benchmark working")
+        else:
+            print("      ❌ GET specific benchmark failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET performance analytics summary
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/benchmarks/analytics/performance-summary", timeout=10)
+        print(f"      GET performance analytics status: {response.status_code}")
+        if response.status_code == 200:
+            analytics = response.json()
+            print("      ✅ GET performance analytics working")
+        else:
+            print("      ❌ GET performance analytics failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # Test Predictive Models API
+        print("   19d. Testing Predictive Models API")
+        
+        # GET all models
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/models", timeout=10)
+        print(f"      GET all models status: {response.status_code}")
+        if response.status_code == 200:
+            models = response.json()
+            print(f"      Found {len(models)} existing models")
+            print("      ✅ GET all models working")
+        else:
+            print("      ❌ GET all models failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # POST create model
+        test_model_data = {
+            "site_id": site_id,
+            "model_name": f"Test Predictive Model {uuid.uuid4().hex[:8]}",
+            "model_type": "Safety Prediction",
+            "prediction_target": "safety_incidents",
+            "algorithm": "random_forest",
+            "input_features": {
+                "weather": "categorical",
+                "personnel_count": "numeric",
+                "activity_level": "categorical"
+            },
+            "training_data_period_days": 90,
+            "training_start_date": "2023-10-01",
+            "training_end_date": "2023-12-31",
+            "prediction_horizon_days": 7,
+            "prediction_frequency": "daily",
+            "hyperparameters": {
+                "n_estimators": 100,
+                "max_depth": 10
+            },
+            "confidence_threshold": 85.0,
+            "version": "1.0"
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/historical-analysis/models",
+            json=test_model_data,
+            params={"created_by": fake_user_id},
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create model status: {response.status_code}")
+        
+        if response.status_code == 200:
+            model = response.json()
+            created_model_id = model.get("id")
+            print(f"      Created model ID: {created_model_id}")
+            print("      ✅ POST model creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST model creation failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET specific model
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/models/{created_model_id}", timeout=10)
+        print(f"      GET specific model status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ GET specific model working")
+        else:
+            print("      ❌ GET specific model failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # PUT update model
+        model_update_data = {
+            "accuracy_score": 92.5,
+            "is_active": True
+        }
+        response = requests.put(
+            f"{API_BASE_URL}/historical-analysis/models/{created_model_id}",
+            json=model_update_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      PUT update model status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ PUT model update working")
+        else:
+            print("      ❌ PUT model update failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # Test Predictive Model Predictions API
+        print("   19e. Testing Predictive Model Predictions API")
+        
+        # GET all predictions
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/predictions", timeout=10)
+        print(f"      GET all predictions status: {response.status_code}")
+        if response.status_code == 200:
+            predictions = response.json()
+            print(f"      Found {len(predictions)} existing predictions")
+            print("      ✅ GET all predictions working")
+        else:
+            print("      ❌ GET all predictions failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # POST create prediction
+        test_prediction_data = {
+            "model_id": created_model_id,
+            "site_id": site_id,
+            "prediction_date": "2024-01-15",
+            "target_date": "2024-01-22",
+            "target_time": "14:00:00",
+            "predicted_value": 2.5,
+            "confidence_score": 88.5,
+            "prediction_interval_lower": 1.8,
+            "prediction_interval_upper": 3.2,
+            "input_features_snapshot": {
+                "weather": "clear",
+                "personnel_count": 25,
+                "activity_level": "high"
+            },
+            "feature_values": {
+                "weather_score": 0.9,
+                "personnel_normalized": 0.7,
+                "activity_score": 0.8
+            },
+            "prediction_context": {
+                "model_version": "1.0",
+                "data_quality": "high"
+            }
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/historical-analysis/predictions",
+            json=test_prediction_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      POST create prediction status: {response.status_code}")
+        
+        if response.status_code == 200:
+            prediction = response.json()
+            created_prediction_id = prediction.get("id")
+            print(f"      Created prediction ID: {created_prediction_id}")
+            print("      ✅ POST prediction creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST prediction creation failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET specific prediction
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/predictions/{created_prediction_id}", timeout=10)
+        print(f"      GET specific prediction status: {response.status_code}")
+        if response.status_code == 200:
+            print("      ✅ GET specific prediction working")
+        else:
+            print("      ❌ GET specific prediction failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # PUT validate prediction
+        response = requests.put(
+            f"{API_BASE_URL}/historical-analysis/predictions/{created_prediction_id}/validate",
+            params={"actual_value": 2.3},
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      PUT validate prediction status: {response.status_code}")
+        if response.status_code == 200:
+            validated_prediction = response.json()
+            print("      ✅ PUT prediction validation working")
+        else:
+            print("      ❌ PUT prediction validation failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        # GET model performance analytics
+        response = requests.get(f"{API_BASE_URL}/historical-analysis/predictions/analytics/model-performance", timeout=10)
+        print(f"      GET model performance analytics status: {response.status_code}")
+        if response.status_code == 200:
+            performance_analytics = response.json()
+            print("      ✅ GET model performance analytics working")
+        else:
+            print("      ❌ GET model performance analytics failed")
+            return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+        print("   ✅ Historical Data & Temporal Analysis APIs testing completed successfully")
+        return True, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
+
 def main():
     """Run all backend tests"""
     print("Starting AI Construction Management Backend API Tests...")
