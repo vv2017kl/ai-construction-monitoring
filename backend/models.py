@@ -6997,3 +6997,249 @@ class ActivityFeed(Base):
         Index('idx_activity_feed_entity', 'entity_type', 'entity_id'),
         Index('idx_activity_feed_attention', 'requires_attention', 'impact_level'),
     )
+
+
+# PERSONNEL MANAGEMENT EXTENSIONS TABLES
+
+# Personnel Management enums
+class DepartmentType(enum.Enum):
+    construction = "construction"
+    engineering = "engineering"
+    safety = "safety"
+    project_management = "project_management"
+    quality_control = "quality_control"
+    logistics = "logistics"
+    administration = "administration"
+
+class ShiftType(enum.Enum):
+    day_shift = "day_shift"
+    night_shift = "night_shift"
+    weekend = "weekend"
+    overtime = "overtime"
+    on_call = "on_call"
+
+class SafetyRating(enum.Enum):
+    excellent = "excellent"
+    good = "good"
+    satisfactory = "satisfactory"
+    needs_improvement = "needs_improvement"
+    critical = "critical"
+
+
+class PersonnelAttendance(Base):
+    __tablename__ = 'personnel_attendance'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Attendance details
+    attendance_date = Column(Date, nullable=False)
+    shift_type = Column(SQLEnum(ShiftType), nullable=False)
+    scheduled_start = Column(Time, nullable=False)
+    scheduled_end = Column(Time, nullable=False)
+    
+    # Actual attendance
+    actual_start = Column(Time)
+    actual_end = Column(Time)
+    status = Column(SQLEnum(AttendanceStatus), nullable=False)
+    
+    # Time tracking
+    total_scheduled_hours = Column(Decimal(5,2), nullable=False)
+    total_actual_hours = Column(Decimal(5,2))
+    break_duration_minutes = Column(Integer, default=0)
+    overtime_hours = Column(Decimal(5,2), default=0.00)
+    
+    # Location tracking
+    check_in_location = Column(String(500))  # GPS coordinates or zone
+    check_out_location = Column(String(500))
+    location_accuracy_meters = Column(Integer)
+    
+    # Attendance quality
+    punctuality_score = Column(Decimal(5,2))  # 0-100 based on timeliness
+    attendance_quality = Column(String(50))  # excellent, good, poor
+    
+    # Reasons and notes
+    late_reason = Column(Text)
+    early_departure_reason = Column(Text)
+    absence_reason = Column(Text)
+    supervisor_notes = Column(Text)
+    
+    # Approval workflow
+    requires_approval = Column(Boolean, default=False)
+    approved_by = Column(CHAR(36), ForeignKey('users.id'))
+    approval_timestamp = Column(TIMESTAMP)
+    approval_status = Column(String(50), default="approved")
+    
+    # System tracking
+    check_in_method = Column(String(100))  # mobile_app, biometric, manual
+    check_out_method = Column(String(100))
+    ip_address = Column(String(45))
+    device_info = Column(JSON)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    site = relationship("Site")
+    approved_by_user = relationship("User", foreign_keys=[approved_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_attendance_user_date', 'user_id', 'attendance_date'),
+        Index('idx_attendance_site_date', 'site_id', 'attendance_date'),
+        Index('idx_attendance_status', 'status', 'attendance_date'),
+        Index('idx_attendance_shift', 'shift_type', 'scheduled_start'),
+        Index('idx_attendance_punctuality', 'punctuality_score', 'attendance_quality'),
+        UniqueConstraint('user_id', 'site_id', 'attendance_date', 'shift_type', name='unique_user_attendance'),
+    )
+
+
+class PersonnelSafetyScore(Base):
+    __tablename__ = 'personnel_safety_scores'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Score calculation period
+    evaluation_date = Column(Date, nullable=False)
+    evaluation_period_start = Column(Date, nullable=False)
+    evaluation_period_end = Column(Date, nullable=False)
+    
+    # Safety metrics
+    overall_safety_score = Column(Decimal(5,2), nullable=False)  # 0-100
+    safety_rating = Column(SQLEnum(SafetyRating), nullable=False)
+    
+    # Component scores
+    compliance_score = Column(Decimal(5,2))  # Safety rule compliance
+    training_score = Column(Decimal(5,2))  # Training completion/currency
+    incident_score = Column(Decimal(5,2))  # Incident involvement (inverse)
+    equipment_usage_score = Column(Decimal(5,2))  # PPE and safety equipment
+    reporting_score = Column(Decimal(5,2))  # Safety hazard reporting
+    
+    # Performance indicators
+    incident_count = Column(Integer, default=0)
+    near_miss_reports = Column(Integer, default=0)
+    safety_violations = Column(Integer, default=0)
+    training_completions = Column(Integer, default=0)
+    
+    # Behavior tracking
+    proactive_safety_actions = Column(Integer, default=0)  # Positive safety behaviors
+    peer_recognition_count = Column(Integer, default=0)  # Safety recognitions from peers
+    supervisor_commendations = Column(Integer, default=0)
+    
+    # Historical comparison
+    previous_score = Column(Decimal(5,2))
+    score_improvement = Column(Decimal(5,2))  # Change from previous evaluation
+    trend_direction = Column(SQLEnum(TrendDirection))
+    
+    # Goals and targets
+    target_score = Column(Decimal(5,2))
+    performance_vs_target = Column(Decimal(5,2))
+    improvement_plan = Column(JSON)  # Structured improvement recommendations
+    
+    # Evaluation details
+    evaluation_method = Column(String(100))  # automated, manual, hybrid
+    evaluator_id = Column(CHAR(36), ForeignKey('users.id'))
+    evaluation_notes = Column(Text)
+    supporting_evidence = Column(JSON)  # References to incidents, training, etc.
+    
+    # Status and tracking
+    is_current = Column(Boolean, default=True)  # Most recent evaluation
+    review_required = Column(Boolean, default=False)
+    review_reason = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    site = relationship("Site")
+    evaluator = relationship("User", foreign_keys=[evaluator_id])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_safety_scores_user_date', 'user_id', 'evaluation_date'),
+        Index('idx_safety_scores_site_date', 'site_id', 'evaluation_date'),
+        Index('idx_safety_scores_rating', 'safety_rating', 'overall_safety_score'),
+        Index('idx_safety_scores_current', 'is_current', 'user_id'),
+        Index('idx_safety_scores_performance', 'overall_safety_score', 'trend_direction'),
+    )
+
+
+class DepartmentAssignment(Base):
+    __tablename__ = 'department_assignments'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    user_id = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Department details
+    department_name = Column(String(255), nullable=False)
+    department_type = Column(SQLEnum(DepartmentType), nullable=False)
+    job_title = Column(String(255), nullable=False)
+    
+    # Assignment details
+    assignment_start_date = Column(Date, nullable=False)
+    assignment_end_date = Column(Date)  # NULL for current assignments
+    is_active = Column(Boolean, default=True)
+    
+    # Hierarchy and reporting
+    supervisor_id = Column(CHAR(36), ForeignKey('users.id'))
+    reporting_level = Column(Integer, default=1)  # 1=front-line, 2=supervisor, 3=manager, etc.
+    team_lead_flag = Column(Boolean, default=False)
+    
+    # Role and responsibilities
+    primary_responsibilities = Column(JSON)  # Array of responsibility descriptions
+    secondary_responsibilities = Column(JSON)
+    required_certifications = Column(JSON)  # Required certs for this role
+    skill_requirements = Column(JSON)  # Required skills
+    
+    # Performance and evaluation
+    performance_goals = Column(JSON)  # Structured performance objectives
+    last_performance_review = Column(Date)
+    next_performance_review = Column(Date)
+    performance_rating = Column(Decimal(5,2))  # Latest performance rating
+    
+    # Work arrangement
+    work_schedule = Column(JSON)  # Work days, hours, shift preferences
+    remote_work_eligible = Column(Boolean, default=False)
+    travel_requirements = Column(String(500))
+    
+    # Budget and resource access
+    budget_authority = Column(Decimal(15,2))  # Spending authority limit
+    equipment_assignments = Column(JSON)  # Assigned equipment/tools
+    system_access_rights = Column(JSON)  # IT system access levels
+    
+    # Assignment history
+    assignment_reason = Column(Text)
+    previous_department = Column(String(255))
+    promotion_flag = Column(Boolean, default=False)
+    transfer_flag = Column(Boolean, default=False)
+    
+    # Status tracking
+    probationary_period_end = Column(Date)
+    training_completion_required = Column(Boolean, default=False)
+    training_deadline = Column(Date)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    site = relationship("Site")
+    supervisor = relationship("User", foreign_keys=[supervisor_id])
+    created_by_user = relationship("User", foreign_keys=[created_by])
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_dept_assignments_user', 'user_id', 'is_active'),
+        Index('idx_dept_assignments_site_dept', 'site_id', 'department_type'),
+        Index('idx_dept_assignments_supervisor', 'supervisor_id', 'reporting_level'),
+        Index('idx_dept_assignments_dates', 'assignment_start_date', 'assignment_end_date'),
+        Index('idx_dept_assignments_performance', 'performance_rating', 'last_performance_review'),
+        UniqueConstraint('user_id', 'site_id', 'assignment_start_date', name='unique_user_assignment_date'),
+    )
