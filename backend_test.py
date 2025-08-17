@@ -4628,7 +4628,7 @@ def test_street_view_comparison_apis(site_id, user_id=None, camera_id=None):
         response = requests.post(
             f"{API_BASE_URL}/street-view/sessions",
             json=test_session_data,
-            params={"created_by": str(uuid.uuid4())},  # Add required created_by parameter
+            params={"created_by": user_id},  # Use existing user ID
             headers={"Content-Type": "application/json"},
             timeout=10
         )
