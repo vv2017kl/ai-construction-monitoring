@@ -1939,6 +1939,197 @@ class ComparisonAnalysisMetricResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+# HISTORICAL DATA & TEMPORAL ANALYSIS SCHEMAS
+
+class HistoricalDataSnapshotResponse(BaseModel):
+    id: str
+    site_id: str
+    snapshot_date: str
+    snapshot_time: str
+    data_source_type: str
+    source_entity_id: Optional[str] = None
+    source_entity_name: Optional[str] = None
+    data_payload: dict
+    metadata: Optional[dict] = None
+    data_completeness_percentage: float = 100.0
+    data_accuracy_score: float = 100.0
+    processing_duration_ms: Optional[int] = None
+    created_by: str
+    processing_timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+class HistoricalDataSnapshotCreateRequest(BaseModel):
+    site_id: str
+    snapshot_date: str
+    snapshot_time: str
+    data_source_type: str
+    source_entity_id: Optional[str] = None
+    source_entity_name: Optional[str] = None
+    data_payload: dict
+    metadata: Optional[dict] = None
+    data_completeness_percentage: Optional[float] = 100.0
+    data_accuracy_score: Optional[float] = 100.0
+
+class TemporalAnalysisJobResponse(BaseModel):
+    id: str
+    site_id: str
+    job_name: str
+    analysis_type: str
+    aggregation_period: str
+    algorithm: str
+    start_date: str
+    end_date: str
+    data_sources: dict
+    status: str = "pending"
+    scheduled_at: Optional[datetime] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    execution_duration_seconds: Optional[int] = None
+    results_summary: Optional[dict] = None
+    error_message: Optional[str] = None
+    retry_count: int = 0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TemporalAnalysisJobCreateRequest(BaseModel):
+    site_id: str
+    job_name: str
+    analysis_type: str
+    aggregation_period: str
+    algorithm: str
+    start_date: str
+    end_date: str
+    data_sources: dict
+    include_weekends: Optional[bool] = True
+    include_holidays: Optional[bool] = True
+    filter_criteria: Optional[dict] = None
+    scheduled_at: Optional[datetime] = None
+
+class PerformanceBenchmarkResponse(BaseModel):
+    id: str
+    site_id: str
+    benchmark_name: str
+    benchmark_category: str
+    measurement_date: str
+    current_value: float
+    target_value: float
+    baseline_value: Optional[float] = None
+    industry_average: Optional[float] = None
+    performance_percentage: Optional[float] = None
+    improvement_percentage: Optional[float] = None
+    variance_percentage: Optional[float] = None
+    trend_direction: Optional[str] = None
+    trend_strength: Optional[float] = None
+    confidence_level: float = 95.0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PerformanceBenchmarkCreateRequest(BaseModel):
+    site_id: str
+    benchmark_name: str
+    benchmark_category: str
+    measurement_date: str
+    current_value: float
+    target_value: float
+    baseline_value: Optional[float] = None
+    industry_average: Optional[float] = None
+    measurement_method: Optional[str] = None
+    data_source_entities: Optional[dict] = None
+    external_factors: Optional[dict] = None
+    confidence_level: Optional[float] = 95.0
+    sample_size: Optional[int] = None
+
+class PredictiveModelResponse(BaseModel):
+    id: str
+    site_id: str
+    model_name: str
+    model_type: str
+    prediction_target: str
+    algorithm: str
+    input_features: dict
+    training_data_period_days: int
+    training_start_date: str
+    training_end_date: str
+    accuracy_score: Optional[float] = None
+    status: str = "training"
+    version: str
+    is_active: bool = False
+    deployment_date: Optional[str] = None
+    prediction_horizon_days: int
+    prediction_frequency: str
+    confidence_threshold: float = 80.0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PredictiveModelCreateRequest(BaseModel):
+    site_id: str
+    model_name: str
+    model_type: str
+    prediction_target: str
+    algorithm: str
+    input_features: dict
+    training_data_period_days: int
+    training_start_date: str
+    training_end_date: str
+    prediction_horizon_days: int
+    prediction_frequency: str
+    hyperparameters: Optional[dict] = None
+    confidence_threshold: Optional[float] = 80.0
+    version: str = "1.0"
+
+class PredictiveModelPredictionResponse(BaseModel):
+    id: str
+    model_id: str
+    site_id: str
+    prediction_date: str
+    target_date: str
+    target_time: Optional[str] = None
+    predicted_value: float
+    confidence_score: float
+    prediction_interval_lower: Optional[float] = None
+    prediction_interval_upper: Optional[float] = None
+    input_features_snapshot: dict
+    feature_values: dict
+    actual_value: Optional[float] = None
+    prediction_error: Optional[float] = None
+    percentage_error: Optional[float] = None
+    is_accurate: Optional[bool] = None
+    prediction_context: Optional[dict] = None
+    created_at: datetime
+    validated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class PredictiveModelPredictionCreateRequest(BaseModel):
+    model_id: str
+    site_id: str
+    prediction_date: str
+    target_date: str
+    target_time: Optional[str] = None
+    predicted_value: float
+    confidence_score: float
+    prediction_interval_lower: Optional[float] = None
+    prediction_interval_upper: Optional[float] = None
+    input_features_snapshot: dict
+    feature_values: dict
+    prediction_context: Optional[dict] = None
+
 class ComparisonAnalysisMetricCreateRequest(BaseModel):
     comparison_id: str
     metric_type: str
