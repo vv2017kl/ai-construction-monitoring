@@ -2130,6 +2130,273 @@ class PredictiveModelPredictionCreateRequest(BaseModel):
     feature_values: dict
     prediction_context: Optional[dict] = None
 
+
+# ALERT MANAGEMENT EXTENSIONS SCHEMAS
+
+class AlertCommentResponse(BaseModel):
+    id: str
+    alert_id: str
+    author_id: str
+    comment_text: str
+    comment_type: str = "note"
+    parent_comment_id: Optional[str] = None
+    thread_level: int = 0
+    mentioned_users: Optional[list] = None
+    attachment_urls: Optional[list] = None
+    is_internal: bool = False
+    is_edited: bool = False
+    visibility_level: str = "team"
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AlertCommentCreateRequest(BaseModel):
+    alert_id: str
+    comment_text: str
+    comment_type: Optional[str] = "note"
+    parent_comment_id: Optional[str] = None
+    mentioned_users: Optional[list] = None
+    attachment_urls: Optional[list] = None
+    is_internal: Optional[bool] = False
+    visibility_level: Optional[str] = "team"
+
+class AlertEvidenceResponse(BaseModel):
+    id: str
+    alert_id: str
+    source_type: str
+    evidence_type: str
+    file_name: str
+    file_path: str
+    file_size_bytes: Optional[int] = None
+    location_description: Optional[str] = None
+    evidence_description: Optional[str] = None
+    is_processed: bool = False
+    evidence_quality_score: Optional[float] = None
+    collected_by: str
+    verified_by: Optional[str] = None
+    access_level: str = "team"
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AlertEvidenceCreateRequest(BaseModel):
+    alert_id: str
+    source_type: str
+    evidence_type: str
+    file_name: str
+    file_path: str
+    file_size_bytes: Optional[int] = None
+    location_description: Optional[str] = None
+    evidence_description: Optional[str] = None
+    camera_id: Optional[str] = None
+    access_level: Optional[str] = "team"
+
+class SafetyMetricResponse(BaseModel):
+    id: str
+    site_id: str
+    metric_name: str
+    metric_category: str
+    measurement_date: str
+    measurement_period: str
+    incident_count: int = 0
+    near_miss_count: int = 0
+    safety_violation_count: int = 0
+    compliance_score: Optional[float] = None
+    training_completion_rate: Optional[float] = None
+    performance_vs_target: Optional[float] = None
+    trend_direction: Optional[str] = None
+    improvement_percentage: Optional[float] = None
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SafetyMetricCreateRequest(BaseModel):
+    site_id: str
+    metric_name: str
+    metric_category: str
+    measurement_date: str
+    measurement_period: str
+    incident_count: Optional[int] = 0
+    near_miss_count: Optional[int] = 0
+    safety_violation_count: Optional[int] = 0
+    compliance_score: Optional[float] = None
+    target_value: Optional[float] = None
+
+
+# PERSONNEL MANAGEMENT EXTENSIONS SCHEMAS
+
+class PersonnelAttendanceResponse(BaseModel):
+    id: str
+    user_id: str
+    site_id: str
+    attendance_date: str
+    shift_type: str
+    scheduled_start: str
+    scheduled_end: str
+    actual_start: Optional[str] = None
+    actual_end: Optional[str] = None
+    status: str
+    total_scheduled_hours: float
+    total_actual_hours: Optional[float] = None
+    overtime_hours: float = 0.0
+    punctuality_score: Optional[float] = None
+    attendance_quality: Optional[str] = None
+    approved_by: Optional[str] = None
+    approval_status: str = "approved"
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PersonnelAttendanceCreateRequest(BaseModel):
+    user_id: str
+    site_id: str
+    attendance_date: str
+    shift_type: str
+    scheduled_start: str
+    scheduled_end: str
+    total_scheduled_hours: float
+    actual_start: Optional[str] = None
+    actual_end: Optional[str] = None
+    status: str = "present"
+
+class PersonnelSafetyScoreResponse(BaseModel):
+    id: str
+    user_id: str
+    site_id: str
+    evaluation_date: str
+    overall_safety_score: float
+    safety_rating: str
+    compliance_score: Optional[float] = None
+    training_score: Optional[float] = None
+    incident_score: Optional[float] = None
+    incident_count: int = 0
+    near_miss_reports: int = 0
+    safety_violations: int = 0
+    previous_score: Optional[float] = None
+    score_improvement: Optional[float] = None
+    trend_direction: Optional[str] = None
+    target_score: Optional[float] = None
+    is_current: bool = True
+    evaluator_id: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PersonnelSafetyScoreCreateRequest(BaseModel):
+    user_id: str
+    site_id: str
+    evaluation_date: str
+    evaluation_period_start: str
+    evaluation_period_end: str
+    overall_safety_score: float
+    safety_rating: str
+    incident_count: Optional[int] = 0
+    target_score: Optional[float] = None
+
+
+# ADVANCED MONITORING & COMMUNICATION SCHEMAS
+
+class EnvironmentalSensorResponse(BaseModel):
+    id: str
+    site_id: str
+    sensor_name: str
+    sensor_type: str
+    location_description: Optional[str] = None
+    measurement_unit: str
+    sampling_interval_seconds: int = 300
+    calibration_status: str = "calibrated"
+    is_active: bool = True
+    operational_status: str = "operational"
+    last_reading_value: Optional[float] = None
+    last_reading_timestamp: Optional[datetime] = None
+    warning_threshold_low: Optional[float] = None
+    warning_threshold_high: Optional[float] = None
+    alert_enabled: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class EnvironmentalSensorCreateRequest(BaseModel):
+    site_id: str
+    sensor_name: str
+    sensor_type: str
+    measurement_unit: str
+    location_description: Optional[str] = None
+    sampling_interval_seconds: Optional[int] = 300
+    warning_threshold_low: Optional[float] = None
+    warning_threshold_high: Optional[float] = None
+
+class SensorReadingResponse(BaseModel):
+    id: str
+    sensor_id: str
+    reading_timestamp: datetime
+    reading_value: float
+    reading_unit: str
+    data_quality_score: float = 100.0
+    is_validated: bool = True
+    is_anomaly: bool = False
+    exceeds_threshold: bool = False
+    threshold_type: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SensorReadingCreateRequest(BaseModel):
+    sensor_id: str
+    reading_timestamp: datetime
+    reading_value: float
+    reading_unit: str
+    data_quality_score: Optional[float] = 100.0
+    weather_conditions: Optional[str] = None
+
+class QualityControlInspectionResponse(BaseModel):
+    id: str
+    site_id: str
+    inspection_type: str
+    inspection_category: str
+    scheduled_date: str
+    actual_date: Optional[str] = None
+    inspector_id: str
+    inspection_scope: str
+    overall_result: str
+    compliance_percentage: Optional[float] = None
+    passed_items_count: int = 0
+    failed_items_count: int = 0
+    deficiency_count: int = 0
+    critical_issues_count: int = 0
+    requires_reinspection: bool = False
+    approved_by: Optional[str] = None
+    approval_status: str = "pending"
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class QualityControlInspectionCreateRequest(BaseModel):
+    site_id: str
+    inspection_type: str
+    inspection_category: str
+    scheduled_date: str
+    inspector_id: str
+    inspection_scope: str
+    checklist_items: dict
+    overall_result: str = "pending"
+
 class ComparisonAnalysisMetricCreateRequest(BaseModel):
     comparison_id: str
     metric_type: str
