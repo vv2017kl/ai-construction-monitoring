@@ -1790,3 +1790,141 @@ class UserFeedbackCreateRequest(BaseModel):
     priority: Optional[str] = "medium"
     category: Optional[str] = None
     attachments: Optional[list] = None
+
+
+# INTEGRATION & USER EXPERIENCE SCHEMAS
+
+class ThirdPartyIntegrationResponse(BaseModel):
+    id: str
+    integration_name: str
+    integration_type: str
+    provider_name: str
+    description: Optional[str] = None
+    status: str = "pending"
+    health_score: Optional[float] = 0.0
+    monthly_usage: int = 0
+    error_rate: Optional[float] = 0.0
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ThirdPartyIntegrationCreateRequest(BaseModel):
+    integration_name: str
+    integration_type: str
+    provider_name: str
+    description: Optional[str] = None
+    configuration: dict
+    endpoints: Optional[dict] = None
+    rate_limits: Optional[dict] = None
+    monthly_limit: Optional[int] = None
+
+class UserProfileSettingResponse(BaseModel):
+    id: str
+    user_id: str
+    profile_picture_url: Optional[str] = None
+    bio: Optional[str] = None
+    preferences: Optional[dict] = None
+    notification_settings: Optional[dict] = None
+    dashboard_config: Optional[dict] = None
+    theme_settings: Optional[dict] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserProfileSettingCreateRequest(BaseModel):
+    user_id: str
+    profile_picture_url: Optional[str] = None
+    bio: Optional[str] = None
+    preferences: Optional[dict] = None
+    notification_settings: Optional[dict] = None
+    dashboard_config: Optional[dict] = None
+    theme_settings: Optional[dict] = None
+
+class UserApplicationSettingResponse(BaseModel):
+    id: str
+    user_id: str
+    language: str = "en"
+    timezone: Optional[str] = None
+    time_format: str = "12h"
+    theme: str = "light"
+    font_size: str = "medium"
+    notifications_enabled: bool = True
+    email_notifications: bool = True
+    quiet_hours_enabled: bool = False
+    data_sharing_enabled: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserApplicationSettingCreateRequest(BaseModel):
+    user_id: str
+    language: Optional[str] = "en"
+    timezone: Optional[str] = None
+    time_format: Optional[str] = "12h"
+    theme: Optional[str] = "light"
+    font_size: Optional[str] = "medium"
+    notifications_enabled: Optional[bool] = True
+    email_notifications: Optional[bool] = True
+    quiet_hours_enabled: Optional[bool] = False
+
+class HelpArticleResponse(BaseModel):
+    id: str
+    title: str
+    content: str
+    category: str
+    subcategory: Optional[str] = None
+    tags: Optional[list] = None
+    author_id: str
+    is_published: bool = False
+    view_count: int = 0
+    helpful_count: int = 0
+    unhelpful_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class HelpArticleCreateRequest(BaseModel):
+    title: str
+    content: str
+    category: str
+    subcategory: Optional[str] = None
+    tags: Optional[list] = None
+    is_published: Optional[bool] = False
+    search_keywords: Optional[str] = None
+
+class UserFeedbackResponse(BaseModel):
+    id: str
+    user_id: str
+    feedback_type: str
+    title: str
+    description: str
+    priority: str = "medium"
+    status: str = "submitted"
+    category: Optional[str] = None
+    upvote_count: int = 0
+    admin_response: Optional[str] = None
+    responded_by: Optional[str] = None
+    responded_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserFeedbackCreateRequest(BaseModel):
+    user_id: str
+    feedback_type: str
+    title: str
+    description: str
+    priority: Optional[str] = "medium"
+    category: Optional[str] = None
+    attachments: Optional[list] = None
