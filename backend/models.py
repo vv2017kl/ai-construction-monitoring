@@ -6070,7 +6070,7 @@ class HelpArticle(Base):
     __table_args__ = (
         Index('idx_help_articles_category', 'category', 'subcategory', 'is_published'),
         Index('idx_help_articles_popularity', 'view_count', 'helpful_count'),
-        Index('idx_help_articles_search', 'title', 'search_keywords'),
+        Index('idx_help_articles_title', 'title'),
     )
 
 
