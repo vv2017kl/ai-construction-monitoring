@@ -5582,11 +5582,11 @@ def main():
     created_sv_metric_id = None
     
     # Test Street View Comparison & Analysis APIs
-    if created_site_id:
-        street_view_ok, (created_comparison_id, created_sv_session_id, created_change_id, created_location_id, created_sv_metric_id) = test_street_view_comparison_apis(created_site_id)
+    if created_site_id and created_user_id:
+        street_view_ok, (created_comparison_id, created_sv_session_id, created_change_id, created_location_id, created_sv_metric_id) = test_street_view_comparison_apis(created_site_id, created_user_id)
         results.append(("Street View Comparison & Analysis APIs", street_view_ok))
     else:
-        print("   ⚠️ Skipping Street View Comparison & Analysis tests - no site created")
+        print("   ⚠️ Skipping Street View Comparison & Analysis tests - no site or user created")
         results.append(("Street View Comparison & Analysis APIs", False))
     
     # HISTORICAL DATA & TEMPORAL ANALYSIS TESTS
