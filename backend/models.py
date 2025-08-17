@@ -6104,3 +6104,267 @@ class UserFeedback(Base):
         Index('idx_feedback_user', 'user_id', 'created_at'),
         Index('idx_feedback_priority', 'priority', 'status'),
     )
+
+
+# STREET VIEW COMPARISON & ANALYSIS TABLES
+
+# Street View Comparison enums
+class ComparisonType(enum.Enum):
+    construction_progress = "construction_progress"
+    equipment_changes = "equipment_changes"
+    safety_compliance = "safety_compliance"
+    personnel_activity = "personnel_activity"
+
+class AnalysisStatus(enum.Enum):
+    pending = "pending"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+
+class RecordingQuality(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    ultra = "ultra"
+
+class ChangeType(enum.Enum):
+    construction_progress = "construction_progress"
+    equipment_addition = "equipment_addition"
+    safety_improvement = "safety_improvement"
+    personnel_increase = "personnel_increase"
+    material_change = "material_change"
+    structural_change = "structural_change"
+
+class ZoneType(enum.Enum):
+    foundation = "foundation"
+    structural = "structural"
+    entrance = "entrance"
+    equipment_yard = "equipment_yard"
+    storage = "storage"
+    office = "office"
+    safety = "safety"
+
+class MonitoringPriority(enum.Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+class ReviewStatus(enum.Enum):
+    pending = "pending"
+    confirmed = "confirmed"
+    rejected = "rejected"
+    needs_review = "needs_review"
+
+class MetricType(enum.Enum):
+    overall_progress = "overall_progress"
+    construction_growth = "construction_growth"
+    equipment_changes = "equipment_changes"
+    safety_improvements = "safety_improvements"
+    personnel_variation = "personnel_variation"
+    cost_impact = "cost_impact"
+    timeline_impact = "timeline_impact"
+
+class TrendDirection(enum.Enum):
+    increasing = "increasing"
+    decreasing = "decreasing"
+    stable = "stable"
+    volatile = "volatile"
+
+
+class StreetViewComparison(Base):
+    __tablename__ = 'street_view_comparisons'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    session_before_id = Column(CHAR(36), ForeignKey('street_view_sessions.id'), nullable=False)
+    session_after_id = Column(CHAR(36), ForeignKey('street_view_sessions.id'), nullable=False)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    location_zone = Column(String(255))
+    
+    # Comparison configuration
+    comparison_type = Column(SQLEnum(ComparisonType), nullable=False)
+    timespan_days = Column(Integer, nullable=False)
+    
+    # Analysis results
+    overall_progress_percentage = Column(Decimal(5,2))
+    construction_growth = Column(Decimal(5,2))
+    equipment_changes_count = Column(Integer, default=0)
+    safety_improvements_count = Column(Integer, default=0)
+    personnel_variation_percentage = Column(Decimal(5,2))
+    
+    # Processing status
+    analysis_status = Column(SQLEnum(AnalysisStatus), default=AnalysisStatus.pending)
+    processing_started_at = Column(TIMESTAMP)
+    processing_completed_at = Column(TIMESTAMP)
+    processing_time_seconds = Column(Integer)
+    error_message = Column(Text)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    session_before = relationship("StreetViewSession", foreign_keys=[session_before_id])
+    session_after = relationship("StreetViewSession", foreign_keys=[session_after_id])
+    site = relationship("Site")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_sv_comparisons_site', 'site_id', 'created_at'),
+        Index('idx_sv_comparisons_type', 'comparison_type', 'analysis_status'),
+        Index('idx_sv_comparisons_timespan', 'timespan_days', 'overall_progress_percentage'),
+        Index('idx_sv_comparisons_status', 'analysis_status', 'processing_completed_at'),
+        UniqueConstraint('session_before_id', 'session_after_id', 'comparison_type', name='unique_comparison_sessions'),
+    )
+
+
+class StreetViewSession(Base):
+    __tablename__ = 'street_view_sessions'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    camera_id = Column(CHAR(36), ForeignKey('cameras.id'), nullable=False)
+    
+    # Session metadata
+    session_label = Column(String(255), nullable=False)
+    session_date = Column(Date, nullable=False)
+    session_time = Column(Time, nullable=False)
+    
+    # Location and positioning
+    location_coordinates_x = Column(Decimal(10,6))
+    location_coordinates_y = Column(Decimal(10,6))
+    heading_degrees = Column(Decimal(5,2))  # 0-360 degrees
+    
+    # Recording details
+    weather_conditions = Column(Text)
+    recording_quality = Column(SQLEnum(RecordingQuality), default=RecordingQuality.high)
+    file_path = Column(Text)
+    file_size_mb = Column(Decimal(10,2))
+    duration_seconds = Column(Integer)
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    created_by = Column(CHAR(36), ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
+    site = relationship("Site")
+    camera = relationship("Camera")
+    created_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_sv_sessions_site_date', 'site_id', 'session_date'),
+        Index('idx_sv_sessions_camera', 'camera_id', 'session_date'),
+        Index('idx_sv_sessions_location', 'location_coordinates_x', 'location_coordinates_y'),
+        Index('idx_sv_sessions_quality', 'recording_quality', 'file_size_mb'),
+    )
+
+
+class DetectedChange(Base):
+    __tablename__ = 'detected_changes'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    comparison_id = Column(CHAR(36), ForeignKey('street_view_comparisons.id'), nullable=False)
+    
+    # Change details
+    change_type = Column(SQLEnum(ChangeType), nullable=False)
+    severity = Column(SQLEnum(Severity), nullable=False)
+    description = Column(Text, nullable=False)
+    
+    # Location information
+    location_name = Column(String(255))
+    location_coordinates_x = Column(Decimal(10,6))
+    location_coordinates_y = Column(Decimal(10,6))
+    
+    # AI analysis results
+    confidence_percentage = Column(Decimal(5,2), nullable=False)
+    impact_description = Column(Text)
+    ai_model_version = Column(String(50))
+    detection_algorithm = Column(String(100))
+    
+    # Review workflow
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    reviewed_by = Column(CHAR(36), ForeignKey('users.id'))
+    review_status = Column(SQLEnum(ReviewStatus), default=ReviewStatus.pending)
+    review_notes = Column(Text)
+    
+    # Relationships
+    comparison = relationship("StreetViewComparison")
+    reviewed_by_user = relationship("User")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_detected_changes_comparison', 'comparison_id', 'change_type'),
+        Index('idx_detected_changes_severity', 'severity', 'confidence_percentage'),
+        Index('idx_detected_changes_location', 'location_name', 'change_type'),
+        Index('idx_detected_changes_review', 'review_status', 'created_at'),
+    )
+
+
+class ComparisonLocation(Base):
+    __tablename__ = 'comparison_locations'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    site_id = Column(CHAR(36), ForeignKey('sites.id'), nullable=False)
+    
+    # Location details
+    location_name = Column(String(255), nullable=False)
+    description = Column(Text)
+    coordinates_x = Column(Decimal(10,6))
+    coordinates_y = Column(Decimal(10,6))
+    
+    # Classification
+    zone_type = Column(SQLEnum(ZoneType), nullable=False)
+    monitoring_priority = Column(SQLEnum(MonitoringPriority), default=MonitoringPriority.medium)
+    
+    # Status and activity
+    is_active = Column(Boolean, default=True)
+    last_comparison_date = Column(TIMESTAMP)
+    change_frequency_score = Column(Decimal(5,2))  # Historical change frequency
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    site = relationship("Site")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_comparison_locations_site', 'site_id', 'is_active'),
+        Index('idx_comparison_locations_zone', 'zone_type', 'monitoring_priority'),
+        Index('idx_comparison_locations_activity', 'change_frequency_score', 'last_comparison_date'),
+        Index('idx_comparison_locations_coordinates', 'coordinates_x', 'coordinates_y'),
+    )
+
+
+class ComparisonAnalysisMetric(Base):
+    __tablename__ = 'comparison_analysis_metrics'
+    
+    id = Column(CHAR(36), primary_key=True, default=generate_uuid)
+    comparison_id = Column(CHAR(36), ForeignKey('street_view_comparisons.id'), nullable=False)
+    
+    # Metric details
+    metric_type = Column(SQLEnum(MetricType), nullable=False)
+    metric_value = Column(Decimal(10,4), nullable=False)
+    metric_unit = Column(String(50))
+    
+    # Analysis metadata
+    calculation_method = Column(Text)
+    baseline_value = Column(Decimal(10,4))
+    improvement_percentage = Column(Decimal(5,2))
+    trend_direction = Column(SQLEnum(TrendDirection))
+    confidence_level = Column(Decimal(5,2))
+    
+    created_at = Column(TIMESTAMP, default=func.current_timestamp())
+    calculated_by = Column(String(100))  # AI model or user ID
+    
+    # Relationships
+    comparison = relationship("StreetViewComparison")
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_analysis_metrics_comparison', 'comparison_id', 'metric_type'),
+        Index('idx_analysis_metrics_value', 'metric_value', 'improvement_percentage'),
+        Index('idx_analysis_metrics_trend', 'trend_direction', 'confidence_level'),
+        UniqueConstraint('comparison_id', 'metric_type', name='unique_comparison_metric'),
+    )
