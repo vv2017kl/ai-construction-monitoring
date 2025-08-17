@@ -4909,7 +4909,7 @@ def test_historical_temporal_analysis_apis(site_id, user_id=None):
             "site_id": site_id,
             "snapshot_date": "2024-01-15",
             "snapshot_time": "14:30:00",
-            "data_source_type": "camera_feed",
+            "data_source_type": "cameras",  # Use valid enum value
             "source_entity_id": str(uuid.uuid4()),
             "source_entity_name": "Camera Alpha",
             "data_payload": {
