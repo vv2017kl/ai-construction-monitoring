@@ -4848,7 +4848,7 @@ def test_street_view_comparison_apis(site_id, camera_id=None):
         print(f"   ❌ Unexpected error: {e}")
         return False, (created_comparison_id, created_session_id, created_change_id, created_location_id, created_metric_id)
 
-def test_historical_temporal_analysis_apis(site_id):
+def test_historical_temporal_analysis_apis(site_id, user_id=None):
     """Test Historical Data & Temporal Analysis API endpoints"""
     print("\n19. Testing Historical Data & Temporal Analysis APIs")
     created_snapshot_id = None
@@ -4858,8 +4858,24 @@ def test_historical_temporal_analysis_apis(site_id):
     created_prediction_id = None
     
     try:
+        # Get existing user if not provided
+        if not user_id:
+            print("   19a. Getting existing user for Historical Analysis tests")
+            response = requests.get(f"{API_BASE_URL}/users", timeout=10)
+            if response.status_code == 200:
+                users = response.json()
+                if users:
+                    user_id = users[0]["id"]
+                    print(f"      Using existing user ID: {user_id}")
+                else:
+                    print("      No existing users found, creating fake user_id")
+                    user_id = str(uuid.uuid4())
+            else:
+                print("      Failed to get users list, using fake user_id")
+                user_id = str(uuid.uuid4())
+        
         # Test Historical Data Snapshots API
-        print("   19a. Testing Historical Data Snapshots API")
+        print("   19b. Testing Historical Data Snapshots API")
         
         # GET all snapshots
         response = requests.get(f"{API_BASE_URL}/historical-analysis/snapshots", timeout=10)
