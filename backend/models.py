@@ -5220,7 +5220,7 @@ class SiteConfiguration(Base):
     # Indexes
     __table_args__ = (
         Index('idx_site_configs_safety', 'safety_level', 'ai_detection_enabled'),
-        Index('idx_site_configs_compliance', 'compliance_frameworks', 'audit_frequency'),
+        Index('idx_site_configs_audit', 'audit_frequency'),
         Index('idx_site_configs_performance', 'system_health_threshold', 'performance_monitoring'),
     )
 
