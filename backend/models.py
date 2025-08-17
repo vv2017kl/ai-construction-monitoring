@@ -8076,7 +8076,7 @@ class VendorManagement(Base):
     # Risk assessment
     financial_stability_rating = Column(String(50))
     business_continuity_score = Column(Decimal(5,2))
-    risk_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.low)
+    risk_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.info)
     
     # Vendor status
     is_active = Column(Boolean, default=True)
