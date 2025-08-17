@@ -1951,7 +1951,7 @@ class HistoricalDataSnapshotResponse(BaseModel):
     source_entity_id: Optional[str] = None
     source_entity_name: Optional[str] = None
     data_payload: dict
-    metadata: Optional[dict] = None
+    data_metadata: Optional[dict] = None
     data_completeness_percentage: float = 100.0
     data_accuracy_score: float = 100.0
     processing_duration_ms: Optional[int] = None
