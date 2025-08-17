@@ -23,7 +23,7 @@ from schemas import (
     UserFeedbackResponse, UserFeedbackCreateRequest
 )
 
-router = APIRouter(prefix="/api/integration", tags=["Integration & User Experience"])
+router = APIRouter(prefix="/integration", tags=["Integration & User Experience"])
 
 # THIRD PARTY INTEGRATIONS ENDPOINTS
 
