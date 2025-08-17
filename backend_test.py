@@ -4909,7 +4909,7 @@ def test_historical_temporal_analysis_apis(site_id, user_id=None):
             "data_accuracy_score": 96.0
         }
         
-        fake_user_id = str(uuid.uuid4())
+        fake_user_id = user_id
         response = requests.post(
             f"{API_BASE_URL}/historical-analysis/snapshots",
             json=test_snapshot_data,
