@@ -6274,7 +6274,7 @@ class DetectedChange(Base):
     
     # Change details
     change_type = Column(SQLEnum(ChangeType), nullable=False)
-    severity = Column(SQLEnum(Severity), nullable=False)
+    severity = Column(SQLEnum(SeverityLevel), nullable=False)
     description = Column(Text, nullable=False)
     
     # Location information
