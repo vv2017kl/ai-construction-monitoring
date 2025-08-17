@@ -1792,6 +1792,166 @@ class UserFeedbackCreateRequest(BaseModel):
     attachments: Optional[list] = None
 
 
+# STREET VIEW COMPARISON & ANALYSIS SCHEMAS
+
+class StreetViewComparisonResponse(BaseModel):
+    id: str
+    session_before_id: str
+    session_after_id: str
+    site_id: str
+    location_zone: Optional[str] = None
+    comparison_type: str
+    timespan_days: int
+    overall_progress_percentage: Optional[float] = None
+    construction_growth: Optional[float] = None
+    equipment_changes_count: int = 0
+    safety_improvements_count: int = 0
+    personnel_variation_percentage: Optional[float] = None
+    analysis_status: str = "pending"
+    processing_time_seconds: Optional[int] = None
+    error_message: Optional[str] = None
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class StreetViewComparisonCreateRequest(BaseModel):
+    session_before_id: str
+    session_after_id: str
+    site_id: str
+    location_zone: Optional[str] = None
+    comparison_type: str
+    timespan_days: int
+
+class StreetViewSessionResponse(BaseModel):
+    id: str
+    site_id: str
+    camera_id: str
+    session_label: str
+    session_date: str
+    session_time: str
+    location_coordinates_x: Optional[float] = None
+    location_coordinates_y: Optional[float] = None
+    heading_degrees: Optional[float] = None
+    weather_conditions: Optional[str] = None
+    recording_quality: str = "high"
+    file_path: Optional[str] = None
+    file_size_mb: Optional[float] = None
+    duration_seconds: Optional[int] = None
+    created_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class StreetViewSessionCreateRequest(BaseModel):
+    site_id: str
+    camera_id: str
+    session_label: str
+    session_date: str
+    session_time: str
+    location_coordinates_x: Optional[float] = None
+    location_coordinates_y: Optional[float] = None
+    heading_degrees: Optional[float] = None
+    weather_conditions: Optional[str] = None
+    recording_quality: Optional[str] = "high"
+    file_path: Optional[str] = None
+    file_size_mb: Optional[float] = None
+    duration_seconds: Optional[int] = None
+
+class DetectedChangeResponse(BaseModel):
+    id: str
+    comparison_id: str
+    change_type: str
+    severity: str
+    description: str
+    location_name: Optional[str] = None
+    location_coordinates_x: Optional[float] = None
+    location_coordinates_y: Optional[float] = None
+    confidence_percentage: float
+    impact_description: Optional[str] = None
+    ai_model_version: Optional[str] = None
+    detection_algorithm: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    review_status: str = "pending"
+    review_notes: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class DetectedChangeCreateRequest(BaseModel):
+    comparison_id: str
+    change_type: str
+    severity: str
+    description: str
+    location_name: Optional[str] = None
+    location_coordinates_x: Optional[float] = None
+    location_coordinates_y: Optional[float] = None
+    confidence_percentage: float
+    impact_description: Optional[str] = None
+    ai_model_version: Optional[str] = None
+    detection_algorithm: Optional[str] = None
+
+class ComparisonLocationResponse(BaseModel):
+    id: str
+    site_id: str
+    location_name: str
+    description: Optional[str] = None
+    coordinates_x: Optional[float] = None
+    coordinates_y: Optional[float] = None
+    zone_type: str
+    monitoring_priority: str = "medium"
+    is_active: bool = True
+    last_comparison_date: Optional[datetime] = None
+    change_frequency_score: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ComparisonLocationCreateRequest(BaseModel):
+    site_id: str
+    location_name: str
+    description: Optional[str] = None
+    coordinates_x: Optional[float] = None
+    coordinates_y: Optional[float] = None
+    zone_type: str
+    monitoring_priority: Optional[str] = "medium"
+
+class ComparisonAnalysisMetricResponse(BaseModel):
+    id: str
+    comparison_id: str
+    metric_type: str
+    metric_value: float
+    metric_unit: Optional[str] = None
+    calculation_method: Optional[str] = None
+    baseline_value: Optional[float] = None
+    improvement_percentage: Optional[float] = None
+    trend_direction: Optional[str] = None
+    confidence_level: Optional[float] = None
+    calculated_by: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ComparisonAnalysisMetricCreateRequest(BaseModel):
+    comparison_id: str
+    metric_type: str
+    metric_value: float
+    metric_unit: Optional[str] = None
+    calculation_method: Optional[str] = None
+    baseline_value: Optional[float] = None
+    improvement_percentage: Optional[float] = None
+    trend_direction: Optional[str] = None
+    confidence_level: Optional[float] = None
+    calculated_by: Optional[str] = None
+
+
 # INTEGRATION & USER EXPERIENCE SCHEMAS
 
 class ThirdPartyIntegrationResponse(BaseModel):
