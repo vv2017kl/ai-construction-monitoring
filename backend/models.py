@@ -8376,7 +8376,7 @@ class WeatherIntegration(Base):
     __table_args__ = (
         Index('idx_weather_site_update', 'site_id', 'last_update_timestamp'),
         Index('idx_weather_conditions', 'current_condition', 'work_suitability_score'),
-        Index('idx_weather_alerts', 'severe_weather_probability', 'active_weather_alerts'),
+        Index('idx_weather_alerts', 'severe_weather_probability'),
         Index('idx_weather_coordinates', 'latitude', 'longitude'),
         UniqueConstraint('site_id', name='unique_weather_per_site'),
     )
