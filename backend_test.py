@@ -4580,7 +4580,7 @@ def test_street_view_comparison_apis(site_id, user_id=None, camera_id=None):
                 print("      Failed to get users list, using fake user_id")
                 user_id = str(uuid.uuid4())
         
-        # Get existing cameras to use a valid camera_id
+        # Get existing cameras to use a valid camera_id, or create one if none exist
         if not camera_id:
             print("   18b. Getting existing cameras for valid camera_id")
             response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
@@ -4590,8 +4590,35 @@ def test_street_view_comparison_apis(site_id, user_id=None, camera_id=None):
                     camera_id = cameras[0]["id"]
                     print(f"      Using existing camera ID: {camera_id}")
                 else:
-                    print("      No existing cameras found, using fake camera_id")
-                    camera_id = str(uuid.uuid4())
+                    print("      No existing cameras found, creating a test camera")
+                    # Create a test camera
+                    test_camera_data = {
+                        "site_id": site_id,
+                        "name": f"Test Camera {uuid.uuid4().hex[:8]}",
+                        "location": "Test Location",
+                        "camera_type": "security",
+                        "status": "active",
+                        "ip_address": "192.168.1.100",
+                        "port": 8080,
+                        "username": "admin",
+                        "password": "password123",
+                        "stream_url": "rtsp://192.168.1.100:554/stream1"
+                    }
+                    
+                    response = requests.post(
+                        f"{API_BASE_URL}/cameras",
+                        json=test_camera_data,
+                        headers={"Content-Type": "application/json"},
+                        timeout=10
+                    )
+                    
+                    if response.status_code == 200:
+                        camera = response.json()
+                        camera_id = camera.get("id")
+                        print(f"      Created test camera ID: {camera_id}")
+                    else:
+                        print(f"      Failed to create camera: {response.status_code}")
+                        camera_id = str(uuid.uuid4())  # Use fake ID as fallback
             else:
                 print("      Failed to get cameras list, using fake camera_id")
                 camera_id = str(uuid.uuid4())
