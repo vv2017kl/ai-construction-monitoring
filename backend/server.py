@@ -87,6 +87,7 @@ api_router.include_router(ai_models.router, tags=["AI Model Management & Deploym
 api_router.include_router(site_configuration.router, tags=["Site Configuration & Infrastructure"])
 api_router.include_router(system_monitoring.router, tags=["System Monitoring & Infrastructure Health"])
 api_router.include_router(integration_user_experience.router, tags=["Integration & User Experience"])
+api_router.include_router(street_view_comparison.router, tags=["Street View Comparison & Analysis"])
 
 # Include the main router in the app
 app.include_router(api_router)
