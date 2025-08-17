@@ -4554,7 +4554,7 @@ def test_integration_user_feedback_api(user_id):
         print(f"   ❌ Unexpected error: {e}")
         return False, created_feedback_id
 
-def test_street_view_comparison_apis(site_id, camera_id=None):
+def test_street_view_comparison_apis(site_id, user_id=None, camera_id=None):
     """Test Street View Comparison & Analysis API endpoints"""
     print("\n18. Testing Street View Comparison & Analysis APIs")
     created_comparison_id = None
@@ -4564,9 +4564,25 @@ def test_street_view_comparison_apis(site_id, camera_id=None):
     created_metric_id = None
     
     try:
+        # Get existing user if not provided
+        if not user_id:
+            print("   18a. Getting existing user for Street View tests")
+            response = requests.get(f"{API_BASE_URL}/users", timeout=10)
+            if response.status_code == 200:
+                users = response.json()
+                if users:
+                    user_id = users[0]["id"]
+                    print(f"      Using existing user ID: {user_id}")
+                else:
+                    print("      No existing users found, creating fake user_id")
+                    user_id = str(uuid.uuid4())
+            else:
+                print("      Failed to get users list, using fake user_id")
+                user_id = str(uuid.uuid4())
+        
         # Get existing cameras to use a valid camera_id
         if not camera_id:
-            print("   18a. Getting existing cameras for valid camera_id")
+            print("   18b. Getting existing cameras for valid camera_id")
             response = requests.get(f"{API_BASE_URL}/cameras", timeout=10)
             if response.status_code == 200:
                 cameras = response.json()
@@ -4581,7 +4597,7 @@ def test_street_view_comparison_apis(site_id, camera_id=None):
                 camera_id = str(uuid.uuid4())
         
         # Test Street View Sessions API
-        print("   18b. Testing Street View Sessions API")
+        print("   18c. Testing Street View Sessions API")
         
         # GET all sessions
         response = requests.get(f"{API_BASE_URL}/street-view/sessions", timeout=10)
