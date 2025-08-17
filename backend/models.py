@@ -6409,6 +6409,13 @@ class AnalysisAlgorithm(enum.Enum):
     clustering = "clustering"
     forecasting = "forecasting"
 
+class JobStatus(enum.Enum):
+    pending = "pending"
+    running = "running"
+    completed = "completed"
+    failed = "failed"
+    cancelled = "cancelled"
+
 
 class HistoricalDataSnapshot(Base):
     __tablename__ = 'historical_data_snapshots'
