@@ -89,6 +89,11 @@ api_router.include_router(system_monitoring.router, tags=["System Monitoring & I
 api_router.include_router(integration_user_experience.router, tags=["Integration & User Experience"])
 api_router.include_router(street_view_comparison.router, tags=["Street View Comparison & Analysis"])
 api_router.include_router(historical_temporal_analysis.router, tags=["Historical Data & Temporal Analysis"])
+api_router.include_router(alert_management_extensions.router, tags=["Alert Management Extensions"])
+api_router.include_router(personnel_hr_management.router, tags=["Personnel & HR Management"])
+api_router.include_router(environmental_equipment_monitoring.router, tags=["Environmental & Equipment Monitoring"])
+api_router.include_router(resource_procurement_management.router, tags=["Resource & Procurement Management"])
+api_router.include_router(weather_maintenance_management.router, tags=["Weather & Maintenance Management"])
 
 # Include the main router in the app
 app.include_router(api_router)
