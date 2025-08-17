@@ -13,7 +13,8 @@ from database import get_db
 from models import (
     ThirdPartyIntegration, UserProfileSetting, UserApplicationSetting, 
     HelpArticle, UserFeedback, User,
-    IntegrationType, IntegrationStatus, FeedbackType, FeedbackStatus
+    IntegrationType, IntegrationStatus, FeedbackType, FeedbackStatus,
+    TimeFormat, Theme, FontSize
 )
 from schemas import (
     ThirdPartyIntegrationResponse, ThirdPartyIntegrationCreateRequest,
