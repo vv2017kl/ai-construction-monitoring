@@ -253,6 +253,12 @@ class Severity(enum.Enum):
     error = "error"
     critical = "critical"
 
+class SeverityLevel(enum.Enum):
+    info = "info"
+    warning = "warning"
+    error = "error"
+    critical = "critical"
+
 class EvidenceQuality(enum.Enum):
     poor = "poor"
     fair = "fair"
