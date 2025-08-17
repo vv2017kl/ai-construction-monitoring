@@ -6838,7 +6838,7 @@ class AlertAssignment(Base):
     
     # Assignment details
     assignment_reason = Column(Text)
-    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.medium)
+    priority_level = Column(SQLEnum(SeverityLevel), default=SeverityLevel.warning)
     estimated_completion = Column(TIMESTAMP)
     
     # Assignment status
