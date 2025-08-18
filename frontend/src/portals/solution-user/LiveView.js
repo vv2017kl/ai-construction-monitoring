@@ -376,7 +376,7 @@ const LiveView = () => {
   };
 
   const PTZControls = ({ camera }) => {
-    if (camera?.type !== 'ptz') return null;
+    if (!camera?.ptz_capable) return null;
 
     return (
       <div className="bg-white rounded-lg p-4 border border-gray-200">
