@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Import modular routers
-from routers import core, ai_detection, video_evidence, system_reports, timelapse, field_operations, navigation, analytics, admin, user_management, access_control, ai_models, site_configuration, system_monitoring, integration_user_experience, street_view_comparison, historical_temporal_analysis, alert_management_extensions, personnel_hr_management, environmental_equipment_monitoring, resource_procurement_management, weather_maintenance_management
+from routers import core, ai_detection, video_evidence, system_reports, timelapse, field_operations, navigation, analytics, admin, user_management, access_control, ai_models, site_configuration, system_monitoring, integration_user_experience, street_view_comparison, historical_temporal_analysis, alert_management_extensions, personnel_hr_management, environmental_equipment_monitoring, resource_procurement_management, weather_maintenance_management, zoneminder_integration
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
