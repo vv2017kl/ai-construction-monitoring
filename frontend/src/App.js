@@ -84,8 +84,9 @@ const Home = () => {
 function App() {
   return (
     <ThemeProvider>
-      <div className="App">
-        <BrowserRouter>
+      <AuthProvider>
+        <div className="App">
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
