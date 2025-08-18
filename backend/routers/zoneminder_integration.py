@@ -170,7 +170,18 @@ async def get_live_stream(
 ):
     """Get live stream URL and metadata for a camera"""
     try:
-        stream_quality = StreamQuality(quality)
+        # Map quality string to StreamQuality enum
+        quality_mapping = {
+            "low": StreamQuality.LOW,
+            "medium": StreamQuality.MEDIUM,
+            "high": StreamQuality.HIGH,
+            "ultra": StreamQuality.ULTRA
+        }
+        
+        if quality.lower() not in quality_mapping:
+            raise HTTPException(status_code=400, detail=f"Invalid quality parameter: '{quality}' is not a valid StreamQuality")
+        
+        stream_quality = quality_mapping[quality.lower()]
         stream_metadata = await connector.get_live_stream(camera_id, stream_quality)
         
         return {
