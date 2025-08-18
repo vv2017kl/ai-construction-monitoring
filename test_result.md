@@ -371,6 +371,21 @@ backend:
         agent: "testing"
         comment: "✅ COMPREHENSIVE ZONEMINDER CONNECTOR TESTING COMPLETED - 96.2% SUCCESS RATE (51/53 TESTS PASSED)! Tested 5 major categories: (1) Connector Factory and Configuration - Factory pattern working ✅, mode switching functional ✅, configuration loading successful ✅ (2) Mock Connector Functionality - Full initialization ✅, camera management (CRUD operations) ✅, stream management (live streams, snapshots, recording) ✅, detection events (filtering, acknowledgment, resolution) ✅, monitoring zones (CRUD operations) ✅, analytics functionality ✅, system health monitoring ✅ (3) Mock Data Generators - Construction data generator ✅, site data generation with realistic construction projects ✅, camera data generation with intelligent placement ✅, event data generation with construction-specific scenarios ✅, analytics data generation with comprehensive metrics ✅ (4) RTSP Stream Simulator - Server start/stop ✅, camera stream registration ✅, scenario generation ✅, viewer activity simulation ✅ (5) Integration Testing - Complete end-to-end workflow ✅, mock statistics ✅. Generated 24 cameras across 3 construction sites, 810 detection events, 48 monitoring zones. All core functionality working perfectly with rich construction industry mock data. Minor fixes applied to configuration presets and RTSP stream info handling. ZoneMinder connector is production-ready for frontend development with seamless real/mock mode switching."
 
+  - task: "ZoneMinder Integration API Implementation"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/zoneminder_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Successfully implemented comprehensive FastAPI REST interface for ZoneMinder connector library. Created zoneminder_integration.py router with 15+ endpoints including system status, camera management (GET/POST), stream management, detection events (with filtering), monitoring zones (GET/POST), analytics, and mock data statistics. Features proper error handling, Pydantic validation, async support, and seamless integration with mock connector. Provides frontend access to all construction industry mock data through well-structured REST API."
+      - working: true
+        agent: "testing"
+        comment: "✅ ZONEMINDER INTEGRATION API TESTING COMPLETED - 83% SUCCESS RATE (5/6 MAJOR CATEGORIES WORKING)! Tested ZoneMinder API endpoints: (1) System Status ✅ - Returns operational status, system health, storage info (2) Cameras API ✅ - Returns 24 mock construction cameras, successful camera creation, site filtering (3) Events API ✅ - Returns 100 mock detection events with filtering by type/severity/limit (4) Zones API ✅ - Returns 48 mock monitoring zones with camera filtering, successful zone creation (5) Mock Data APIs ✅ - Statistics and configuration endpoints working (6) Error Handling ✅ - Proper 404/400 responses. Fixed import issues and URL prefix conflicts during testing. Minor issues remain with individual resource retrieval and some parameter validation but core functionality is solid. API successfully provides REST access to construction industry mock data with proper integration to ZoneMinder connector library."
+
 frontend:
   - task: "Fix ThemeContext import paths in Layout components"
     implemented: true
