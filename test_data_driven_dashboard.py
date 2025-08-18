@@ -119,10 +119,10 @@ def test_data_driven_dashboard():
                     personnel_involved.update(event["personnel_involved"])
             
             personnel_count = len(personnel_involved)
-            print(f"      Recent person detection events: {len(recent_person_events)}")
+            print(f"      Recent personnel count events: {len(recent_person_events)}")
             print(f"      ✅ Calculated Personnel Count: {personnel_count} (from real detection events)")
         else:
-            print("      ❌ Person detection events API failed")
+            print("      ❌ Personnel count detection events API failed")
             return False
         
         # 2. Test Weather API Integration
