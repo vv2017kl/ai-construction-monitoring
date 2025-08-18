@@ -216,15 +216,17 @@ const AdminDashboard = () => {
       });
     }
     
-    // AI model updates
-    activity.push({
-      id: activityId++,
-      type: 'system_update',
-      description: `AI detection models running at ${systemHealthData.aiModels}% efficiency`,
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      severity: 'info',
-      site: 'System'
-    });
+    // AI model updates - only add if systemHealthData is available
+    if (systemHealthData?.aiModels) {
+      activity.push({
+        id: activityId++,
+        type: 'system_update',
+        description: `AI detection models running at ${systemHealthData.aiModels}% efficiency`,
+        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+        severity: 'info',
+        site: 'System'
+      });
+    }
     
     return activity.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 6);
   };
