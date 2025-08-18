@@ -134,7 +134,8 @@ function App() {
           </Routes>
         </BrowserRouter>
       </div>
-    </ThemeProvider>
+    </AuthProvider>
+  </ThemeProvider>
   );
 }
 
