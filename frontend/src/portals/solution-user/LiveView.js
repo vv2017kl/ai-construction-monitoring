@@ -736,7 +736,7 @@ const LiveView = () => {
             {/* Fullscreen Camera View */}
             <div className="absolute inset-0">
               {(() => {
-                const camera = mockCameras.find(c => c.id === fullscreenCamera);
+                const camera = cameraList.find(c => c.camera_id === fullscreenCamera);
                 const detection = liveDetections.find(d => d.camera === camera?.name);
                 return (
                   <div className="relative w-full h-full bg-gray-900">
