@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Settings, User, Bell, Shield, Palette, Globe, Clock, 
+  Settings as SettingsIcon, User, Bell, Shield, Palette, Globe, Clock, 
   Save, RefreshCw, Download, Upload, ChevronRight, ChevronDown,
   Moon, Sun, Monitor, Volume2, VolumeX, Eye, EyeOff, Key,
   MapPin, Calendar, Languages, Smartphone, Mail, MessageSquare
