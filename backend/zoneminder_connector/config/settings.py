@@ -102,7 +102,6 @@ def get_config() -> Dict[str, Any]:
 def get_connector():
     """Factory function to get appropriate connector based on configuration"""
     from ..mock_connector import MockZoneMinderConnector
-    from ..real_connector import RealZoneMinderConnector
     
     config = get_config()
     
@@ -111,7 +110,13 @@ def get_connector():
         return MockZoneMinderConnector(config)
     else:
         print("🔗 Using Real ZoneMinder Connector")
-        return RealZoneMinderConnector(config)
+        try:
+            from ..real_connector import RealZoneMinderConnector
+            return RealZoneMinderConnector(config)
+        except ImportError as e:
+            print(f"⚠️ Real connector dependencies not available: {e}")
+            print("🎭 Falling back to Mock ZoneMinder Connector")
+            return MockZoneMinderConnector(config)
 
 def set_mode(mode: str):
     """Set the connector mode (for testing purposes)"""
