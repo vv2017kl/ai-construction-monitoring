@@ -671,7 +671,7 @@ const LiveView = () => {
                     key={camera.id}
                     camera={camera}
                     detection={detection}
-                    isSelected={selectedCamera === camera.id}
+                    isSelected={selectedCamera === camera.camera_id}
                     onClick={() => setSelectedCamera(camera.camera_id)}
                   />
                 );
