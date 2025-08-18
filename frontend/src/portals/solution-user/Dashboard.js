@@ -41,25 +41,35 @@ const Dashboard = () => {
   const { data: recentEvents, loading: eventsLoading } = useRecentEvents(24);
   const { data: criticalAlerts, loading: alertsLoading } = useCriticalAlerts(24);
 
-  // Derived data from API responses
-  const activeCameras = cameras?.cameras?.filter(cam => cam.status === 'online') || [];
-  const totalCameras = cameras?.cameras?.length || 0;
-  const activeAlerts = criticalAlerts?.events?.length || 0;
-  const recentActivity = recentEvents?.events?.slice(0, 10) || [];
-  const priorityAlerts = criticalAlerts?.events?.filter(event => 
-    event.severity === 'critical' || event.severity === 'high'
-  ).slice(0, 5) || [];
-
-  // Get current site info (using first available site or default)
+  // State for calculated metrics and weather
+  const [calculatedMetrics, setCalculatedMetrics] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
   const [currentSite, setCurrentSite] = useState({
-    name: 'Construction Site Alpha',
-    type: 'high_rise_building',
+    name: 'Loading...',
+    type: 'construction_site',
     progress: 0,
-    personnel: 0,
-    weather: { temp: 72, wind: '8 mph', condition: 'Clear' }
+    personnel: 0
   });
 
-  // Load initial site data
+  // Calculate real-time metrics from ZoneMinder data
+  useEffect(() => {
+    if (cameras && recentEvents && criticalAlerts) {
+      const metrics = generateDashboardMetrics({
+        cameras,
+        events: recentEvents,
+        zones: {},
+        status: zoneminderStatus
+      });
+      setCalculatedMetrics(metrics);
+      
+      // Load weather data for site coordinates
+      if (metrics.coordinates && !weatherData) {
+        loadWeatherData(metrics.coordinates.lat, metrics.coordinates.lon);
+      }
+    }
+  }, [cameras, recentEvents, criticalAlerts, zoneminderStatus]);
+
+  // Load site data from backend
   useEffect(() => {
     const loadSiteData = async () => {
       try {
@@ -67,23 +77,48 @@ const Dashboard = () => {
         if (sites && sites.length > 0) {
           const site = sites[0];
           setCurrentSite({
-            name: site.name || 'Construction Site Alpha',
-            type: site.type || 'high_rise_building', 
-            progress: site.progress_percentage || 65,
-            personnel: site.active_personnel || 0,
-            weather: { 
-              temp: 72 + Math.floor(Math.random() * 20), 
-              wind: `${5 + Math.floor(Math.random() * 15)} mph`,
-              condition: ['Clear', 'Partly Cloudy', 'Overcast'][Math.floor(Math.random() * 3)]
-            }
+            name: site.name || site.site_name || 'Construction Site Alpha',
+            type: site.type || site.project_type || 'high_rise_building',
+            progress: calculatedMetrics?.progress?.completion || 0,
+            personnel: calculatedMetrics?.personnel?.count || 0,
+            location: site.location || 'Seattle, WA',
+            contractor: site.contractor || 'Construction Management LLC'
           });
         }
       } catch (error) {
         console.error('Error loading site data:', error);
+        // Keep default values if API fails
       }
     };
     loadSiteData();
-  }, []);
+  }, [calculatedMetrics]);
+
+  // Load real weather data
+  const loadWeatherData = async (lat, lon) => {
+    try {
+      const weather = await weatherAPI.getCurrentWeather(lat, lon);
+      const conditions = await weatherAPI.getWorkingConditions(lat, lon);
+      
+      setWeatherData({
+        ...weather,
+        workingConditions: conditions,
+        displayTemp: `${weather.temperature}°F`,
+        displayWind: weather.windSpeed || 'Light winds',
+        displayCondition: weather.condition || 'Clear'
+      });
+    } catch (error) {
+      console.error('Error loading weather data:', error);
+    }
+  };
+
+  // Derived data from API responses and calculations
+  const activeCameras = cameras?.cameras?.filter(cam => cam.status === 'online') || [];
+  const totalCameras = cameras?.cameras?.length || 0;
+  const activeAlerts = criticalAlerts?.events?.length || 0;
+  const recentActivity = recentEvents?.events?.slice(0, 10) || [];
+  const priorityAlerts = criticalAlerts?.events?.filter(event => 
+    event.severity === 'critical' || event.severity === 'high'
+  ).slice(0, 5) || [];
 
   // Loading state component
   const LoadingCard = () => (
