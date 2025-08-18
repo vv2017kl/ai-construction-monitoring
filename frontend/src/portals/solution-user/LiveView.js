@@ -313,14 +313,30 @@ const LiveView = () => {
           <div className="flex items-center justify-between text-white text-sm">
             <div>
               <div className="font-semibold">{camera.name}</div>
-              <div className="text-xs text-gray-300">{camera.location}</div>
+              <div className="text-xs text-gray-300">{camera.location_description}</div>
             </div>
             <div className="flex items-center space-x-2">
-              {camera.alerts > 0 && (
+              {/* Recording Indicator */}
+              {recordingCameras.has(camera.camera_id) && (
+                <div className="flex items-center space-x-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">
+                  <Record className="w-3 h-3" />
+                  <span>REC</span>
+                </div>
+              )}
+              
+              {/* Alert Count from Recent Events */}
+              {liveDetections.filter(d => d.camera_id === camera.camera_id && ['critical', 'high'].includes(d.severity)).length > 0 && (
                 <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {camera.alerts}
+                  {liveDetections.filter(d => d.camera_id === camera.camera_id && ['critical', 'high'].includes(d.severity)).length}
                 </span>
               )}
+              
+              {/* Camera Type Indicator */}
+              {camera.ptz_capable && (
+                <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">PTZ</span>
+              )}
+              
+              {/* Status Indicator */}
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-red-400'}`}></div>
             </div>
           </div>
