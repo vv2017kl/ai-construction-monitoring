@@ -103,11 +103,31 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Test the ZoneMinder events API fix for the datetime timezone issue. Focus on testing:
-  1. Events API with Datetime Parameters - Test GET /api/zoneminder/events without date filters and with start_date and end_date parameters
-  2. Recent Events for Dashboard - Test the specific API call the Dashboard is making
-  3. Error Handling - Confirm the 500 "can't compare offset-naive and offset-aware datetimes" error is fixed
-  The issue was that the frontend was sending timezone-aware datetimes (with 'Z' suffix) but the backend ZoneMinder connector expected timezone-naive datetimes.
+  Please analyze the data sources for the Dashboard by testing each API endpoint that feeds the Dashboard. Focus on:
+
+  1. **Dashboard Stats API**: Test `GET /api/dashboard/stats` - what actual data is this returning?
+
+  2. **ZoneMinder APIs**: 
+     - Test `GET /api/zoneminder/status` - system status data
+     - Test `GET /api/zoneminder/cameras` - camera data (should show 24 cameras from mock connector)
+     - Test `GET /api/zoneminder/events` - recent events data
+
+  3. **Backend Database APIs**:
+     - Test `GET /api/sites` - sites data from database
+     - Test `GET /api/users` - user data
+     - Test `GET /api/` - basic health check
+
+  4. **Data Analysis**:
+     - For each API, show exactly what data is returned
+     - Identify which data is from mock generators vs database vs hardcoded
+     - Trace where the Dashboard metrics are coming from:
+       * "23/24" camera status
+       * "8.7/10" safety score  
+       * "94% PPE compliance"
+       * Live activity events (PPE violations, personnel count, etc.)
+       * Weather data (87°F, 9 mph wind)
+
+  I need to understand the complete data flow to explain to the user where each piece of Dashboard data originates (API mock data, database records, or hardcoded fallbacks).
 
 backend:
   - task: "ZoneMinder Events API Datetime Timezone Fix"
