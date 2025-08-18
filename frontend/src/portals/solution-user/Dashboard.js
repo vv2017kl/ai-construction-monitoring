@@ -323,43 +323,61 @@ const Dashboard = () => {
             </div>
             
             <div className="p-6">
-              <div className="space-y-4">
-                {mockDetections.map((detection, index) => (
-                  <div 
-                    key={detection.id} 
-                    className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => setShowActivityModal(true)}
-                  >
+              {eventsLoading ? (
+                <div className="space-y-4">
+                  {Array(5).fill(0).map((_, i) => (
+                    <div key={i} className="animate-pulse flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recentActivity.length > 0 ? (
+                <div className="space-y-4">
+                  {recentActivity.map((event, index) => (
                     <div 
-                      className="w-12 h-12 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: theme.primary[100] }}
+                      key={event.event_id || index} 
+                      className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => setShowActivityModal(true)}
                     >
-                      <Activity className="w-6 h-6" style={{ color: theme.primary[500] }} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-medium text-gray-900">
-                          {detection.personCount} personnel detected
-                        </h4>
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                          detection.ppeCompliance >= 90 ? 'bg-green-100 text-green-600' :
-                          detection.ppeCompliance >= 75 ? 'bg-yellow-100 text-yellow-600' :
-                          'bg-red-100 text-red-600'
-                        }`}>
-                          {detection.ppeCompliance}% PPE
-                        </span>
+                      <div 
+                        className="w-12 h-12 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: theme.primary[100] }}
+                      >
+                        <Activity className="w-6 h-6" style={{ color: theme.primary[500] }} />
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        Camera: {mockSites[0].cameras > index ? `Camera ${index + 1}` : 'Main Entrance'} • 
-                        Confidence: {Math.round(detection.confidence * 100)}%
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium text-gray-900">
+                            {formatters.formatDetectionType(event.detection_type)}
+                          </h4>
+                          <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                            event.confidence_score >= 0.9 ? 'bg-green-100 text-green-600' :
+                            event.confidence_score >= 0.75 ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-red-100 text-red-600'
+                          }`}>
+                            {Math.round(event.confidence_score * 100)}% confidence
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          Camera: {event.camera_id} • Location: {event.location}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {formatters.formatRelativeTime(event.timestamp)}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(detection.timestamp).toLocaleTimeString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No recent activity detected</p>
+                </div>
+              )}
             </div>
           </div>
 
