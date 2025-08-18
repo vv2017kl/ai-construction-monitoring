@@ -393,14 +393,44 @@ const Dashboard = () => {
                     className="text-sm font-medium hover:underline"
                     style={{ color: theme.primary[500] }}
                   >
-                    View All ({mockAlerts.length})
+                    View All ({priorityAlerts.length})
                   </button>
                 </div>
               </div>
               <div className="p-6 space-y-4">
-                {mockAlerts.slice(0, 3).map((alert) => (
-                  <AlertCard key={alert.id} alert={alert} />
-                ))}
+                {alertsLoading ? (
+                  Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="animate-pulse p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-5 h-5 bg-gray-200 rounded"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : priorityAlerts.length > 0 ? (
+                  priorityAlerts.slice(0, 3).map((event) => (
+                    <AlertCard 
+                      key={event.event_id} 
+                      alert={{
+                        id: event.event_id,
+                        priority: event.severity,
+                        title: formatters.formatDetectionType(event.detection_type),
+                        message: event.description,
+                        location: event.location,
+                        timestamp: event.timestamp,
+                        status: event.acknowledged ? 'acknowledged' : 'open'
+                      }} 
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                    <p>No priority alerts</p>
+                  </div>
+                )}
               </div>
             </div>
 
