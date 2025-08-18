@@ -432,14 +432,14 @@ const LiveView = () => {
         {/* Zoom Controls */}
         <div className="flex justify-center space-x-2 mt-4">
           <button 
-            onClick={() => handleZoom(camera.id, false)}
+            onClick={() => handleZoom(camera.camera_id, false)}
             className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           >
             <ZoomOut className="w-4 h-4" />
             <span className="text-sm">Zoom Out</span>
           </button>
           <button 
-            onClick={() => handleZoom(camera.id, true)}
+            onClick={() => handleZoom(camera.camera_id, true)}
             className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           >
             <ZoomIn className="w-4 h-4" />
