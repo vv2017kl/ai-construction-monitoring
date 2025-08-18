@@ -11,8 +11,8 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, date
 from pydantic import BaseModel
 
-from ..zoneminder_connector import get_zoneminder_connector
-from ..zoneminder_connector.base_connector import DetectionType, StreamQuality
+from zoneminder_connector import get_zoneminder_connector
+from zoneminder_connector.base_connector import DetectionType, StreamQuality
 
 router = APIRouter(prefix="/api/zoneminder", tags=["ZoneMinder"])
 
