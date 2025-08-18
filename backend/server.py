@@ -96,6 +96,7 @@ api_router.include_router(environmental_equipment_monitoring.router, tags=["Envi
 api_router.include_router(resource_procurement_management.router, tags=["Resource & Procurement Management"])
 api_router.include_router(weather_maintenance_management.router, tags=["Weather & Maintenance Management"])
 api_router.include_router(zoneminder_integration.router, tags=["ZoneMinder Integration"])
+api_router.include_router(weather.router, tags=["Weather"])
 
 # Include the main router in the app
 app.include_router(api_router)
