@@ -206,7 +206,7 @@ const LiveView = () => {
   const getCamerasForGrid = () => {
     const layout = gridLayouts[gridLayout];
     const totalSlots = layout.cols * layout.rows;
-    return mockCameras.slice(0, Math.min(totalSlots, mockCameras.length));
+    return cameraList.slice(0, Math.min(totalSlots, cameraList.length));
   };
 
   const CameraFeed = ({ camera, isSelected, onClick, detection }) => {
