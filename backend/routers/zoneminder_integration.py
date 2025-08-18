@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from zoneminder_connector import get_zoneminder_connector
 from zoneminder_connector.base_connector import DetectionType, StreamQuality
 
-router = APIRouter(prefix="/api/zoneminder", tags=["ZoneMinder"])
+router = APIRouter(prefix="/zoneminder", tags=["ZoneMinder"])
 
 # Pydantic models for request/response validation
 class CameraCreateRequest(BaseModel):
