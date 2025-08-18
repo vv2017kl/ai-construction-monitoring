@@ -283,7 +283,7 @@ class RTSPStreamSimulator:
             stream_info = self.active_streams[camera_id].copy()
             
             # Add current scenario details
-            scenario = stream_info.get("current_scenario", {})
+            scenario = stream_info.get("current_scenario") or {}
             stream_info["current_activity"] = {
                 "scenario": scenario.get("name", "unknown"),
                 "description": scenario.get("description", "No activity"),
