@@ -60,7 +60,8 @@ async def get_dashboard_stats(db: Session = Depends(get_db)):
     active_sites = db.query(Site).filter(Site.status == SiteStatus.active).count()
     total_users = db.query(User).count()
     total_cameras = db.query(Camera).count()
-    active_alerts = db.query(Alert).filter(Alert.status == AlertStatus.open).count()
+    # Use 'active' instead of 'open' since the second AlertStatus enum doesn't have 'open'
+    active_alerts = db.query(Alert).filter(Alert.status == AlertStatus.active).count()
     
     return {
         "total_sites": total_sites,
