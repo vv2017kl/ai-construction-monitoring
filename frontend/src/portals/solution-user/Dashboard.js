@@ -483,26 +483,63 @@ const Dashboard = () => {
                 <h2 className="text-lg font-semibold text-gray-900">Site Conditions</h2>
               </div>
               <div className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Thermometer className="w-8 h-8 text-orange-500" />
+                {weatherData ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-2">
+                          <Thermometer className="w-8 h-8 text-orange-500" />
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900">{weatherData.displayTemp}</div>
+                        <div className="text-sm text-gray-500">Temperature</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-2">
+                          <Wind className="w-8 h-8 text-blue-500" />
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900">{weatherData.displayWind}</div>
+                        <div className="text-sm text-gray-500">Wind Speed</div>
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{currentSite.weather.temp}°F</div>
-                    <div className="text-sm text-gray-500">Temperature</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Wind className="w-8 h-8 text-blue-500" />
+                    <div className={`mt-4 p-3 rounded-lg text-center ${
+                      weatherData.workingConditions?.status === 'optimal' ? 'bg-green-50' :
+                      weatherData.workingConditions?.status === 'caution' ? 'bg-yellow-50' :
+                      'bg-red-50'
+                    }`}>
+                      <div className="text-sm font-medium text-gray-900">{weatherData.displayCondition}</div>
+                      <div className={`text-xs mt-1 ${
+                        weatherData.workingConditions?.status === 'optimal' ? 'text-green-600' :
+                        weatherData.workingConditions?.status === 'caution' ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {weatherData.workingConditions?.message || 'Working conditions assessment'}
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{currentSite.weather.wind}</div>
-                    <div className="text-sm text-gray-500">Wind Speed</div>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-center">
-                  <div className="text-sm font-medium text-gray-900">{currentSite.weather.condition}</div>
-                  <div className="text-xs text-gray-600 mt-1">Optimal working conditions</div>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-2">
+                          <Thermometer className="w-8 h-8 text-gray-300" />
+                        </div>
+                        <div className="animate-pulse bg-gray-200 h-8 w-16 mx-auto rounded"></div>
+                        <div className="text-sm text-gray-500">Temperature</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center mb-2">
+                          <Wind className="w-8 h-8 text-gray-300" />
+                        </div>
+                        <div className="animate-pulse bg-gray-200 h-8 w-16 mx-auto rounded"></div>
+                        <div className="text-sm text-gray-500">Wind Speed</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center">
+                      <div className="animate-pulse bg-gray-200 h-4 w-32 mx-auto rounded"></div>
+                      <div className="text-xs text-gray-600 mt-1">Loading weather conditions...</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
