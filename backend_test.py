@@ -5928,6 +5928,10 @@ def main():
     dashboard_ok = test_dashboard_stats()
     results.append(("Dashboard Stats", dashboard_ok))
     
+    # Test ZoneMinder Dashboard Integration
+    zoneminder_ok = test_zoneminder_dashboard_integration()
+    results.append(("ZoneMinder Dashboard Integration", zoneminder_ok))
+    
     # Test CRUD operations
     users_ok, created_user_id = test_users_crud()
     results.append(("Users CRUD", users_ok))
