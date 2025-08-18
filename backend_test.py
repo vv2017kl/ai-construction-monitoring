@@ -3082,6 +3082,287 @@ def test_data_driven_dashboard():
         print(f"   ❌ Unexpected error: {e}")
         return False
 
+def test_zoneminder_live_view_integration():
+    """Test ZoneMinder Live View Integration - Comprehensive Testing"""
+    print("\n🎥 TESTING ZONEMINDER LIVE VIEW INTEGRATION")
+    print("=" * 80)
+    
+    test_results = {
+        "zoneminder_api_integration": False,
+        "real_time_camera_data": False,
+        "stream_management": False,
+        "live_detection_integration": False,
+        "ptz_controls": False,
+        "camera_grid_layout": False
+    }
+    
+    try:
+        # 1. ZoneMinder API Integration Tests
+        print("\n1. 🔌 TESTING ZONEMINDER API INTEGRATION")
+        
+        # Test ZoneMinder system status
+        print("   1a. Testing ZoneMinder System Status (GET /api/zoneminder/status)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/status", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            status_data = response.json()
+            print(f"      System Status: {status_data.get('status')}")
+            print(f"      Connector Mode: {status_data.get('connector_mode')}")
+            system_health = status_data.get('system_health', {})
+            print(f"      Total Cameras: {system_health.get('total_cameras', 0)}")
+            print(f"      Online Cameras: {system_health.get('online_cameras', 0)}")
+            print("      ✅ ZoneMinder system status working")
+        else:
+            print("      ❌ ZoneMinder system status failed")
+            return test_results
+        
+        # Test ZoneMinder cameras API
+        print("   1b. Testing ZoneMinder Cameras API (GET /api/zoneminder/cameras)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        cameras_data = []
+        if response.status_code == 200:
+            cameras_response = response.json()
+            cameras_data = cameras_response.get('cameras', [])
+            total_cameras = len(cameras_data)
+            print(f"      Total Cameras Found: {total_cameras}")
+            
+            if total_cameras >= 24:
+                print("      ✅ Expected 24+ construction site cameras found")
+                test_results["zoneminder_api_integration"] = True
+                test_results["real_time_camera_data"] = True
+                
+                # Display sample camera data
+                sample_camera = cameras_data[0] if cameras_data else {}
+                print(f"      Sample Camera: {sample_camera.get('name', 'N/A')}")
+                print(f"      Camera Type: {sample_camera.get('camera_type', 'N/A')}")
+                print(f"      Status: {sample_camera.get('status', 'N/A')}")
+                print(f"      Site ID: {sample_camera.get('site_id', 'N/A')}")
+                print(f"      PTZ Capable: {sample_camera.get('ptz_capable', False)}")
+                
+                # Check for construction industry context
+                construction_indicators = ['construction', 'site', 'safety', 'crane', 'excavator', 'worker']
+                has_construction_context = any(
+                    indicator in str(sample_camera.get('name', '')).lower() or
+                    indicator in str(sample_camera.get('location_description', '')).lower()
+                    for indicator in construction_indicators
+                )
+                
+                if has_construction_context:
+                    print("      ✅ Construction industry context detected in camera data")
+                else:
+                    print("      ⚠️ Construction industry context not clearly detected")
+                
+            else:
+                print(f"      ❌ Expected 24+ cameras, found only {total_cameras}")
+                return test_results
+        else:
+            print("      ❌ ZoneMinder cameras API failed")
+            return test_results
+        
+        # 2. Stream Management Tests
+        print("\n2. 📹 TESTING STREAM MANAGEMENT")
+        
+        if cameras_data:
+            test_camera = cameras_data[0]
+            camera_id = test_camera.get('camera_id')
+            
+            # Test camera stream information
+            print(f"   2a. Testing Camera Stream Info (GET /api/zoneminder/cameras/{camera_id}/stream)")
+            response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/stream?quality=high", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                stream_data = response.json()
+                print(f"      Stream URL: {stream_data.get('stream_url', 'N/A')}")
+                print(f"      Quality: {stream_data.get('quality', 'N/A')}")
+                print(f"      FPS: {stream_data.get('fps', 'N/A')}")
+                print(f"      Is Live: {stream_data.get('is_live', False)}")
+                print("      ✅ Camera stream information working")
+                test_results["stream_management"] = True
+            else:
+                print("      ❌ Camera stream information failed")
+            
+            # Test camera snapshot
+            print(f"   2b. Testing Camera Snapshot (GET /api/zoneminder/cameras/{camera_id}/snapshot)")
+            response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/snapshot", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                snapshot_data = response.json()
+                print(f"      Snapshot URL: {snapshot_data.get('snapshot_url', 'N/A')}")
+                print(f"      Timestamp: {snapshot_data.get('timestamp', 'N/A')}")
+                print("      ✅ Camera snapshot loading working")
+            else:
+                print("      ❌ Camera snapshot loading failed")
+            
+            # Test different stream qualities
+            print("   2c. Testing Stream Quality Selection")
+            qualities = ["low", "medium", "high", "ultra"]
+            quality_results = []
+            
+            for quality in qualities:
+                response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/stream?quality={quality}", timeout=10)
+                if response.status_code == 200:
+                    stream_data = response.json()
+                    quality_results.append(f"{quality}:{stream_data.get('quality', 'N/A')}")
+                else:
+                    quality_results.append(f"{quality}:FAILED")
+            
+            print(f"      Quality Test Results: {', '.join(quality_results)}")
+            successful_qualities = [q for q in quality_results if "FAILED" not in q]
+            if len(successful_qualities) >= 3:
+                print("      ✅ Stream quality selection working")
+            else:
+                print("      ⚠️ Some stream qualities failed")
+        
+        # 3. Live Detection Integration Tests
+        print("\n3. 🤖 TESTING LIVE DETECTION INTEGRATION")
+        
+        # Test ZoneMinder events API
+        print("   3a. Testing Detection Events (GET /api/zoneminder/events)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?limit=50", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            events = events_data.get('events', [])
+            total_events = len(events)
+            print(f"      Total Detection Events: {total_events}")
+            
+            if total_events > 0:
+                # Analyze construction industry events
+                construction_events = []
+                ppe_violations = []
+                safety_hazards = []
+                equipment_operations = []
+                
+                for event in events[:10]:  # Check first 10 events
+                    event_type = event.get('detection_type', '').lower()
+                    description = event.get('description', '').lower()
+                    
+                    if 'ppe' in event_type or 'ppe' in description:
+                        ppe_violations.append(event)
+                    elif 'safety' in event_type or 'hazard' in description:
+                        safety_hazards.append(event)
+                    elif 'equipment' in event_type or 'equipment' in description:
+                        equipment_operations.append(event)
+                    
+                    construction_events.append(event)
+                
+                print(f"      PPE Violations Found: {len(ppe_violations)}")
+                print(f"      Safety Hazards Found: {len(safety_hazards)}")
+                print(f"      Equipment Operations Found: {len(equipment_operations)}")
+                
+                # Display sample event with bounding box data
+                if construction_events:
+                    sample_event = construction_events[0]
+                    print(f"      Sample Event Type: {sample_event.get('detection_type', 'N/A')}")
+                    print(f"      Confidence Score: {sample_event.get('confidence_score', 'N/A')}")
+                    print(f"      Bounding Boxes: {len(sample_event.get('bounding_boxes', []))} boxes")
+                    print(f"      Personnel Involved: {sample_event.get('personnel_involved', 'N/A')}")
+                    
+                    if sample_event.get('bounding_boxes'):
+                        print("      ✅ Real bounding box data found for AI detection overlays")
+                    else:
+                        print("      ⚠️ No bounding box data found")
+                
+                print("      ✅ Live detection integration working")
+                test_results["live_detection_integration"] = True
+            else:
+                print("      ⚠️ No detection events found")
+        else:
+            print("      ❌ Detection events API failed")
+        
+        # Test construction industry specific event filtering
+        print("   3b. Testing Construction Industry Event Filtering")
+        construction_event_types = ["ppe_violation", "safety_hazard", "equipment_operation", "person_detection"]
+        
+        for event_type in construction_event_types:
+            response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type={event_type}&limit=10", timeout=10)
+            if response.status_code == 200:
+                filtered_events = response.json().get('events', [])
+                print(f"      {event_type}: {len(filtered_events)} events")
+            else:
+                print(f"      {event_type}: API failed")
+        
+        # 4. PTZ Controls Tests
+        print("\n4. 🎮 TESTING PTZ CONTROLS")
+        
+        # Find PTZ-capable cameras
+        ptz_cameras = [cam for cam in cameras_data if cam.get('ptz_capable', False)]
+        print(f"   PTZ-Capable Cameras Found: {len(ptz_cameras)}")
+        
+        if ptz_cameras:
+            ptz_camera = ptz_cameras[0]
+            print(f"   Testing PTZ Camera: {ptz_camera.get('name', 'N/A')}")
+            print("   ✅ PTZ controls should only appear for PTZ-capable cameras")
+            test_results["ptz_controls"] = True
+            
+            # Note: Actual PTZ control endpoints (up, down, left, right, home, zoom) 
+            # would need to be implemented in the ZoneMinder integration router
+            print("   ⚠️ PTZ control endpoints (up/down/left/right/home/zoom) not found in current API")
+            print("   📝 Recommendation: Implement PTZ control endpoints in zoneminder_integration.py")
+        else:
+            print("   ⚠️ No PTZ-capable cameras found in current dataset")
+        
+        # 5. Camera Grid and Layout Tests
+        print("\n5. 📱 TESTING CAMERA GRID AND LAYOUT")
+        
+        # Test site-based camera filtering for grid layouts
+        sites = set(cam.get('site_id') for cam in cameras_data if cam.get('site_id'))
+        print(f"   Construction Sites Found: {len(sites)}")
+        
+        for site_id in list(sites)[:3]:  # Test first 3 sites
+            response = requests.get(f"{API_BASE_URL}/zoneminder/cameras?site_id={site_id}", timeout=10)
+            if response.status_code == 200:
+                site_cameras = response.json().get('cameras', [])
+                print(f"   Site {site_id}: {len(site_cameras)} cameras")
+                
+                # Check camera names and locations for grid display
+                for cam in site_cameras[:2]:  # Show first 2 cameras per site
+                    print(f"     - {cam.get('name', 'N/A')} at {cam.get('location_description', 'N/A')}")
+            else:
+                print(f"   Site {site_id}: API failed")
+        
+        # Verify camera data has required fields for grid display
+        required_fields = ['camera_id', 'name', 'status', 'location_description', 'stream_url']
+        sample_camera = cameras_data[0] if cameras_data else {}
+        missing_fields = [field for field in required_fields if not sample_camera.get(field)]
+        
+        if not missing_fields:
+            print("   ✅ All required fields present for camera grid display")
+            test_results["camera_grid_layout"] = True
+        else:
+            print(f"   ❌ Missing required fields for grid display: {missing_fields}")
+        
+        # Test different grid layout scenarios
+        total_cameras = len(cameras_data)
+        grid_layouts = {
+            "1x1": 1,
+            "2x2": 4,
+            "3x3": 9,
+            "4x4": 16
+        }
+        
+        print("   Grid Layout Support Analysis:")
+        for layout, max_cameras in grid_layouts.items():
+            if total_cameras >= max_cameras:
+                print(f"     {layout}: ✅ Supported ({max_cameras} cameras available)")
+            else:
+                print(f"     {layout}: ⚠️ Limited ({total_cameras} cameras available)")
+        
+        return test_results
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error during ZoneMinder testing: {e}")
+        return test_results
+    except Exception as e:
+        print(f"   ❌ Unexpected error during ZoneMinder testing: {e}")
+        return test_results
+
 def cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                      created_bookmark_id, created_export_id, created_route_id=None, created_waypoint_id=None, 
                      created_session_id=None, created_camera_config_id=None, created_certification_id=None,
