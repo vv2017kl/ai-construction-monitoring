@@ -524,8 +524,8 @@ const Dashboard = () => {
             
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               <div className="space-y-4">
-                {mockDetections.map((detection, index) => (
-                  <div key={detection.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                {recentActivity.map((event, index) => (
+                  <div key={event.event_id || index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <div 
                       className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: theme.primary[100] }}
@@ -535,12 +535,12 @@ const Dashboard = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <h4 className="font-medium text-gray-900">
-                          {detection.personCount} personnel detected in {detection.zone}
+                          {formatters.formatDetectionType(event.detection_type)}
                         </h4>
-                        <span className="text-xs text-gray-500">{detection.timestamp}</span>
+                        <span className="text-xs text-gray-500">{formatters.formatRelativeTime(event.timestamp)}</span>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
-                        Camera: {detection.camera} • Confidence: {detection.confidence}%
+                        Camera: {event.camera_id} • Location: {event.location} • Confidence: {Math.round(event.confidence_score * 100)}%
                       </p>
                       <div className="flex items-center space-x-4 mt-2">
                         <button 
@@ -550,7 +550,10 @@ const Dashboard = () => {
                           <Eye className="w-3 h-3" />
                           <span>View Camera</span>
                         </button>
-                        <button className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-700">
+                        <button 
+                          onClick={() => navigate(`/alert-center/${event.event_id}`)}
+                          className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-700"
+                        >
                           <ExternalLink className="w-3 h-3" />
                           <span>Full Details</span>
                         </button>
