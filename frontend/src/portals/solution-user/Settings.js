@@ -220,7 +220,7 @@ const Settings = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <Settings className="w-8 h-8 text-blue-600" />
+            <SettingsIcon className="w-8 h-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold">Settings</h1>
               <p className="text-gray-600">Customize your experience</p>
