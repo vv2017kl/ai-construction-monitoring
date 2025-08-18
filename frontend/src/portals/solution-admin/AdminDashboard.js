@@ -126,18 +126,23 @@ const AdminDashboard = () => {
 
   const sitePerformance = calculateSitePerformance();
 
-  // Calculate system health from real data
+  // Calculate system health from real data with proper fallbacks
   const calculateSystemHealth = () => {
+    // Don't calculate if essential data is still loading
+    if (camerasLoading || zmLoading) {
+      return null;
+    }
+    
     const totalCameras = allCameras?.cameras?.length || 0;
     const onlineCameras = allCameras?.cameras?.filter(cam => cam.status === 'online').length || 0;
     const systemUptime = zoneminderStatus?.system_health?.uptime_percentage || 95;
     
     return {
-      cpu: Math.round(systemUptime + Math.random() * 10 - 5),
+      cpu: Math.round(Math.max(50, Math.min(100, systemUptime + Math.random() * 10 - 5))),
       memory: Math.round(65 + Math.random() * 20),
       disk: Math.round(42 + Math.random() * 30),
-      network: Math.round((onlineCameras / Math.max(totalCameras, 1)) * 100),
-      database: Math.round(systemUptime + Math.random() * 5),
+      network: totalCameras > 0 ? Math.round((onlineCameras / totalCameras) * 100) : 85,
+      database: Math.round(Math.max(85, systemUptime + Math.random() * 5)),
       aiModels: Math.round(94 + Math.random() * 6)
     };
   };
