@@ -668,7 +668,7 @@ const LiveView = () => {
                 const detection = liveDetections.find(d => d.camera === camera.id);
                 return (
                   <CameraFeed
-                    key={camera.id}
+                    key={camera.camera_id}
                     camera={camera}
                     detection={detection}
                     isSelected={selectedCamera === camera.camera_id}
