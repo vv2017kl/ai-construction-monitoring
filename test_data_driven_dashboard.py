@@ -81,7 +81,7 @@ def test_data_driven_dashboard():
             ppe_violations = ppe_events_data.get("events", [])
             
             # Get total personnel detection events for comparison
-            response2 = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=person&limit=100", timeout=10)
+            response2 = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=personnel_count&limit=100", timeout=10)
             if response2.status_code == 200:
                 person_events_data = response2.json()
                 person_detections = person_events_data.get("events", [])
@@ -97,7 +97,7 @@ def test_data_driven_dashboard():
                     ppe_compliance = 100.0
                     print(f"      ✅ PPE Compliance: {ppe_compliance}% (no violations found)")
             else:
-                print("      ❌ Failed to get person detection events")
+                print("      ❌ Failed to get personnel count detection events")
                 return False
         else:
             print("      ❌ PPE violation events API failed")
@@ -105,7 +105,7 @@ def test_data_driven_dashboard():
         
         # Test personnel count from detection events
         print("   1d. Testing Personnel Count from Detection Events")
-        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=person&limit=10", timeout=10)
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=personnel_count&limit=10", timeout=10)
         print(f"      Status Code: {response.status_code}")
         
         if response.status_code == 200:
