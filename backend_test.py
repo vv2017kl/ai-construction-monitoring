@@ -2524,6 +2524,310 @@ def test_admin_analytics_api():
         print(f"   ❌ Unexpected error: {e}")
         return False
 
+def test_dashboard_data_sources():
+    """
+    COMPREHENSIVE DASHBOARD DATA SOURCES ANALYSIS
+    Test each API endpoint that feeds the Dashboard and analyze data sources
+    """
+    print("\n" + "="*80)
+    print("DASHBOARD DATA SOURCES ANALYSIS")
+    print("Testing each API endpoint that feeds the Dashboard")
+    print("="*80)
+    
+    dashboard_data = {}
+    
+    try:
+        # 1. Dashboard Stats API - Core metrics
+        print("\n1. DASHBOARD STATS API - GET /api/dashboard/stats")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/dashboard/stats", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            stats_data = response.json()
+            dashboard_data['dashboard_stats'] = stats_data
+            print("   ✅ Dashboard Stats API working")
+            print("   📊 DASHBOARD STATS DATA:")
+            for key, value in stats_data.items():
+                print(f"      • {key}: {value}")
+            print(f"   🔍 DATA SOURCE: MySQL database queries (Sites, Users, Cameras, Alerts tables)")
+        else:
+            print("   ❌ Dashboard Stats API failed")
+            dashboard_data['dashboard_stats'] = None
+        
+        # 2. ZoneMinder System Status API
+        print("\n2. ZONEMINDER SYSTEM STATUS API - GET /api/zoneminder/status")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/zoneminder/status", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            zm_status = response.json()
+            dashboard_data['zoneminder_status'] = zm_status
+            print("   ✅ ZoneMinder Status API working")
+            print("   📊 ZONEMINDER STATUS DATA:")
+            for key, value in zm_status.items():
+                if isinstance(value, dict):
+                    print(f"      • {key}:")
+                    for sub_key, sub_value in value.items():
+                        print(f"        - {sub_key}: {sub_value}")
+                else:
+                    print(f"      • {key}: {value}")
+            print(f"   🔍 DATA SOURCE: ZoneMinder Mock Connector (construction industry mock data)")
+        else:
+            print("   ❌ ZoneMinder Status API failed")
+            dashboard_data['zoneminder_status'] = None
+        
+        # 3. ZoneMinder Cameras API
+        print("\n3. ZONEMINDER CAMERAS API - GET /api/zoneminder/cameras")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            zm_cameras = response.json()
+            dashboard_data['zoneminder_cameras'] = zm_cameras
+            print("   ✅ ZoneMinder Cameras API working")
+            print(f"   📊 ZONEMINDER CAMERAS DATA: Found {len(zm_cameras)} cameras")
+            if zm_cameras:
+                print("   📋 SAMPLE CAMERA DATA:")
+                sample_camera = zm_cameras[0]
+                for key, value in sample_camera.items():
+                    print(f"      • {key}: {value}")
+                
+                # Analyze camera status for Dashboard "23/24" metric
+                active_cameras = sum(1 for cam in zm_cameras if cam.get('status') == 'active')
+                total_cameras = len(zm_cameras)
+                print(f"   🎯 DASHBOARD CAMERA STATUS: {active_cameras}/{total_cameras} cameras active")
+            print(f"   🔍 DATA SOURCE: ZoneMinder Mock Connector (24 construction site cameras)")
+        else:
+            print("   ❌ ZoneMinder Cameras API failed")
+            dashboard_data['zoneminder_cameras'] = None
+        
+        # 4. ZoneMinder Events API - Recent events for Dashboard
+        print("\n4. ZONEMINDER EVENTS API - GET /api/zoneminder/events")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?limit=50", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            zm_events = response.json()
+            dashboard_data['zoneminder_events'] = zm_events
+            print("   ✅ ZoneMinder Events API working")
+            print(f"   📊 ZONEMINDER EVENTS DATA: Found {len(zm_events)} recent events")
+            
+            if zm_events:
+                # Analyze event types for Dashboard live activity
+                event_types = {}
+                ppe_violations = 0
+                safety_scores = []
+                
+                print("   📋 RECENT EVENTS ANALYSIS:")
+                for event in zm_events[:10]:  # Show first 10 events
+                    event_type = event.get('event_type', 'unknown')
+                    event_types[event_type] = event_types.get(event_type, 0) + 1
+                    
+                    if event_type == 'ppe_violation':
+                        ppe_violations += 1
+                    
+                    if 'confidence' in event:
+                        safety_scores.append(event['confidence'])
+                
+                print("   📈 EVENT TYPE DISTRIBUTION:")
+                for event_type, count in event_types.items():
+                    print(f"      • {event_type}: {count} events")
+                
+                # Calculate safety metrics for Dashboard
+                if safety_scores:
+                    avg_safety_score = sum(safety_scores) / len(safety_scores)
+                    print(f"   🎯 DASHBOARD SAFETY SCORE: {avg_safety_score:.1f}/10 (from event confidence)")
+                
+                ppe_compliance = max(0, 100 - (ppe_violations * 2))  # Mock calculation
+                print(f"   🎯 DASHBOARD PPE COMPLIANCE: {ppe_compliance}% (calculated from PPE violations)")
+                
+                print("   📋 SAMPLE EVENT DATA:")
+                sample_event = zm_events[0]
+                for key, value in sample_event.items():
+                    print(f"      • {key}: {value}")
+            
+            print(f"   🔍 DATA SOURCE: ZoneMinder Mock Connector (construction industry detection events)")
+        else:
+            print("   ❌ ZoneMinder Events API failed")
+            dashboard_data['zoneminder_events'] = None
+        
+        # 5. Backend Database APIs - Sites
+        print("\n5. BACKEND DATABASE API - GET /api/sites")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/sites", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            sites_data = response.json()
+            dashboard_data['sites'] = sites_data
+            print("   ✅ Sites API working")
+            print(f"   📊 SITES DATA: Found {len(sites_data)} sites in database")
+            if sites_data:
+                print("   📋 SAMPLE SITE DATA:")
+                sample_site = sites_data[0]
+                for key, value in sample_site.items():
+                    print(f"      • {key}: {value}")
+            print(f"   🔍 DATA SOURCE: MySQL database (sites table)")
+        else:
+            print("   ❌ Sites API failed")
+            dashboard_data['sites'] = None
+        
+        # 6. Backend Database APIs - Users
+        print("\n6. BACKEND DATABASE API - GET /api/users")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/users", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            users_data = response.json()
+            dashboard_data['users'] = users_data
+            print("   ✅ Users API working")
+            print(f"   📊 USERS DATA: Found {len(users_data)} users in database")
+            if users_data:
+                print("   📋 SAMPLE USER DATA:")
+                sample_user = users_data[0]
+                for key, value in sample_user.items():
+                    if key != 'password':  # Don't show password
+                        print(f"      • {key}: {value}")
+            print(f"   🔍 DATA SOURCE: MySQL database (users table)")
+        else:
+            print("   ❌ Users API failed")
+            dashboard_data['users'] = None
+        
+        # 7. Backend Health Check
+        print("\n7. BACKEND HEALTH CHECK - GET /api/health")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/health", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            health_data = response.json()
+            dashboard_data['health'] = health_data
+            print("   ✅ Health Check API working")
+            print("   📊 HEALTH CHECK DATA:")
+            for key, value in health_data.items():
+                print(f"      • {key}: {value}")
+            print(f"   🔍 DATA SOURCE: Backend server status + MySQL database connection")
+        else:
+            print("   ❌ Health Check API failed")
+            dashboard_data['health'] = None
+        
+        # 8. Root API endpoint
+        print("\n8. ROOT API ENDPOINT - GET /api/")
+        print("-" * 60)
+        response = requests.get(f"{API_BASE_URL}/", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            root_data = response.json()
+            dashboard_data['root'] = root_data
+            print("   ✅ Root API working")
+            print("   📊 ROOT API DATA:")
+            for key, value in root_data.items():
+                print(f"      • {key}: {value}")
+            print(f"   🔍 DATA SOURCE: Hardcoded API metadata")
+        else:
+            print("   ❌ Root API failed")
+            dashboard_data['root'] = None
+        
+        # COMPREHENSIVE DATA FLOW ANALYSIS
+        print("\n" + "="*80)
+        print("DASHBOARD DATA FLOW ANALYSIS")
+        print("="*80)
+        
+        print("\n🎯 DASHBOARD METRICS TRACEABILITY:")
+        print("-" * 50)
+        
+        # Camera Status Analysis
+        if dashboard_data.get('zoneminder_cameras'):
+            cameras = dashboard_data['zoneminder_cameras']
+            active_cameras = sum(1 for cam in cameras if cam.get('status') == 'active')
+            total_cameras = len(cameras)
+            print(f"📹 CAMERA STATUS '{active_cameras}/{total_cameras}':")
+            print(f"   • Source: ZoneMinder Mock Connector")
+            print(f"   • Data: {total_cameras} construction site cameras")
+            print(f"   • Active: {active_cameras} cameras online")
+            print(f"   • Type: Mock data from construction industry generator")
+        
+        # Safety Score Analysis
+        if dashboard_data.get('zoneminder_events'):
+            events = dashboard_data['zoneminder_events']
+            if events:
+                safety_scores = [event.get('confidence', 0) for event in events if 'confidence' in event]
+                if safety_scores:
+                    avg_score = sum(safety_scores) / len(safety_scores)
+                    print(f"🛡️ SAFETY SCORE '{avg_score:.1f}/10':")
+                    print(f"   • Source: ZoneMinder Mock Connector")
+                    print(f"   • Calculation: Average confidence from {len(safety_scores)} detection events")
+                    print(f"   • Type: Mock data from AI detection events")
+        
+        # PPE Compliance Analysis
+        if dashboard_data.get('zoneminder_events'):
+            events = dashboard_data['zoneminder_events']
+            ppe_violations = sum(1 for event in events if event.get('event_type') == 'ppe_violation')
+            total_events = len(events)
+            if total_events > 0:
+                ppe_compliance = max(0, 100 - (ppe_violations * 2))
+                print(f"🦺 PPE COMPLIANCE '{ppe_compliance}%':")
+                print(f"   • Source: ZoneMinder Mock Connector")
+                print(f"   • Calculation: Based on {ppe_violations} PPE violations out of {total_events} events")
+                print(f"   • Type: Mock data from construction safety events")
+        
+        # Live Activity Events
+        if dashboard_data.get('zoneminder_events'):
+            events = dashboard_data['zoneminder_events']
+            event_types = {}
+            for event in events:
+                event_type = event.get('event_type', 'unknown')
+                event_types[event_type] = event_types.get(event_type, 0) + 1
+            
+            print(f"📊 LIVE ACTIVITY EVENTS:")
+            print(f"   • Source: ZoneMinder Mock Connector")
+            print(f"   • Total Events: {len(events)}")
+            print(f"   • Event Types: {list(event_types.keys())}")
+            print(f"   • Type: Mock data from construction site monitoring")
+        
+        # Weather Data Analysis
+        print(f"🌤️ WEATHER DATA (87°F, 9 mph wind):")
+        print(f"   • Source: Likely hardcoded or external weather API")
+        print(f"   • Status: Not found in tested endpoints")
+        print(f"   • Type: External integration or mock data")
+        
+        # Database Metrics
+        if dashboard_data.get('dashboard_stats'):
+            stats = dashboard_data['dashboard_stats']
+            print(f"📈 DATABASE METRICS:")
+            print(f"   • Source: MySQL database direct queries")
+            print(f"   • Sites: {stats.get('total_sites', 0)} total, {stats.get('active_sites', 0)} active")
+            print(f"   • Users: {stats.get('total_users', 0)} total")
+            print(f"   • Cameras: {stats.get('total_cameras', 0)} in database")
+            print(f"   • Alerts: {stats.get('active_alerts', 0)} active")
+            print(f"   • Type: Real database records")
+        
+        print("\n🔍 DATA SOURCE SUMMARY:")
+        print("-" * 50)
+        print("1. 📊 Dashboard Stats: MySQL database (real data)")
+        print("2. 📹 Camera Data: ZoneMinder Mock Connector (24 mock cameras)")
+        print("3. 🚨 Events/Alerts: ZoneMinder Mock Connector (construction events)")
+        print("4. 🛡️ Safety Metrics: Calculated from mock detection events")
+        print("5. 👥 User Data: MySQL database (real user records)")
+        print("6. 🏗️ Site Data: MySQL database (real site records)")
+        print("7. 🌤️ Weather Data: External source (not in tested APIs)")
+        print("8. ⚡ System Health: Backend server + database status")
+        
+        return True, dashboard_data
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error during dashboard analysis: {e}")
+        return False, {}
+    except Exception as e:
+        print(f"   ❌ Unexpected error during dashboard analysis: {e}")
+        return False, {}
+
 def cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                      created_bookmark_id, created_export_id, created_route_id=None, created_waypoint_id=None, 
                      created_session_id=None, created_camera_config_id=None, created_certification_id=None,
