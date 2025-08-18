@@ -709,7 +709,7 @@ const LiveView = () => {
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                   <div>
                     <div className="font-medium text-red-900">Alert Center</div>
-                    <div className="text-xs text-red-600">{mockAlerts.length} active alerts</div>
+                    <div className="text-xs text-red-600">{liveDetections.filter(d => ['critical', 'high'].includes(d.severity)).length} active alerts</div>
                   </div>
                 </button>
                 
