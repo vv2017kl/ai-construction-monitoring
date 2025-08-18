@@ -7326,6 +7326,27 @@ def main():
     dashboard_ok = test_dashboard_stats()
     results.append(("Dashboard Stats", dashboard_ok))
     
+    # ADMIN DASHBOARD SPECIFIC TESTING - FOCUS AREA
+    print("\n" + "="*80)
+    print("🎯 ADMIN DASHBOARD API INTEGRATION TESTING - FOCUS AREA")
+    print("="*80)
+    
+    # Test Admin Dashboard APIs
+    admin_passed, admin_total = test_admin_dashboard_apis()
+    results.append((f"Admin Dashboard APIs ({admin_passed}/{admin_total})", admin_passed == admin_total))
+    
+    # Test ZoneMinder System APIs
+    zm_passed, zm_total = test_zoneminder_system_apis()
+    results.append((f"ZoneMinder System APIs ({zm_passed}/{zm_total})", zm_passed == zm_total))
+    
+    # Analyze Admin Dashboard Data Flow
+    analysis_results = analyze_admin_dashboard_data_flow()
+    results.append(("Admin Dashboard Data Flow Analysis", len(analysis_results["issues_found"]) == 0))
+    
+    print("\n" + "="*80)
+    print("🎯 END ADMIN DASHBOARD FOCUS TESTING")
+    print("="*80)
+    
     # Test ZoneMinder Dashboard Integration
     zoneminder_ok = test_zoneminder_dashboard_integration()
     results.append(("ZoneMinder Dashboard Integration", zoneminder_ok))
