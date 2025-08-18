@@ -89,10 +89,36 @@ const LiveView = () => {
   ) || [];
 
   // PTZ Control Functions
-  const handlePTZControl = (cameraId, direction) => {
+  const handlePTZControl = async (cameraId, direction) => {
     setPtzActive(cameraId);
-    console.log(`PTZ Control: Camera ${cameraId} moving ${direction}`);
-    setTimeout(() => setPtzActive(null), 1000);
+    
+    try {
+      // Find camera to check if PTZ capable
+      const camera = cameraList.find(cam => cam.camera_id === cameraId);
+      if (!camera?.ptz_capable) {
+        console.warn(`Camera ${cameraId} is not PTZ capable`);
+        return;
+      }
+      
+      // Simulate PTZ control API call (implement when real ZoneMinder PTZ is available)
+      console.log(`PTZ Control: Camera ${cameraId}, Direction: ${direction}`);
+      
+      setCameraPTZSettings(prev => ({
+        ...prev,
+        [cameraId]: {
+          ...prev[cameraId],
+          lastCommand: direction,
+          timestamp: new Date().toISOString()
+        }
+      }));
+      
+      // Visual feedback
+      setTimeout(() => setPtzActive(null), 500);
+      
+    } catch (error) {
+      console.error('PTZ control error:', error);
+      setPtzActive(null);
+    }
   };
 
   const handleZoom = (cameraId, zoomIn) => {
