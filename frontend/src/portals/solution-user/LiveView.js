@@ -250,20 +250,28 @@ const LiveView = () => {
               {/* AI Detection Overlays */}
               {showAIOverlay && detection && (
                 <>
-                  {/* Person Detection Boxes */}
-                  {Array.from({ length: detection.personCount }, (_, i) => (
+                  {/* Real Detection Bounding Boxes */}
+                  {detection.bounding_boxes?.map((box, i) => (
                     <div
-                      key={`person-${i}`}
-                      className="absolute border-2 border-green-400 bg-green-400/20"
+                      key={`detection-${i}`}
+                      className={`absolute border-2 ${
+                        detection.severity === 'critical' ? 'border-red-400 bg-red-400/20' :
+                        detection.severity === 'high' ? 'border-orange-400 bg-orange-400/20' :
+                        'border-green-400 bg-green-400/20'
+                      }`}
                       style={{
-                        left: `${20 + i * 25}%`,
-                        top: `${40 + (i % 2) * 15}%`,
-                        width: '60px',
-                        height: '80px'
+                        left: `${box.x1 * 100}%`,
+                        top: `${box.y1 * 100}%`,
+                        width: `${(box.x2 - box.x1) * 100}%`,
+                        height: `${(box.y2 - box.y1) * 100}%`
                       }}
                     >
-                      <div className="absolute -top-6 left-0 bg-green-400 text-black text-xs px-1 rounded">
-                        Person {detection.confidence}
+                      <div className={`absolute -top-6 left-0 text-black text-xs px-1 rounded ${
+                        detection.severity === 'critical' ? 'bg-red-400' :
+                        detection.severity === 'high' ? 'bg-orange-400' :
+                        'bg-green-400'
+                      }`}>
+                        {formatters.formatDetectionType(detection.detection_type)} {Math.round(box.confidence * 100)}%
                       </div>
                     </div>
                   ))}
