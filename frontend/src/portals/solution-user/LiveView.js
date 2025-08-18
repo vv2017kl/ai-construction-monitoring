@@ -811,7 +811,7 @@ const LiveView = () => {
                           <div className="grid grid-cols-3 gap-2">
                             <div></div>
                             <button 
-                              onClick={() => handlePTZControl(camera.id, 'up')}
+                              onClick={() => handlePTZControl(camera.camera_id, 'up')}
                               className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
                             >
                               <ArrowUp className="w-4 h-4" />
