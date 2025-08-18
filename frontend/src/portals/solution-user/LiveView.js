@@ -211,6 +211,8 @@ const LiveView = () => {
 
   const CameraFeed = ({ camera, isSelected, onClick, detection }) => {
     const isOnline = camera.status === 'online';
+    const cameraStream = cameraStreams[camera.camera_id];
+    const cameraSnapshot = cameraSnapshots[camera.camera_id];
     
     return (
       <div 
@@ -220,13 +222,30 @@ const LiveView = () => {
         onClick={onClick}
         style={{ aspectRatio: '16/9' }}
       >
-        {/* Video Stream Placeholder */}
+        {/* Video Stream */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
           {isOnline ? (
             <div className="relative w-full h-full bg-gray-700 flex items-center justify-center">
-              {/* Simulated construction site scene */}
-              <div className="absolute inset-0 bg-gradient-to-b from-blue-200 via-gray-300 to-amber-100 opacity-80"></div>
-              <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-amber-600 to-amber-400 opacity-60"></div>
+              {/* Real camera stream or snapshot */}
+              {cameraSnapshot ? (
+                <img 
+                  src={cameraSnapshot.snapshot_url} 
+                  alt={`Camera ${camera.camera_id}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to construction site visualization if image fails
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : null}
+              
+              {/* Fallback construction site visualization */}
+              {(!cameraSnapshot || !cameraSnapshot.snapshot_url) && (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-b from-blue-200 via-gray-300 to-amber-100 opacity-80"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-amber-600 to-amber-400 opacity-60"></div>
+                </>
+              )}
               
               {/* AI Detection Overlays */}
               {showAIOverlay && detection && (
