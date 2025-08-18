@@ -1,8 +1,7 @@
 """Stream server module for ZoneMinder connector"""
 
-from .rtsp_simulator import RTSPSimulator, StreamServer
+from .rtsp_simulator import RTSPStreamSimulator
 
 __all__ = [
-    "RTSPSimulator",
-    "StreamServer"
+    "RTSPStreamSimulator"
 ]
