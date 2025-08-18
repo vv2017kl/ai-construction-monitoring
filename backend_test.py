@@ -5888,6 +5888,246 @@ def test_zoneminder_error_handling():
         print(f"   ❌ Unexpected error: {e}")
         return False
 
+def test_zoneminder_events_datetime_fix():
+    """Test ZoneMinder Events API with datetime timezone fix"""
+    print("\n🕐 TESTING ZONEMINDER EVENTS API - DATETIME TIMEZONE FIX")
+    print("=" * 80)
+    
+    try:
+        # Test 1: GET events without date filters (should work)
+        print("   1a. Testing GET /api/zoneminder/events (no date filters)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events", timeout=15)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            events = events_data.get("events", [])
+            print(f"      Found {len(events)} events")
+            print("      ✅ GET events without date filters working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ GET events without date filters failed")
+            return False
+        
+        # Test 2: GET events with timezone-aware datetime parameters (the main fix)
+        print("   1b. Testing GET /api/zoneminder/events with timezone-aware datetimes")
+        # Use the exact parameters that were failing before the fix
+        params = {
+            "start_date": "2025-08-17T14:20:14.287Z",  # Timezone-aware with 'Z' suffix
+            "end_date": "2025-08-18T14:20:14.287Z",    # Timezone-aware with 'Z' suffix
+            "limit": 50
+        }
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events", params=params, timeout=15)
+        print(f"      Status Code: {response.status_code}")
+        print(f"      Request URL: {response.url}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            events = events_data.get("events", [])
+            filters_applied = events_data.get("filters_applied", {})
+            print(f"      Found {len(events)} events with date filters")
+            print(f"      Filters applied: {filters_applied}")
+            print("      ✅ GET events with timezone-aware datetimes working - FIX SUCCESSFUL!")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ GET events with timezone-aware datetimes failed")
+            # Check if it's the old timezone error
+            if "can't compare offset-naive and offset-aware datetimes" in response.text:
+                print("      🚨 CRITICAL: The timezone datetime comparison error is NOT fixed!")
+            return False
+        
+        # Test 3: Test with different timezone-aware formats
+        print("   1c. Testing various timezone-aware datetime formats")
+        test_formats = [
+            {
+                "name": "ISO format with Z",
+                "start_date": "2024-01-01T00:00:00.000Z",
+                "end_date": "2024-12-31T23:59:59.000Z"
+            },
+            {
+                "name": "ISO format with timezone offset",
+                "start_date": "2024-01-01T00:00:00+00:00",
+                "end_date": "2024-12-31T23:59:59+00:00"
+            },
+            {
+                "name": "Simple ISO format with Z",
+                "start_date": "2024-06-01T12:00:00Z",
+                "end_date": "2024-06-02T12:00:00Z"
+            }
+        ]
+        
+        for test_format in test_formats:
+            print(f"      Testing {test_format['name']}")
+            params = {
+                "start_date": test_format["start_date"],
+                "end_date": test_format["end_date"],
+                "limit": 25
+            }
+            response = requests.get(f"{API_BASE_URL}/zoneminder/events", params=params, timeout=15)
+            print(f"        Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                events_data = response.json()
+                print(f"        Found {len(events_data.get('events', []))} events")
+                print(f"        ✅ {test_format['name']} working")
+            else:
+                print(f"        Response: {response.text}")
+                print(f"        ❌ {test_format['name']} failed")
+                return False
+        
+        # Test 4: Test with additional filters combined with datetime
+        print("   1d. Testing datetime filters with additional parameters")
+        params = {
+            "start_date": "2024-01-01T00:00:00.000Z",
+            "end_date": "2024-12-31T23:59:59.000Z",
+            "detection_type": "person",
+            "severity": "high",
+            "limit": 10
+        }
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events", params=params, timeout=15)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            events = events_data.get("events", [])
+            filters_applied = events_data.get("filters_applied", {})
+            print(f"      Found {len(events)} events with combined filters")
+            print(f"      Filters applied: {filters_applied}")
+            print("      ✅ Combined datetime and other filters working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Combined filters with datetime failed")
+            return False
+        
+        # Test 5: Test Dashboard API call (the specific use case that was failing)
+        print("   1e. Testing Dashboard recent events API call")
+        # This simulates the Dashboard component making the API call that was failing
+        dashboard_params = {
+            "start_date": "2025-08-17T14:20:14.287Z",
+            "end_date": "2025-08-18T14:20:14.287Z",
+            "limit": 50
+        }
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events", params=dashboard_params, timeout=15)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            events = events_data.get("events", [])
+            print(f"      Dashboard API call successful - {len(events)} recent events")
+            print("      ✅ Dashboard recent events API working - DASHBOARD FIX CONFIRMED!")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ Dashboard recent events API failed")
+            return False
+        
+        # Test 6: Test error handling for invalid datetime formats
+        print("   1f. Testing error handling for invalid datetime formats")
+        invalid_params = {
+            "start_date": "invalid-date-format",
+            "end_date": "2024-12-31T23:59:59.000Z",
+            "limit": 10
+        }
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events", params=invalid_params, timeout=15)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 422:  # FastAPI validation error
+            print("      ✅ Invalid datetime format properly rejected")
+        elif response.status_code == 400:  # Bad request
+            print("      ✅ Invalid datetime format properly handled")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ⚠️ Unexpected response for invalid datetime (not critical)")
+        
+        print("\n🎉 ZONEMINDER EVENTS DATETIME TIMEZONE FIX TESTING COMPLETED SUCCESSFULLY!")
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_system_status():
+    """Test ZoneMinder system status and health"""
+    print("\n🔧 TESTING ZONEMINDER SYSTEM STATUS")
+    
+    try:
+        # Test system status endpoint
+        print("   Testing GET /api/zoneminder/status")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/status", timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            status_data = response.json()
+            required_fields = ["status", "system_health", "storage_info", "connector_mode"]
+            if all(field in status_data for field in required_fields):
+                print(f"   System Status: {status_data.get('status')}")
+                print(f"   Connector Mode: {status_data.get('connector_mode')}")
+                print("   ✅ ZoneMinder system status working")
+                return True
+            else:
+                print("   ❌ Missing required fields in system status")
+                return False
+        else:
+            print(f"   Response: {response.text}")
+            print("   ❌ ZoneMinder system status failed")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_cameras_api():
+    """Test ZoneMinder cameras API"""
+    print("\n📹 TESTING ZONEMINDER CAMERAS API")
+    
+    try:
+        # Test GET all cameras
+        print("   Testing GET /api/zoneminder/cameras")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            cameras_data = response.json()
+            cameras = cameras_data.get("cameras", [])
+            total_count = cameras_data.get("total_count", 0)
+            print(f"   Found {total_count} cameras")
+            print("   ✅ GET all cameras working")
+            
+            # Test with site filter if cameras exist
+            if cameras:
+                first_camera = cameras[0]
+                site_id = first_camera.get("site_id")
+                if site_id:
+                    print("   Testing GET /api/zoneminder/cameras with site filter")
+                    response = requests.get(f"{API_BASE_URL}/zoneminder/cameras?site_id={site_id}", timeout=15)
+                    print(f"   Status Code: {response.status_code}")
+                    
+                    if response.status_code == 200:
+                        filtered_cameras = response.json()
+                        print(f"   Found {len(filtered_cameras.get('cameras', []))} cameras for site {site_id}")
+                        print("   ✅ GET cameras with site filter working")
+                    else:
+                        print("   ❌ GET cameras with site filter failed")
+                        return False
+            
+            return True
+        else:
+            print(f"   Response: {response.text}")
+            print("   ❌ GET all cameras failed")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
 def main():
     """Run all backend tests"""
     print("Starting AI Construction Management Backend API Tests...")
