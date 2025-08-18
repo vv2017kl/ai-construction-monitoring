@@ -18,36 +18,75 @@ import { ZONEMINDER_CONSTANTS } from '../../utils/constants';
 const LiveView = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  
+  // Layout and UI state
   const [gridLayout, setGridLayout] = useState('2x2'); // '1x1', '2x2', '3x3', '4x4'
-  const [selectedCamera, setSelectedCamera] = useState(mockCameras[0].id);
+  const [selectedCamera, setSelectedCamera] = useState(null);
   const [fullscreenCamera, setFullscreenCamera] = useState(null);
   const [showAIOverlay, setShowAIOverlay] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [ptzActive, setPtzActive] = useState(null);
   
-  // New state for enhanced functionality
+  // Enhanced functionality state
   const [showCameraSettings, setShowCameraSettings] = useState(false);
   const [selectedCameraForSettings, setSelectedCameraForSettings] = useState(null);
   const [recordingCameras, setRecordingCameras] = useState(new Set());
   const [showDetectionDetail, setShowDetectionDetail] = useState(false);
   const [selectedDetection, setSelectedDetection] = useState(null);
   const [cameraPTZSettings, setCameraPTZSettings] = useState({});
+  const [streamQuality, setStreamQuality] = useState('high');
+  const [cameraStreams, setCameraStreams] = useState({});
+  const [cameraSnapshots, setCameraSnapshots] = useState({});
 
-  const currentSite = mockSites.find(s => s.name === mockUser.currentSite) || mockSites[0];
+  // API hooks for real-time data
+  const { data: cameras, loading: camerasLoading } = useZoneminderCameras();
+  const { data: recentEvents } = useRealTimeData(
+    () => zoneminderAPI.events.getRecent(1), // Last hour of events
+    10000 // Update every 10 seconds
+  );
 
-  // Simulate live detections updates
-  const [liveDetections, setLiveDetections] = useState(mockDetections);
+  // Get camera list and set default selected camera
+  const cameraList = cameras?.cameras || [];
+  
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveDetections(prev => prev.map(detection => ({
-        ...detection,
-        personCount: Math.max(0, detection.personCount + Math.floor(Math.random() * 3 - 1)),
-        ppeCompliance: Math.max(70, Math.min(100, detection.ppeCompliance + Math.floor(Math.random() * 10 - 5))),
-        timestamp: new Date().toISOString()
-      })));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    if (cameraList.length > 0 && !selectedCamera) {
+      setSelectedCamera(cameraList[0].camera_id);
+    }
+  }, [cameraList, selectedCamera]);
+
+  // Load stream information for cameras
+  useEffect(() => {
+    const loadCameraStreams = async () => {
+      const streams = {};
+      const snapshots = {};
+      
+      for (const camera of cameraList) {
+        try {
+          // Get stream info
+          const streamInfo = await zoneminderAPI.streams.getStreamInfo(camera.camera_id, streamQuality);
+          streams[camera.camera_id] = streamInfo;
+          
+          // Get snapshot
+          const snapshotInfo = await zoneminderAPI.streams.getSnapshot(camera.camera_id);
+          snapshots[camera.camera_id] = snapshotInfo;
+        } catch (error) {
+          console.error(`Error loading stream for camera ${camera.camera_id}:`, error);
+        }
+      }
+      
+      setCameraStreams(streams);
+      setCameraSnapshots(snapshots);
+    };
+
+    if (cameraList.length > 0) {
+      loadCameraStreams();
+    }
+  }, [cameraList, streamQuality]);
+
+  // Get recent detections for AI overlay
+  const liveDetections = recentEvents?.events?.filter(event => 
+    cameraList.some(cam => cam.camera_id === event.camera_id)
+  ) || [];
 
   // PTZ Control Functions
   const handlePTZControl = (cameraId, direction) => {
