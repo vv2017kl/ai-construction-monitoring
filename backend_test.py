@@ -6744,6 +6744,13 @@ def main():
     zm_cameras_ok = test_zoneminder_cameras_api()
     results.append(("ZoneMinder Cameras API", zm_cameras_ok))
     
+    # PRIORITY TEST: Data-Driven Dashboard (NO hardcoded values)
+    print("\n" + "🎯" * 40)
+    print("PRIORITY TEST: DATA-DRIVEN DASHBOARD - NO HARDCODED VALUES")
+    print("🎯" * 40)
+    data_driven_dashboard_ok = test_data_driven_dashboard()
+    results.append(("🎯 Data-Driven Dashboard", data_driven_dashboard_ok))
+    
     # Test CRUD operations
     users_ok, created_user_id = test_users_crud()
     results.append(("Users CRUD", users_ok))
