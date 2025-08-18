@@ -195,7 +195,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "ZoneMinder Events API Datetime Timezone Fix"
+    - "Dashboard Data Sources Analysis - Complete API Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
