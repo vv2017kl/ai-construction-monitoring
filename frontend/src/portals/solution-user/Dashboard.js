@@ -213,11 +213,18 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {mockUser.firstName}!
+                Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {currentUser.firstName}!
               </h1>
               <p className="text-gray-600 mt-1">
-                Welcome back to {currentSite.name} • {currentSite.type.charAt(0).toUpperCase() + currentSite.type.slice(1)} Site
+                Welcome back to {currentSite.name} • {formatters.formatProjectPhase(currentSite.type)} Site
               </p>
+              <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center space-x-1">
+                  <div className={`w-2 h-2 rounded-full ${zoneminderStatus?.status === 'operational' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span>ZoneMinder: {zoneminderStatus?.status || 'Unknown'}</span>
+                </div>
+                <div>Last Update: {formatters.formatTime(new Date())}</div>
+              </div>
             </div>
             <div className="mt-4 md:mt-0 flex items-center space-x-4">
               <div className="text-right">
