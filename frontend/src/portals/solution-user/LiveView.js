@@ -342,16 +342,35 @@ const LiveView = () => {
           </div>
         </div>
 
-        {/* Fullscreen Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setFullscreenCamera(camera.id);
-          }}
-          className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1 rounded transition-colors"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
+        {/* Camera Controls Overlay */}
+        <div className="absolute top-2 right-2 flex space-x-1">
+          {/* Recording Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleRecording(camera.camera_id);
+            }}
+            className={`bg-black/60 hover:bg-black/80 text-white p-1 rounded transition-colors ${
+              recordingCameras.has(camera.camera_id) ? 'bg-red-600' : ''
+            }`}
+          >
+            {recordingCameras.has(camera.camera_id) ? 
+              <StopIcon className="w-4 h-4" /> : 
+              <Record className="w-4 h-4" />
+            }
+          </button>
+          
+          {/* Fullscreen Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setFullscreenCamera(camera.camera_id);
+            }}
+            className="bg-black/60 hover:bg-black/80 text-white p-1 rounded transition-colors"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     );
   };
