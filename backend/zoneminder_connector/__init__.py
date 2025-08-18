@@ -15,7 +15,11 @@ Features:
 
 from .base_connector import ZoneMinderConnector
 from .mock_connector import MockZoneMinderConnector
-from .real_connector import RealZoneMinderConnector
+try:
+    from .real_connector import RealZoneMinderConnector
+except ImportError:
+    # Real connector dependencies not available, will use mock fallback
+    RealZoneMinderConnector = None
 from .config.settings import get_connector
 
 # Factory function for easy connector instantiation
