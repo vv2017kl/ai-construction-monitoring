@@ -548,8 +548,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Street View Comparison & Analysis Tables and APIs Implementation"
-    - "Historical Data & Temporal Analysis Tables and APIs Implementation"
+    - "User Management & Administration Tables and APIs Implementation"
+    - "Access Control & Security Management Tables and APIs Implementation"
+    - "AI Model Management & Deployment Tables and APIs Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
