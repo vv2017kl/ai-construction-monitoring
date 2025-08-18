@@ -6172,6 +6172,20 @@ def main():
     zoneminder_ok = test_zoneminder_dashboard_integration()
     results.append(("ZoneMinder Dashboard Integration", zoneminder_ok))
     
+    # PRIORITY TEST: ZoneMinder Events API - Datetime Timezone Fix
+    print("\n" + "🚨" * 40)
+    print("PRIORITY TEST: ZONEMINDER EVENTS DATETIME TIMEZONE FIX")
+    print("🚨" * 40)
+    zm_datetime_fix_ok = test_zoneminder_events_datetime_fix()
+    results.append(("🔥 ZoneMinder Events Datetime Timezone Fix", zm_datetime_fix_ok))
+    
+    # Additional ZoneMinder tests
+    zm_status_ok = test_zoneminder_system_status()
+    results.append(("ZoneMinder System Status", zm_status_ok))
+    
+    zm_cameras_ok = test_zoneminder_cameras_api()
+    results.append(("ZoneMinder Cameras API", zm_cameras_ok))
+    
     # Test CRUD operations
     users_ok, created_user_id = test_users_crud()
     results.append(("Users CRUD", users_ok))
