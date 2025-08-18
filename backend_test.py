@@ -5329,6 +5329,565 @@ def test_historical_temporal_analysis_apis(site_id, user_id=None):
         print(f"   ❌ Unexpected error: {e}")
         return False, (created_snapshot_id, created_job_id, created_benchmark_id, created_model_id, created_prediction_id)
 
+def test_zoneminder_system_status():
+    """Test ZoneMinder system status endpoint"""
+    print("\n30. Testing ZoneMinder System Status")
+    
+    try:
+        # Test GET system status
+        print("   30a. Testing GET /api/zoneminder/status")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/status", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            status = response.json()
+            required_fields = ["status", "system_health", "storage_info", "connector_mode"]
+            if all(field in status for field in required_fields):
+                print("      ✅ ZoneMinder system status working")
+                return True
+            else:
+                print("      ❌ Missing required fields in system status")
+                return False
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ ZoneMinder system status failed")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_cameras_api():
+    """Test ZoneMinder cameras API endpoints"""
+    print("\n31. Testing ZoneMinder Cameras API")
+    created_camera_id = None
+    
+    try:
+        # Test GET all cameras
+        print("   31a. Testing GET /api/zoneminder/cameras")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            cameras_data = response.json()
+            cameras = cameras_data.get("cameras", [])
+            print(f"      Found {len(cameras)} ZoneMinder cameras")
+            print("      ✅ GET all ZoneMinder cameras working")
+        else:
+            print("      ❌ GET all ZoneMinder cameras failed")
+            return False, None
+        
+        # Test GET cameras with site filter
+        print("   31b. Testing GET /api/zoneminder/cameras?site_id=test_site")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras?site_id=test_site", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            filtered_cameras = response.json()
+            print(f"      Found {len(filtered_cameras.get('cameras', []))} cameras for site")
+            print("      ✅ GET ZoneMinder cameras with site filter working")
+        else:
+            print("      ❌ GET ZoneMinder cameras with site filter failed")
+            return False, None
+        
+        # Test POST create camera
+        print("   31c. Testing POST /api/zoneminder/cameras")
+        test_camera_data = {
+            "name": f"Test Construction Camera {uuid.uuid4().hex[:8]}",
+            "camera_type": "fixed_security",
+            "site_id": "test_construction_site",
+            "location_description": "Main entrance security checkpoint",
+            "coordinates": [40.7128, -74.0060],  # NYC coordinates
+            "recording_enabled": True,
+            "motion_detection": True,
+            "night_vision": False,
+            "ptz_capable": False
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/zoneminder/cameras",
+            json=test_camera_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            camera = response.json()
+            created_camera_id = camera.get("camera_id")
+            print(f"      Created ZoneMinder camera ID: {created_camera_id}")
+            print("      ✅ POST ZoneMinder camera creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST ZoneMinder camera creation failed")
+            return False, None
+        
+        # Test GET specific camera
+        if created_camera_id:
+            print("   31d. Testing GET /api/zoneminder/cameras/{camera_id}")
+            response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{created_camera_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                camera = response.json()
+                if camera.get("name") == test_camera_data["name"]:
+                    print("      ✅ GET specific ZoneMinder camera working")
+                else:
+                    print("      ❌ ZoneMinder camera data mismatch")
+                    return False, created_camera_id
+            else:
+                print("      ❌ GET specific ZoneMinder camera failed")
+                return False, created_camera_id
+        
+        return True, created_camera_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_camera_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_camera_id
+
+def test_zoneminder_streams_api(camera_id=None):
+    """Test ZoneMinder stream management API endpoints"""
+    print("\n32. Testing ZoneMinder Streams API")
+    
+    try:
+        # Use a test camera ID if none provided
+        if not camera_id:
+            # Get existing cameras first
+            response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=10)
+            if response.status_code == 200:
+                cameras_data = response.json()
+                cameras = cameras_data.get("cameras", [])
+                if cameras:
+                    camera_id = cameras[0]["camera_id"]
+                    print(f"      Using existing camera ID: {camera_id}")
+                else:
+                    print("      No cameras available, using test camera ID")
+                    camera_id = "test_camera_001"
+            else:
+                camera_id = "test_camera_001"
+        
+        # Test GET live stream info
+        print("   32a. Testing GET /api/zoneminder/cameras/{camera_id}/stream")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/stream", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            stream_info = response.json()
+            required_fields = ["camera_id", "stream_url", "quality", "fps", "codec", "is_live"]
+            if all(field in stream_info for field in required_fields):
+                print("      ✅ GET ZoneMinder live stream info working")
+            else:
+                print("      ❌ Missing required fields in stream info")
+                return False
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ GET ZoneMinder live stream info failed")
+            return False
+        
+        # Test GET live stream with quality parameter
+        print("   32b. Testing GET /api/zoneminder/cameras/{camera_id}/stream?quality=medium")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/stream?quality=medium", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            stream_info = response.json()
+            if stream_info.get("quality") == "720p":  # medium quality
+                print("      ✅ GET ZoneMinder stream with quality parameter working")
+            else:
+                print("      ❌ Quality parameter not applied correctly")
+                return False
+        else:
+            print("      ❌ GET ZoneMinder stream with quality parameter failed")
+            return False
+        
+        # Test GET camera snapshot
+        print("   32c. Testing GET /api/zoneminder/cameras/{camera_id}/snapshot")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/snapshot", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            snapshot_info = response.json()
+            required_fields = ["camera_id", "snapshot_url", "timestamp"]
+            if all(field in snapshot_info for field in required_fields):
+                print("      ✅ GET ZoneMinder camera snapshot working")
+            else:
+                print("      ❌ Missing required fields in snapshot info")
+                return False
+        else:
+            print("      ❌ GET ZoneMinder camera snapshot failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_events_api(camera_id=None):
+    """Test ZoneMinder detection events API endpoints"""
+    print("\n33. Testing ZoneMinder Detection Events API")
+    
+    try:
+        # Test GET all events
+        print("   33a. Testing GET /api/zoneminder/events")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            events = events_data.get("events", [])
+            print(f"      Found {len(events)} ZoneMinder detection events")
+            print("      ✅ GET all ZoneMinder events working")
+        else:
+            print("      ❌ GET all ZoneMinder events failed")
+            return False
+        
+        # Test GET events with camera filter
+        if camera_id:
+            print("   33b. Testing GET /api/zoneminder/events?camera_id={camera_id}")
+            response = requests.get(f"{API_BASE_URL}/zoneminder/events?camera_id={camera_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                filtered_events = response.json()
+                print(f"      Found {len(filtered_events.get('events', []))} events for camera")
+                print("      ✅ GET ZoneMinder events with camera filter working")
+            else:
+                print("      ❌ GET ZoneMinder events with camera filter failed")
+                return False
+        
+        # Test GET events with detection type filter
+        print("   33c. Testing GET /api/zoneminder/events?detection_type=ppe_violation")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=ppe_violation", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            type_filtered_events = response.json()
+            print(f"      Found {len(type_filtered_events.get('events', []))} PPE violation events")
+            print("      ✅ GET ZoneMinder events with detection type filter working")
+        else:
+            print("      ❌ GET ZoneMinder events with detection type filter failed")
+            return False
+        
+        # Test GET events with severity filter
+        print("   33d. Testing GET /api/zoneminder/events?severity=high")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?severity=high", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            severity_filtered_events = response.json()
+            print(f"      Found {len(severity_filtered_events.get('events', []))} high severity events")
+            print("      ✅ GET ZoneMinder events with severity filter working")
+        else:
+            print("      ❌ GET ZoneMinder events with severity filter failed")
+            return False
+        
+        # Test GET events with limit
+        print("   33e. Testing GET /api/zoneminder/events?limit=10")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?limit=10", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            limited_events = response.json()
+            events_count = len(limited_events.get("events", []))
+            if events_count <= 10:
+                print(f"      Found {events_count} events (limit applied correctly)")
+                print("      ✅ GET ZoneMinder events with limit working")
+            else:
+                print("      ❌ Limit parameter not applied correctly")
+                return False
+        else:
+            print("      ❌ GET ZoneMinder events with limit failed")
+            return False
+        
+        # Test GET specific event (use first event if available)
+        if events and len(events) > 0:
+            event_id = events[0]["event_id"]
+            print("   33f. Testing GET /api/zoneminder/events/{event_id}")
+            response = requests.get(f"{API_BASE_URL}/zoneminder/events/{event_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                event = response.json()
+                if event.get("event_id") == event_id:
+                    print("      ✅ GET specific ZoneMinder event working")
+                else:
+                    print("      ❌ ZoneMinder event data mismatch")
+                    return False
+            else:
+                print("      ❌ GET specific ZoneMinder event failed")
+                return False
+            
+            # Test POST acknowledge event
+            print("   33g. Testing POST /api/zoneminder/events/{event_id}/acknowledge")
+            response = requests.post(
+                f"{API_BASE_URL}/zoneminder/events/{event_id}/acknowledge?user_id=test_user",
+                timeout=10
+            )
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                ack_response = response.json()
+                required_fields = ["event_id", "acknowledged_by", "acknowledged_at", "message"]
+                if all(field in ack_response for field in required_fields):
+                    print("      ✅ POST ZoneMinder event acknowledgment working")
+                else:
+                    print("      ❌ Missing required fields in acknowledgment response")
+                    return False
+            else:
+                print("      ❌ POST ZoneMinder event acknowledgment failed")
+                return False
+        else:
+            print("      ⚠️ No events available for specific event testing")
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_zones_api(camera_id=None):
+    """Test ZoneMinder monitoring zones API endpoints"""
+    print("\n34. Testing ZoneMinder Monitoring Zones API")
+    created_zone_id = None
+    
+    try:
+        # Test GET all zones
+        print("   34a. Testing GET /api/zoneminder/zones")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/zones", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            zones_data = response.json()
+            zones = zones_data.get("zones", [])
+            print(f"      Found {len(zones)} ZoneMinder monitoring zones")
+            print("      ✅ GET all ZoneMinder zones working")
+        else:
+            print("      ❌ GET all ZoneMinder zones failed")
+            return False, None
+        
+        # Test GET zones with camera filter
+        if camera_id:
+            print("   34b. Testing GET /api/zoneminder/zones?camera_id={camera_id}")
+            response = requests.get(f"{API_BASE_URL}/zoneminder/zones?camera_id={camera_id}", timeout=10)
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                filtered_zones = response.json()
+                print(f"      Found {len(filtered_zones.get('zones', []))} zones for camera")
+                print("      ✅ GET ZoneMinder zones with camera filter working")
+            else:
+                print("      ❌ GET ZoneMinder zones with camera filter failed")
+                return False, None
+        
+        # Test POST create zone
+        print("   34c. Testing POST /api/zoneminder/zones")
+        test_zone_data = {
+            "camera_id": camera_id or "test_camera_001",
+            "name": f"Safety Zone {uuid.uuid4().hex[:8]}",
+            "zone_type": "safety",
+            "coordinates": [[100, 100], [200, 100], [200, 200], [100, 200]],  # Rectangle
+            "detection_enabled": True,
+            "sensitivity": 0.8,
+            "alert_threshold": 3,
+            "description": "High-risk construction area monitoring zone"
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/zoneminder/zones",
+            json=test_zone_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            zone = response.json()
+            created_zone_id = zone.get("zone_id")
+            print(f"      Created ZoneMinder zone ID: {created_zone_id}")
+            print("      ✅ POST ZoneMinder zone creation working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ POST ZoneMinder zone creation failed")
+            return False, None
+        
+        return True, created_zone_id
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False, created_zone_id
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False, created_zone_id
+
+def test_zoneminder_analytics_api(camera_id=None):
+    """Test ZoneMinder analytics API endpoints"""
+    print("\n35. Testing ZoneMinder Analytics API")
+    
+    try:
+        # Test GET camera statistics
+        if camera_id:
+            print("   35a. Testing GET /api/zoneminder/cameras/{camera_id}/statistics")
+            response = requests.get(
+                f"{API_BASE_URL}/zoneminder/cameras/{camera_id}/statistics?start_date=2024-01-01&end_date=2024-01-31",
+                timeout=10
+            )
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                stats = response.json()
+                print("      ✅ GET ZoneMinder camera statistics working")
+            else:
+                print(f"      Response: {response.text}")
+                print("      ❌ GET ZoneMinder camera statistics failed")
+                return False
+        else:
+            print("      ⚠️ No camera ID available for camera statistics test")
+        
+        # Test GET site analytics
+        print("   35b. Testing GET /api/zoneminder/sites/{site_id}/analytics")
+        response = requests.get(
+            f"{API_BASE_URL}/zoneminder/sites/test_construction_site/analytics?start_date=2024-01-01&end_date=2024-01-31",
+            timeout=10
+        )
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            analytics = response.json()
+            print("      ✅ GET ZoneMinder site analytics working")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ GET ZoneMinder site analytics failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_mock_data_api():
+    """Test ZoneMinder mock data API endpoints"""
+    print("\n36. Testing ZoneMinder Mock Data API")
+    
+    try:
+        # Test GET mock statistics
+        print("   36a. Testing GET /api/zoneminder/mock/statistics")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/mock/statistics", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            mock_stats = response.json()
+            print("      ✅ GET ZoneMinder mock statistics working")
+        elif response.status_code == 400:
+            # Expected if not in mock mode
+            print("      ✅ GET ZoneMinder mock statistics properly restricted (not in mock mode)")
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ GET ZoneMinder mock statistics failed")
+            return False
+        
+        # Test GET mock configuration
+        print("   36b. Testing GET /api/zoneminder/mock/config")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/mock/config", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            mock_config = response.json()
+            required_fields = ["mode", "mock_settings"]
+            if all(field in mock_config for field in required_fields):
+                print("      ✅ GET ZoneMinder mock configuration working")
+            else:
+                print("      ❌ Missing required fields in mock configuration")
+                return False
+        else:
+            print(f"      Response: {response.text}")
+            print("      ❌ GET ZoneMinder mock configuration failed")
+            return False
+        
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
+def test_zoneminder_error_handling():
+    """Test ZoneMinder API error handling"""
+    print("\n37. Testing ZoneMinder API Error Handling")
+    
+    try:
+        # Test 404 for non-existent camera
+        fake_camera_id = str(uuid.uuid4())
+        print("   37a. Testing 404 for non-existent camera")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/{fake_camera_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 404:
+            print("      ✅ 404 error handling for cameras working correctly")
+        else:
+            print("      ❌ Expected 404 for non-existent camera")
+            return False
+        
+        # Test 404 for non-existent event
+        fake_event_id = str(uuid.uuid4())
+        print("   37b. Testing 404 for non-existent event")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events/{fake_event_id}", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 404:
+            print("      ✅ 404 error handling for events working correctly")
+        else:
+            print("      ❌ Expected 404 for non-existent event")
+            return False
+        
+        # Test invalid detection type parameter
+        print("   37c. Testing invalid detection type parameter")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=invalid_type", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 400:
+            print("      ✅ 400 error handling for invalid detection type working correctly")
+        else:
+            print("      ❌ Expected 400 for invalid detection type")
+            return False
+        
+        # Test invalid stream quality parameter
+        print("   37d. Testing invalid stream quality parameter")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/test_camera/stream?quality=invalid_quality", timeout=10)
+        print(f"      Status Code: {response.status_code}")
+        
+        if response.status_code == 400:
+            print("      ✅ 400 error handling for invalid stream quality working correctly")
+            return True
+        else:
+            print("      ❌ Expected 400 for invalid stream quality")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error: {e}")
+        return False
+
 def main():
     """Run all backend tests"""
     print("Starting AI Construction Management Backend API Tests...")
