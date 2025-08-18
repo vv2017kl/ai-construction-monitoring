@@ -643,9 +643,9 @@ const LiveView = () => {
               >
                 <AlertTriangle className="w-4 h-4" />
                 <span>Alert Center</span>
-                {mockAlerts.filter(a => a.status === 'open').length > 0 && (
+                {liveDetections.filter(d => ['critical', 'high'].includes(d.severity)).length > 0 && (
                   <span className="bg-red-800 text-white text-xs px-2 py-0.5 rounded-full">
-                    {mockAlerts.filter(a => a.status === 'open').length}
+                    {liveDetections.filter(d => ['critical', 'high'].includes(d.severity)).length}
                   </span>
                 )}
               </button>
