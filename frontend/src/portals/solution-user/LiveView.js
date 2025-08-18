@@ -824,7 +824,7 @@ const LiveView = () => {
                               <ArrowLeft className="w-4 h-4" />
                             </button>
                             <button 
-                              onClick={() => handlePTZControl(camera.id, 'home')}
+                              onClick={() => handlePTZControl(camera.camera_id, 'home')}
                               className="p-2 bg-white/20 hover:bg-white/30 text-white rounded transition-colors"
                             >
                               <RotateCcw className="w-4 h-4" />
