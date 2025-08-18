@@ -492,7 +492,7 @@ const Settings = () => {
           </SettingSection>
 
           {/* Advanced Settings - Admin only */}
-          <SettingSection id="advanced" title="Advanced" icon={Settings} adminOnly>
+          <SettingSection id="advanced" title="Advanced" icon={SettingsIcon} adminOnly>
             <div className="space-y-4">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center space-x-2">
