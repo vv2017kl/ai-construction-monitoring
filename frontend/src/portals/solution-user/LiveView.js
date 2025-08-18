@@ -568,7 +568,7 @@ const LiveView = () => {
     );
   };
 
-  const selectedCameraObj = mockCameras.find(c => c.id === selectedCamera);
+  const selectedCameraObj = cameraList.find(c => c.camera_id === selectedCamera);
 
   return (
     <MainLayout portal="solution-user">
