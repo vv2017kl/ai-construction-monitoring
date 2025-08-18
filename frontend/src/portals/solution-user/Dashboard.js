@@ -10,6 +10,7 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
 import { backendAPI, zoneminderAPI } from '../../services';
+import weatherAPI from '../../services/weatherAPI';
 import { 
   useDashboardStats, 
   useZoneminderStatus, 
@@ -19,6 +20,7 @@ import {
 } from '../../hooks/useAPI';
 import { formatters } from '../../utils/formatters';
 import { ZONEMINDER_CONSTANTS } from '../../utils/constants';
+import { generateDashboardMetrics } from '../../utils/dataCalculations';
 
 const Dashboard = () => {
   const navigate = useNavigate();
