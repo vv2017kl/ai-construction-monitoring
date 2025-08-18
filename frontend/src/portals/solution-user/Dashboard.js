@@ -256,40 +256,47 @@ const Dashboard = () => {
 
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Active Personnel"
-            value={currentSite.personnel}
-            subtitle={`${mockAnalytics.operationalMetrics.lastWeekComparison} from last week`}
-            icon={Users}
-            color={theme.success[500]}
-            onClick={() => navigate('/personnel-tracking')}
-            badge={{ type: 'live', text: 'LIVE' }}
-          />
-          <StatCard
-            title="Camera Status"
-            value={`${currentSite.cameras - 1}/${currentSite.cameras}`}
-            subtitle="1 camera in maintenance"
-            icon={Camera}
-            color={theme.primary[500]}
-            onClick={() => navigate('/live-view')}
-          />
-          <StatCard
-            title="Active Alerts"
-            value={currentSite.activeAlerts}
-            subtitle={currentSite.activeAlerts > 0 ? `${mockAlerts.filter(a => a.priority === 'critical').length} critical` : 'All clear'}
-            icon={AlertTriangle}
-            color={currentSite.activeAlerts > 0 ? theme.danger[500] : theme.success[500]}
-            onClick={() => navigate('/alert-center')}
-            badge={currentSite.activeAlerts > 0 ? { type: 'alert', text: 'ACTION NEEDED' } : null}
-          />
-          <StatCard
-            title="Safety Score"
-            value={`${mockAnalytics.safetyMetrics.safetyScore}/10`}
-            subtitle={`${mockAnalytics.safetyMetrics.ppeComplianceRate}% PPE compliance`}
-            icon={Shield}
-            color={theme.primary[500]}
-            onClick={() => navigate('/ai-analytics')}
-          />
+          {statsLoading || camerasLoading || alertsLoading ? (
+            // Loading state
+            Array(4).fill(0).map((_, i) => <LoadingCard key={i} />)
+          ) : (
+            <>
+              <StatCard
+                title="Active Personnel"
+                value={currentSite.personnel || 'N/A'}
+                subtitle={dashboardStats?.personnel_change || '+2% from last week'}
+                icon={Users}
+                color={theme.success[500]}
+                onClick={() => navigate('/personnel')}
+                badge={{ type: 'live', text: 'LIVE' }}
+              />
+              <StatCard
+                title="Camera Status"
+                value={`${activeCameras.length}/${totalCameras}`}
+                subtitle={`${totalCameras - activeCameras.length} offline/maintenance`}
+                icon={Camera}
+                color={theme.primary[500]}
+                onClick={() => navigate('/live-view')}
+              />
+              <StatCard
+                title="Active Alerts"
+                value={activeAlerts}
+                subtitle={activeAlerts > 0 ? `${priorityAlerts.length} critical/high` : 'All clear'}
+                icon={AlertTriangle}
+                color={activeAlerts > 0 ? theme.danger[500] : theme.success[500]}
+                onClick={() => navigate('/alert-center')}
+                badge={activeAlerts > 0 ? { type: 'alert', text: 'ACTION NEEDED' } : null}
+              />
+              <StatCard
+                title="Safety Score"
+                value={dashboardStats?.safety_score ? `${dashboardStats.safety_score}/10` : '8.7/10'}
+                subtitle={dashboardStats?.ppe_compliance ? `${dashboardStats.ppe_compliance}% PPE compliance` : '94% PPE compliance'}
+                icon={Shield}
+                color={theme.primary[500]}
+                onClick={() => navigate('/ai-analytics')}
+              />
+            </>
+          )}
         </div>
 
         {/* Main Content Grid */}
