@@ -672,7 +672,7 @@ const LiveView = () => {
                     camera={camera}
                     detection={detection}
                     isSelected={selectedCamera === camera.id}
-                    onClick={() => setSelectedCamera(camera.id)}
+                    onClick={() => setSelectedCamera(camera.camera_id)}
                   />
                 );
               })}
