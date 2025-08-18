@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, Shield, Users, Camera, TrendingUp, 
   Clock, MapPin, Activity, CheckCircle, XCircle,
   Play, Eye, BarChart3, Navigation, Zap, Settings,
   Calendar, Wind, Thermometer, X, ExternalLink,
-  ChevronRight, Maximize2, Filter, Download
+  ChevronRight, Maximize2, Filter, Download, Loader
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
-import { mockSites, mockAlerts, mockAnalytics, mockDetections, mockUser } from '../../data/mockData';
+import { backendAPI, zoneminderAPI } from '../../services';
+import { 
+  useDashboardStats, 
+  useZoneminderStatus, 
+  useZoneminderCameras, 
+  useRecentEvents, 
+  useCriticalAlerts 
+} from '../../hooks/useAPI';
+import { formatters } from '../../utils/formatters';
+import { ZONEMINDER_CONSTANTS } from '../../utils/constants';
 
 const Dashboard = () => {
   const navigate = useNavigate();
