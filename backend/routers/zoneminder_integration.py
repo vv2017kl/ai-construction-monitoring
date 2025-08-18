@@ -235,11 +235,23 @@ async def get_events(
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"Invalid detection type: {detection_type}")
         
+        # Handle timezone-aware datetime conversion
+        processed_start_date = None
+        processed_end_date = None
+        
+        if start_date:
+            # Convert to timezone-naive datetime if timezone-aware
+            processed_start_date = start_date.replace(tzinfo=None) if start_date.tzinfo else start_date
+        
+        if end_date:
+            # Convert to timezone-naive datetime if timezone-aware  
+            processed_end_date = end_date.replace(tzinfo=None) if end_date.tzinfo else end_date
+        
         events = await connector.get_events(
             camera_id=camera_id,
             detection_type=detection_type_enum,
-            start_date=start_date,
-            end_date=end_date,
+            start_date=processed_start_date,
+            end_date=processed_end_date,
             severity=severity,
             limit=limit
         )
