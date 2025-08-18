@@ -585,7 +585,7 @@ const LiveView = () => {
                 </div>
                 <span>•</span>
                 <MapPin className="w-3 h-3" />
-                <span>{currentSite.name}</span>
+                <span>Construction Site</span>
                 <span>•</span>
                 <span>{getCamerasForGrid().length} cameras active</span>
               </div>
