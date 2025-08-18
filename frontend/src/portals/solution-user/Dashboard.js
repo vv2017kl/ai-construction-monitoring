@@ -300,8 +300,11 @@ const Dashboard = () => {
             <>
               <StatCard
                 title="Active Personnel"
-                value={currentSite.personnel || 'N/A'}
-                subtitle={dashboardStats?.personnel_change || '+2% from last week'}
+                value={calculatedMetrics?.personnel?.count || 0}
+                subtitle={calculatedMetrics?.personnel?.activeZones ? 
+                  `Active in ${calculatedMetrics.personnel.activeZones} zones` : 
+                  'No recent activity detected'
+                }
                 icon={Users}
                 color={theme.success[500]}
                 onClick={() => navigate('/personnel')}
@@ -326,8 +329,11 @@ const Dashboard = () => {
               />
               <StatCard
                 title="Safety Score"
-                value={dashboardStats?.safety_score ? `${dashboardStats.safety_score}/10` : '8.7/10'}
-                subtitle={dashboardStats?.ppe_compliance ? `${dashboardStats.ppe_compliance}% PPE compliance` : '94% PPE compliance'}
+                value={calculatedMetrics?.safety ? `${calculatedMetrics.safety.score}/10` : '0/10'}
+                subtitle={calculatedMetrics?.ppe ? 
+                  `${calculatedMetrics.ppe.compliance}% PPE compliance` : 
+                  'Calculating compliance...'
+                }
                 icon={Shield}
                 color={theme.primary[500]}
                 onClick={() => navigate('/ai-analytics')}
