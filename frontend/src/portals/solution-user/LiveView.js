@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Grid3X3, Grid2X2, Square, Maximize2, Camera, 
   Play, Pause, Volume2, VolumeX, RotateCcw, ZoomIn, ZoomOut,
   AlertTriangle, CheckCircle, Settings, Download, Fullscreen,
   Users, HardHat, Car, Wrench, Eye, MapPin, Clock, 
-  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCw
+  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCw, Loader,
+  Wifi, WifiOff, Record, Square as StopIcon
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
-import { mockCameras, mockDetections, mockSites, mockUser, mockAlerts } from '../../data/mockData';
+import { zoneminderAPI } from '../../services';
+import { useZoneminderCameras, useRecentEvents, useRealTimeData } from '../../hooks/useAPI';
+import { formatters } from '../../utils/formatters';
+import { ZONEMINDER_CONSTANTS } from '../../utils/constants';
 
 const LiveView = () => {
   const navigate = useNavigate();
