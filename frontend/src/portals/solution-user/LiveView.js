@@ -385,9 +385,9 @@ const LiveView = () => {
           {/* PTZ Direction Controls */}
           <div></div>
           <button 
-            onClick={() => handlePTZControl(camera.id, 'up')}
+            onClick={() => handlePTZControl(camera.camera_id, 'up')}
             className={`p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ${
-              ptzActive === camera.id ? 'bg-blue-200' : ''
+              ptzActive === camera.camera_id ? 'bg-blue-200' : ''
             }`}
           >
             <ArrowUp className="w-4 h-4 mx-auto" />
