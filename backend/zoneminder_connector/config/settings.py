@@ -167,7 +167,16 @@ def load_preset(preset_name: str):
     
     preset = presets[preset_name]
     for key, value in preset.items():
-        os.environ[f"ZONEMINDER_{key.upper()}"] = str(value)
+        if key == "mode":
+            os.environ["ZONEMINDER_MODE"] = str(value)
+        elif key == "sites_count":
+            os.environ["MOCK_SITES_COUNT"] = str(value)
+        elif key == "cameras_per_site":
+            os.environ["MOCK_CAMERAS_PER_SITE"] = str(value)
+        elif key == "events_per_day":
+            os.environ["MOCK_EVENTS_PER_DAY"] = str(value)
+        else:
+            os.environ[f"ZONEMINDER_{key.upper()}"] = str(value)
     
     # Reinitialize configuration
     global _config
