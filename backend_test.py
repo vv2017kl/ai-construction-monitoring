@@ -6194,6 +6194,43 @@ def main():
         print("   ⚠️ Skipping Historical Data & Temporal Analysis tests - no site or user created")
         results.append(("Historical Data & Temporal Analysis APIs", False))
     
+    # ZONEMINDER INTEGRATION TESTS
+    print("\n" + "=" * 80)
+    print("STARTING ZONEMINDER INTEGRATION API TESTS")
+    print("=" * 80)
+    
+    # Test ZoneMinder System Status
+    zm_status_ok = test_zoneminder_system_status()
+    results.append(("ZoneMinder System Status", zm_status_ok))
+    
+    # Test ZoneMinder Cameras API
+    zm_cameras_ok, created_zm_camera_id = test_zoneminder_cameras_api()
+    results.append(("ZoneMinder Cameras API", zm_cameras_ok))
+    
+    # Test ZoneMinder Streams API
+    zm_streams_ok = test_zoneminder_streams_api(created_zm_camera_id)
+    results.append(("ZoneMinder Streams API", zm_streams_ok))
+    
+    # Test ZoneMinder Events API
+    zm_events_ok = test_zoneminder_events_api(created_zm_camera_id)
+    results.append(("ZoneMinder Events API", zm_events_ok))
+    
+    # Test ZoneMinder Zones API
+    zm_zones_ok, created_zm_zone_id = test_zoneminder_zones_api(created_zm_camera_id)
+    results.append(("ZoneMinder Zones API", zm_zones_ok))
+    
+    # Test ZoneMinder Analytics API
+    zm_analytics_ok = test_zoneminder_analytics_api(created_zm_camera_id)
+    results.append(("ZoneMinder Analytics API", zm_analytics_ok))
+    
+    # Test ZoneMinder Mock Data API
+    zm_mock_data_ok = test_zoneminder_mock_data_api()
+    results.append(("ZoneMinder Mock Data API", zm_mock_data_ok))
+    
+    # Test ZoneMinder Error Handling
+    zm_error_handling_ok = test_zoneminder_error_handling()
+    results.append(("ZoneMinder Error Handling", zm_error_handling_ok))
+
     # Cleanup test data
     cleanup_ok = cleanup_test_data(created_user_id, created_site_id, created_detection_id, created_model_id, 
                                  created_bookmark_id, created_export_id, created_route_id, created_waypoint_id, 
