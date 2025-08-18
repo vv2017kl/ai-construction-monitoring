@@ -7025,6 +7025,13 @@ def main():
     zm_cameras_ok = test_zoneminder_cameras_api()
     results.append(("ZoneMinder Cameras API", zm_cameras_ok))
     
+    # PRIORITY TEST: ZoneMinder Live View Integration
+    print("\n" + "🎥" * 40)
+    print("PRIORITY TEST: ZONEMINDER LIVE VIEW INTEGRATION")
+    print("🎥" * 40)
+    zm_live_view_results = test_zoneminder_live_view_integration()
+    results.append(("🎥 ZoneMinder Live View Integration", zm_live_view_results))
+    
     # PRIORITY TEST: Data-Driven Dashboard (NO hardcoded values)
     print("\n" + "🎯" * 40)
     print("PRIORITY TEST: DATA-DRIVEN DASHBOARD - NO HARDCODED VALUES")
