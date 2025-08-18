@@ -12,7 +12,7 @@ import httpx
 import asyncio
 from datetime import datetime
 
-router = APIRouter(prefix="/api/weather", tags=["Weather"])
+router = APIRouter(prefix="/weather", tags=["Weather"])
 
 # Get OpenWeatherMap API key from environment
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
