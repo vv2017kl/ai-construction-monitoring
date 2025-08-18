@@ -6,7 +6,7 @@ import {
   AlertTriangle, CheckCircle, Settings, Download, Fullscreen,
   Users, HardHat, Car, Wrench, Eye, MapPin, Clock, 
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCw, Loader,
-  Wifi, WifiOff, Record, Square as StopIcon
+  Wifi, WifiOff, Circle, Square as StopIcon
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
