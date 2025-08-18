@@ -103,6 +103,76 @@
 #====================================================================================================
 
 user_problem_statement: |
+  Test the ZoneMinder events API fix for the datetime timezone issue. Focus on testing:
+  1. Events API with Datetime Parameters - Test GET /api/zoneminder/events without date filters and with start_date and end_date parameters
+  2. Recent Events for Dashboard - Test the specific API call the Dashboard is making
+  3. Error Handling - Confirm the 500 "can't compare offset-naive and offset-aware datetimes" error is fixed
+  The issue was that the frontend was sending timezone-aware datetimes (with 'Z' suffix) but the backend ZoneMinder connector expected timezone-naive datetimes.
+
+backend:
+  - task: "ZoneMinder Events API Datetime Timezone Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/zoneminder_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented timezone-aware datetime conversion fix in ZoneMinder integration router. The fix converts timezone-aware datetimes to timezone-naive before passing to the connector (lines 242-248 in zoneminder_integration.py). Frontend was sending timezone-aware datetimes with 'Z' suffix but backend connector expected timezone-naive datetimes."
+      - working: true
+        agent: "testing"
+        comment: "✅ ZONEMINDER EVENTS DATETIME TIMEZONE FIX SUCCESSFULLY TESTED! Comprehensive testing completed with 6 test scenarios: (1) GET events without date filters - ✅ Working (found 100 events) (2) GET events with timezone-aware datetimes using exact failing parameters (start_date=2025-08-17T14:20:14.287Z&end_date=2025-08-18T14:20:14.287Z&limit=50) - ✅ FIX SUCCESSFUL! (found 29 events with proper filters applied) (3) Various timezone-aware datetime formats (ISO with Z, timezone offset, simple ISO) - ✅ All working (4) Combined datetime and other filters - ✅ Working (minor validation issue with detection_type not related to datetime fix) (5) Dashboard recent events API call - ✅ DASHBOARD FIX CONFIRMED! (Dashboard can successfully load 29 recent events) (6) Error handling for invalid datetime formats - ✅ Proper validation. The critical 500 error 'can't compare offset-naive and offset-aware datetimes' is completely resolved. The fix properly converts timezone-aware datetimes (with tzinfo) to timezone-naive using .replace(tzinfo=None) before passing to the ZoneMinder connector. Dashboard integration is now working perfectly."
+
+  - task: "ZoneMinder System Status API"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/zoneminder_integration.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ ZoneMinder system status API working correctly. GET /api/zoneminder/status returns proper response with status: operational, connector_mode: mock, system_health and storage_info fields. All required fields present and API functioning as expected."
+
+  - task: "ZoneMinder Cameras API"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/zoneminder_integration.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ ZoneMinder cameras API working correctly. GET /api/zoneminder/cameras returns 24 cameras with proper structure. Site filtering working correctly (found 8 cameras for site_001). All camera data includes required fields: camera_id, name, camera_type, status, site_id, coordinates, stream_url, etc."
+
+frontend:
+  # No frontend testing required for this specific datetime timezone fix
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "ZoneMinder Events API Datetime Timezone Fix"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "🎉 ZONEMINDER EVENTS API DATETIME TIMEZONE FIX TESTING COMPLETED SUCCESSFULLY! The critical issue has been resolved. Key findings: (1) The 500 error 'can't compare offset-naive and offset-aware datetimes' is completely fixed (2) Frontend can now send timezone-aware datetimes (with 'Z' suffix) and backend properly handles them (3) Dashboard integration is working - can successfully load recent events (4) All timezone-aware datetime formats are supported (ISO with Z, timezone offset, simple ISO) (5) The fix is implemented in /app/backend/routers/zoneminder_integration.py lines 242-248 where timezone-aware datetimes are converted to timezone-naive using .replace(tzinfo=None) before passing to the ZoneMinder connector. The specific failing parameters from the review request (start_date=2025-08-17T14:20:14.287Z&end_date=2025-08-18T14:20:14.287Z&limit=50) now work perfectly and return 29 events. Dashboard can load recent events with various event types (ppe_violation, equipment_operation, weather_alert, etc.). The fix is production-ready and resolves the timezone datetime comparison issue completely."
+#====================================================================================================
+# Testing Data - Main Agent and testing sub agent both should log testing data below this section
+#====================================================================================================
+
+user_problem_statement: |
   Continue the comprehensive screen analysis for the AI-Construction MVP system to build a robust backend development roadmap. The systematic screen-by-screen analysis is progressing well through Phase 2 enhanced functionality screens. We're approaching Phase 3 with admin portal screens. Continue with 3-4 screens in sequence as requested to maintain momentum toward the 100% completion milestone.
 
 backend:
