@@ -6303,6 +6303,264 @@ def main():
         print("Please check the detailed output above for specific issues.")
         return False
 
+def test_zoneminder_dashboard_integration():
+    """Test ZoneMinder Dashboard Integration APIs"""
+    print("\n🎭 TESTING ZONEMINDER DASHBOARD INTEGRATION")
+    print("=" * 80)
+    
+    try:
+        # Test 1: Dashboard Stats (Core API)
+        print("\n1. Testing Dashboard Stats API (GET /api/dashboard/stats)")
+        response = requests.get(f"{API_BASE_URL}/dashboard/stats", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            stats = response.json()
+            required_fields = ["total_sites", "active_sites", "total_users", "total_cameras", "active_alerts"]
+            if all(field in stats for field in required_fields):
+                print("   ✅ Dashboard stats API working correctly")
+                print(f"   📊 Stats: {stats['total_sites']} sites, {stats['total_cameras']} cameras, {stats['active_alerts']} alerts")
+            else:
+                print("   ❌ Missing required fields in dashboard stats")
+                return False
+        else:
+            print("   ❌ Dashboard stats API failed")
+            return False
+        
+        # Test 2: ZoneMinder System Status
+        print("\n2. Testing ZoneMinder System Status (GET /api/zoneminder/status)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/status", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            status = response.json()
+            required_fields = ["status", "system_health", "storage_info", "connector_mode"]
+            if all(field in status for field in required_fields):
+                print("   ✅ ZoneMinder system status API working correctly")
+                print(f"   🔧 Mode: {status.get('connector_mode', 'unknown')}, Status: {status.get('status', 'unknown')}")
+            else:
+                print("   ❌ Missing required fields in ZoneMinder status")
+                return False
+        else:
+            print("   ❌ ZoneMinder system status API failed")
+            return False
+        
+        # Test 3: ZoneMinder Cameras Data
+        print("\n3. Testing ZoneMinder Cameras API (GET /api/zoneminder/cameras)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            cameras_data = response.json()
+            if "cameras" in cameras_data and "total_count" in cameras_data:
+                cameras = cameras_data["cameras"]
+                print(f"   ✅ ZoneMinder cameras API working correctly")
+                print(f"   📹 Found {len(cameras)} cameras (total: {cameras_data['total_count']})")
+                
+                # Verify camera data structure
+                if cameras:
+                    sample_camera = cameras[0]
+                    required_camera_fields = ["camera_id", "name", "camera_type", "status", "site_id"]
+                    if all(field in sample_camera for field in required_camera_fields):
+                        print(f"   📋 Sample camera: {sample_camera['name']} ({sample_camera['camera_type']}) - {sample_camera['status']}")
+                    else:
+                        print("   ⚠️ Camera data structure incomplete")
+                else:
+                    print("   ⚠️ No cameras found in mock data")
+            else:
+                print("   ❌ Invalid cameras response structure")
+                return False
+        else:
+            print("   ❌ ZoneMinder cameras API failed")
+            return False
+        
+        # Test 4: ZoneMinder Events for Dashboard Activity Feed
+        print("\n4. Testing ZoneMinder Events API (GET /api/zoneminder/events)")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?limit=20", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            events_data = response.json()
+            if "events" in events_data and "total_count" in events_data:
+                events = events_data["events"]
+                print(f"   ✅ ZoneMinder events API working correctly")
+                print(f"   🚨 Found {len(events)} recent events (total: {events_data['total_count']})")
+                
+                # Verify event data structure and categorize by construction industry types
+                if events:
+                    construction_events = {
+                        "ppe_violation": 0,
+                        "safety_hazard": 0,
+                        "equipment_operation": 0,
+                        "progress_milestone": 0,
+                        "other": 0
+                    }
+                    
+                    for event in events[:5]:  # Check first 5 events
+                        detection_type = event.get("detection_type", "other")
+                        if detection_type in construction_events:
+                            construction_events[detection_type] += 1
+                        else:
+                            construction_events["other"] += 1
+                        
+                        required_event_fields = ["event_id", "camera_id", "detection_type", "timestamp", "severity"]
+                        if all(field in event for field in required_event_fields):
+                            print(f"   📋 Event: {event['detection_type']} - {event['severity']} severity")
+                        else:
+                            print("   ⚠️ Event data structure incomplete")
+                    
+                    print(f"   🏗️ Construction Events: PPE:{construction_events['ppe_violation']}, Safety:{construction_events['safety_hazard']}, Equipment:{construction_events['equipment_operation']}, Progress:{construction_events['progress_milestone']}")
+                else:
+                    print("   ⚠️ No events found in mock data")
+            else:
+                print("   ❌ Invalid events response structure")
+                return False
+        else:
+            print("   ❌ ZoneMinder events API failed")
+            return False
+        
+        # Test 5: ZoneMinder Events with Construction Industry Filters
+        print("\n5. Testing Construction Industry Event Filtering")
+        
+        # Test PPE violation events
+        print("   5a. Testing PPE Violation Events")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=ppe_violation&limit=10", timeout=10)
+        if response.status_code == 200:
+            ppe_events = response.json()
+            print(f"      ✅ PPE violation events: {len(ppe_events.get('events', []))} found")
+        else:
+            print("      ❌ PPE violation events filter failed")
+        
+        # Test safety hazard events
+        print("   5b. Testing Safety Hazard Events")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=safety_hazard&limit=10", timeout=10)
+        if response.status_code == 200:
+            safety_events = response.json()
+            print(f"      ✅ Safety hazard events: {len(safety_events.get('events', []))} found")
+        else:
+            print("      ❌ Safety hazard events filter failed")
+        
+        # Test equipment operation events
+        print("   5c. Testing Equipment Operation Events")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=equipment_operation&limit=10", timeout=10)
+        if response.status_code == 200:
+            equipment_events = response.json()
+            print(f"      ✅ Equipment operation events: {len(equipment_events.get('events', []))} found")
+        else:
+            print("      ❌ Equipment operation events filter failed")
+        
+        # Test progress milestone events
+        print("   5d. Testing Progress Milestone Events")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=progress_milestone&limit=10", timeout=10)
+        if response.status_code == 200:
+            progress_events = response.json()
+            print(f"      ✅ Progress milestone events: {len(progress_events.get('events', []))} found")
+        else:
+            print("      ❌ Progress milestone events filter failed")
+        
+        # Test 6: ZoneMinder Mock Data Statistics
+        print("\n6. Testing ZoneMinder Mock Data Statistics")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/mock/statistics", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            mock_stats = response.json()
+            print("   ✅ ZoneMinder mock statistics API working correctly")
+            print(f"   📊 Mock Data Overview:")
+            if "sites" in mock_stats:
+                print(f"      - Sites: {mock_stats['sites']}")
+            if "cameras" in mock_stats:
+                print(f"      - Cameras: {mock_stats['cameras']}")
+            if "events" in mock_stats:
+                print(f"      - Events: {mock_stats['events']}")
+            if "zones" in mock_stats:
+                print(f"      - Zones: {mock_stats['zones']}")
+        else:
+            print("   ❌ ZoneMinder mock statistics API failed")
+            return False
+        
+        # Test 7: Dashboard Data Flow Integration Test
+        print("\n7. Testing Dashboard Data Flow Integration")
+        
+        # Simulate dashboard loading sequence
+        print("   7a. Simulating Dashboard Loading Sequence")
+        
+        # Step 1: Load dashboard stats
+        dashboard_response = requests.get(f"{API_BASE_URL}/dashboard/stats", timeout=10)
+        
+        # Step 2: Load ZoneMinder system status
+        status_response = requests.get(f"{API_BASE_URL}/zoneminder/status", timeout=10)
+        
+        # Step 3: Load camera data
+        cameras_response = requests.get(f"{API_BASE_URL}/zoneminder/cameras", timeout=10)
+        
+        # Step 4: Load recent events for activity feed
+        events_response = requests.get(f"{API_BASE_URL}/zoneminder/events?limit=10", timeout=10)
+        
+        if all(r.status_code == 200 for r in [dashboard_response, status_response, cameras_response, events_response]):
+            print("   ✅ Complete dashboard data flow working correctly")
+            
+            # Extract key metrics for dashboard
+            dashboard_data = dashboard_response.json()
+            status_data = status_response.json()
+            cameras_data = cameras_response.json()
+            events_data = events_response.json()
+            
+            # Calculate dashboard metrics
+            total_cameras = cameras_data.get("total_count", 0)
+            online_cameras = len([c for c in cameras_data.get("cameras", []) if c.get("status") == "online"])
+            recent_events = len(events_data.get("events", []))
+            critical_events = len([e for e in events_data.get("events", []) if e.get("severity") == "critical"])
+            
+            print(f"   📊 Dashboard Metrics Summary:")
+            print(f"      - Total Sites: {dashboard_data.get('total_sites', 0)}")
+            print(f"      - Total Cameras: {total_cameras}")
+            print(f"      - Online Cameras: {online_cameras}")
+            print(f"      - Recent Events: {recent_events}")
+            print(f"      - Critical Events: {critical_events}")
+            print(f"      - System Status: {status_data.get('status', 'unknown')}")
+            
+        else:
+            print("   ❌ Dashboard data flow integration failed")
+            return False
+        
+        # Test 8: Error Handling and Edge Cases
+        print("\n8. Testing Error Handling and Edge Cases")
+        
+        # Test invalid camera ID
+        print("   8a. Testing invalid camera ID")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/cameras/invalid-camera-id", timeout=10)
+        if response.status_code == 404:
+            print("      ✅ Invalid camera ID handled correctly (404)")
+        else:
+            print(f"      ⚠️ Unexpected response for invalid camera ID: {response.status_code}")
+        
+        # Test invalid event ID
+        print("   8b. Testing invalid event ID")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events/invalid-event-id", timeout=10)
+        if response.status_code == 404:
+            print("      ✅ Invalid event ID handled correctly (404)")
+        else:
+            print(f"      ⚠️ Unexpected response for invalid event ID: {response.status_code}")
+        
+        # Test invalid detection type filter
+        print("   8c. Testing invalid detection type filter")
+        response = requests.get(f"{API_BASE_URL}/zoneminder/events?detection_type=invalid_type", timeout=10)
+        if response.status_code == 400:
+            print("      ✅ Invalid detection type handled correctly (400)")
+        else:
+            print(f"      ⚠️ Unexpected response for invalid detection type: {response.status_code}")
+        
+        print("\n🎉 ZONEMINDER DASHBOARD INTEGRATION TESTING COMPLETED SUCCESSFULLY!")
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"   ❌ Connection error during ZoneMinder testing: {e}")
+        return False
+    except Exception as e:
+        print(f"   ❌ Unexpected error during ZoneMinder testing: {e}")
+        return False
+
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
