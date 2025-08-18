@@ -121,23 +121,67 @@ const LiveView = () => {
     }
   };
 
-  const handleZoom = (cameraId, zoomIn) => {
-    console.log(`Zoom: Camera ${cameraId} ${zoomIn ? 'zoom in' : 'zoom out'}`);
+  const handleZoom = async (cameraId, zoomIn) => {
+    try {
+      const camera = cameraList.find(cam => cam.camera_id === cameraId);
+      if (!camera?.ptz_capable) {
+        console.warn(`Camera ${cameraId} does not support zoom`);
+        return;
+      }
+      
+      console.log(`Zoom ${zoomIn ? 'In' : 'Out'}: Camera ${cameraId}`);
+      
+      // Update PTZ settings for zoom
+      setCameraPTZSettings(prev => ({
+        ...prev,
+        [cameraId]: {
+          ...prev[cameraId],
+          zoom: zoomIn ? 'in' : 'out',
+          lastCommand: `zoom_${zoomIn ? 'in' : 'out'}`,
+          timestamp: new Date().toISOString()
+        }
+      }));
+      
+    } catch (error) {
+      console.error('Zoom control error:', error);
+    }
   };
 
   // Recording Functions
-  const toggleRecording = (cameraId) => {
-    setRecordingCameras(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(cameraId)) {
-        newSet.delete(cameraId);
+  const toggleRecording = async (cameraId) => {
+    try {
+      const isCurrentlyRecording = recordingCameras.has(cameraId);
+      
+      if (isCurrentlyRecording) {
+        // Stop recording
+        await zoneminderAPI.streams.stopRecording(cameraId, 'current_session');
+        setRecordingCameras(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(cameraId);
+          return newSet;
+        });
         console.log(`Recording stopped for camera ${cameraId}`);
       } else {
-        newSet.add(cameraId);
+        // Start recording
+        await zoneminderAPI.streams.startRecording(cameraId, 3600); // 1 hour duration
+        setRecordingCameras(prev => {
+          const newSet = new Set(prev);
+          newSet.add(cameraId);
+          return newSet;
+        });
         console.log(`Recording started for camera ${cameraId}`);
       }
-      return newSet;
-    });
+    } catch (error) {
+      console.error('Recording toggle error:', error);
+      // Revert recording state on error
+      setRecordingCameras(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(cameraId)) {
+          newSet.delete(cameraId);
+        }
+        return newSet;
+      });
+    }
   };
 
   // Camera Settings Functions
