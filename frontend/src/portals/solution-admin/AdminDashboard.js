@@ -5,11 +5,14 @@ import {
   Server, Shield, AlertTriangle, CheckCircle, Clock,
   Activity, Zap, Database, Globe, Settings, Eye,
   RefreshCw, Download, Filter, Calendar, MapPin,
-  User, Camera, Bell, Wifi, HardDrive, Cpu, Monitor
+  User, Camera, Bell, Wifi, HardDrive, Cpu, Monitor, Loader
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import MainLayout from '../../components/shared/Layout/MainLayout';
-import { mockSites, mockUser, mockPersonnel } from '../../data/mockData';
+import { backendAPI, zoneminderAPI } from '../../services';
+import { useRealTimeData, useAPI } from '../../hooks/useAPI';
+import { formatters } from '../../utils/formatters';
+import { generateDashboardMetrics } from '../../utils/dataCalculations';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
