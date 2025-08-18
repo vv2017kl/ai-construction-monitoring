@@ -356,7 +356,7 @@ const LiveView = () => {
           >
             {recordingCameras.has(camera.camera_id) ? 
               <StopIcon className="w-4 h-4" /> : 
-              <Record className="w-4 h-4" />
+              <Circle className="w-4 h-4 fill-current" />
             }
           </button>
           
