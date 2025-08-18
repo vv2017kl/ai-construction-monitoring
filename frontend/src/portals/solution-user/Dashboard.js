@@ -601,33 +601,36 @@ const Dashboard = () => {
             
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               <div className="space-y-4">
-                {mockAlerts.filter(alert => alert.priority === 'Critical' || alert.priority === 'High').map((alert) => (
-                  <div key={alert.id} className="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                {priorityAlerts.map((event) => (
+                  <div key={event.event_id} className="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-900">{alert.title}</h4>
+                        <h4 className="font-medium text-gray-900">{formatters.formatDetectionType(event.detection_type)}</h4>
                         <div className="flex items-center space-x-2">
                           <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                            alert.priority === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'
+                            event.severity === 'critical' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'
                           }`}>
-                            {alert.priority}
+                            {formatters.formatSeverity(event.severity)}
                           </span>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{alert.description}</p>
+                      <p className="text-sm text-gray-600 mt-1">{event.description}</p>
                       <div className="flex items-center justify-between mt-3">
                         <div className="text-xs text-gray-500">
-                          {alert.camera} • {alert.zone} • {alert.timestamp}
+                          {event.camera_id} • {event.location} • {formatters.formatDateTime(event.timestamp)}
                         </div>
                         <div className="flex items-center space-x-2">
                           <button 
-                            onClick={() => navigate(`/alert-center/${alert.id}`)}
+                            onClick={() => navigate(`/alert-center/${event.event_id}`)}
                             className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                           >
                             Investigate
                           </button>
-                          <button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
+                          <button 
+                            onClick={() => zoneminderAPI.events.acknowledge(event.event_id, 'current_user')}
+                            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                          >
                             Acknowledge
                           </button>
                         </div>
